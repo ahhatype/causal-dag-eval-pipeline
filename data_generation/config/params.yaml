@@ -1,0 +1,90 @@
+# Simulation design parameters, not estimates of real-world effects.
+# PROVISIONAL: pending domain-expert confirmation.
+
+seeds:
+  full_set: 20261004
+  astronaut_source: 20261005
+  ground_truth: 20261006
+  reference_subsample: 20261007
+  calibration: 20261001
+
+sizes:
+  full_set: 10000
+  reference_subsample: 900
+  astronaut_set: 900
+  ground_truth: 50000
+  calibration: 200000
+
+era:
+  share_2000s: 0.75          # mission era: 0 = 1960s, 1 = 2000s
+
+# Mission-level nodes: [1960s, 2000s]
+era_values:
+  distance_from_earth: [1, -1]
+  vehicle_design: [-1, 1]
+  hsia_risk: [-1, 1]
+  crew_health_and_performance_system: [-1, 1]
+  medical_prevention_capability: [-1, 1]
+  medical_treatment_capability: [-1, 1]
+  medical_monitoring_capability: [-1, 1]
+  pharm_risk: [-1, 1]
+  hostile_closed_environment: [1, -1]
+  humidity: [0, 0]
+  altered_gravity: [0, 0]
+  surveillance: [-1, 1]
+
+# Cumulative mission duration (days)
+duration:
+  era_1960s: {median: 8, log_sd: 0.5, min: 0.5, max: 14}
+  era_2000s:
+    shuttle_share: 0.60      # PROVISIONAL
+    shuttle: {mean: 12, sd: 2, min: 9, max: 16}
+    iss: {mean: 170, sd: 25, min: 120, max: 215}
+
+# Uptake probability: [1960s, 2000s]
+uptake:
+  bisphosphonates: [0.0, 0.05]
+  k_citrate: [0.0, 0.15]
+  thiazides: [0.0, 0.02]
+
+# Default residual SD: sqrt(1 - var(linear predictor)), floored
+resid_sd:
+  resistive_exercise: 0.5
+resid_sd_floor: 0.2
+
+# Marginal prevalence; intercepts are calibrated to these. PROVISIONAL except nephrolithiasis.
+base_rates:
+  nephrolithiasis: 0.10
+  medications: 0.30
+  tamsulosin: 0.20
+  percutaneous_nephrostomy: 0.05
+  ultrasound_manipulation: 0.10
+  evacuation: 0.05
+  loss_of_crew_life: 0.02
+  flight_recertification: 0.90
+  ureterolithiasis: 0.08
+  loss_of_mission_objectives_no_evac: 0.05   # given no evacuation
+
+flip: 0.05                   # near-deterministic binary edges
+
+detection:
+  # Condition present = nephrolithiasis or MRM above threshold. PROVISIONAL.
+  mrm_stone:
+    mrm_threshold: 1.0
+    mrm_slope: 0.5           # log-odds of sensitivity per SD of MRM
+    with_ultrasound: {sensitivity: 0.70, specificity: 0.90}
+    without_ultrasound: {sensitivity: 0.30, specificity: 0.98}
+  # Condition present = outcomes above threshold. PROVISIONAL.
+  ltho:
+    threshold: 0.5
+    with_surveillance: {sensitivity: 0.80, specificity: 0.95}
+    without_surveillance: {sensitivity: 0.40, specificity: 0.95}
+
+selection:
+  b_individual_factors: -1.0
+  b_fitness: 1.0
+  target_retention: 0.30
+
+ground_truth:
+  low_quantile: 0.25
+  high_quantile: 0.75

@@ -1,0 +1,147 @@
+dag {
+bb="-0.5,-0.5,0.5,0.5"
+"Altered Gravity" [pos="-0.451,-0.281"]
+"Astronaut Selection" [pos="-0.031,-0.457"]
+"Bone Fracture (Risk)" [latent,pos="-0.395,-0.367"]
+"Bone Remodeling" [pos="-0.296,-0.302"]
+"CO2 (Risk)" [latent,pos="-0.384,-0.182"]
+"Crew Capability" [pos="0.214,-0.369"]
+"Crew Health and Performance System" [pos="-0.174,0.363"]
+"Detect Long Term Health Outcomes" [pos="0.402,0.131"]
+"Detect MRM/Stone" [pos="-0.048,0.017"]
+"Distance from Earth" [pos="-0.434,0.381"]
+"Flight Recertification" [pos="0.384,0.387"]
+"Food and Nutrition (Risk)" [latent,pos="-0.405,-0.447"]
+"HSIA (Risk)" [latent,pos="-0.308,0.403"]
+"Hostile Closed Environment" [pos="-0.411,-0.040"]
+"Individual Factors" [pos="-0.031,-0.282"]
+"Individual Readiness" [pos="0.232,-0.256"]
+"K+ Citrate" [pos="-0.122,0.124"]
+"Long Term Health Outcomes" [pos="0.407,-0.012"]
+"Loss of Crew Life" [pos="0.416,-0.162"]
+"Loss of Mission Objectives" [pos="0.381,-0.442"]
+"Loss of Mission" [pos="0.452,-0.470"]
+"Medical Illness" [pos="0.207,-0.138"]
+"Medical Monitoring Capability" [pos="0.027,0.360"]
+"Medical Prevention Capability" [pos="-0.146,0.271"]
+"Medical Treatment Capability" [pos="0.251,0.305"]
+"Microhost (Risk)" [latent,pos="-0.175,-0.453"]
+"Mineralized Renal Material" [pos="-0.179,-0.106"]
+"Percutaneous Nephrostomy" [pos="0.125,0.169"]
+"Pharm (Risk)" [latent,pos="0.187,0.401"]
+"Resistive Exercise" [pos="-0.222,-0.352"]
+"Task Performance" [pos="0.292,-0.416"]
+"Ultrasound Manipulation" [pos="0.086,-0.019"]
+"Urinary Retention (Risk)" [latent,pos="0.109,-0.307"]
+"Urine Chemistry" [pos="-0.298,-0.142"]
+"Urine Concentration" [pos="-0.283,-0.008"]
+"Urine Flow" [pos="0.110,-0.142"]
+"Vehicle Design" [pos="-0.316,0.294"]
+"Water Intake" [pos="-0.274,0.173"]
+Bisphosphonates [pos="-0.138,-0.267"]
+Evacuation [pos="0.346,-0.310"]
+Humidity [pos="-0.405,0.212"]
+Hydration [pos="-0.347,0.090"]
+Medications [pos="0.268,0.005"]
+Microbiome [pos="-0.119,-0.365"]
+Nephrolithiasis [outcome,pos="-0.085,-0.137"]
+Nutrients [pos="-0.298,-0.435"]
+Surveillance [pos="0.337,0.237"]
+Tamsulosin [pos="0.200,0.086"]
+Thiazides [pos="-0.067,0.133"]
+Ultrasound [pos="0.031,0.121"]
+Ureterolithiasis [pos="0.020,-0.138"]
+"Cumulative Mission Duration" [exposure,pos="-0.480,-0.340"]
+"Mission Era" [pos="-0.470,0.460"]
+"Pre-flight Fitness" [pos="-0.222,-0.450"]
+"Altered Gravity" -> "Bone Remodeling"
+"Astronaut Selection" -> "Individual Factors"
+"Bone Fracture (Risk)" -> "Bone Remodeling"
+"Bone Remodeling" -> "Urine Chemistry"
+"CO2 (Risk)" -> "Urine Chemistry"
+"Crew Capability" -> "Task Performance"
+"Crew Health and Performance System" -> "Medical Monitoring Capability"
+"Crew Health and Performance System" -> "Medical Prevention Capability"
+"Crew Health and Performance System" -> "Medical Treatment Capability"
+"Crew Health and Performance System" -> "Resistive Exercise"
+"Detect MRM/Stone" -> "Ultrasound Manipulation"
+"Distance from Earth" -> "Vehicle Design"
+"Food and Nutrition (Risk)" -> Nutrients
+"HSIA (Risk)" -> "Crew Health and Performance System"
+"HSIA (Risk)" -> "Vehicle Design"
+"Hostile Closed Environment" -> Hydration
+"Individual Factors" -> Nephrolithiasis
+"Individual Readiness" -> "Crew Capability"
+"K+ Citrate" -> "Urine Chemistry"
+"Long Term Health Outcomes" -> "Detect Long Term Health Outcomes"
+"Loss of Mission Objectives" -> "Loss of Mission"
+"Medical Illness" -> "Individual Readiness"
+"Medical Illness" -> "Long Term Health Outcomes"
+"Medical Illness" -> "Loss of Crew Life"
+"Medical Illness" -> Evacuation
+"Medical Monitoring Capability" -> Ultrasound
+"Medical Prevention Capability" -> "Bone Remodeling"
+"Medical Prevention Capability" -> "K+ Citrate"
+"Medical Prevention Capability" -> "Urine Chemistry"
+"Medical Prevention Capability" -> "Water Intake"
+"Medical Prevention Capability" -> Bisphosphonates
+"Medical Prevention Capability" -> Thiazides
+"Medical Treatment Capability" -> "Percutaneous Nephrostomy"
+"Medical Treatment Capability" -> "Ultrasound Manipulation"
+"Medical Treatment Capability" -> "Water Intake"
+"Medical Treatment Capability" -> Medications
+"Medical Treatment Capability" -> Tamsulosin
+"Microhost (Risk)" -> Microbiome
+"Mineralized Renal Material" -> "Detect MRM/Stone"
+"Mineralized Renal Material" -> Nephrolithiasis
+"Percutaneous Nephrostomy" -> "Medical Illness"
+"Pharm (Risk)" -> "Medical Prevention Capability"
+"Pharm (Risk)" -> "Medical Treatment Capability"
+"Resistive Exercise" -> "Bone Remodeling"
+"Task Performance" -> "Loss of Mission Objectives"
+"Ultrasound Manipulation" -> Ureterolithiasis
+"Urinary Retention (Risk)" -> "Urine Flow"
+"Urine Chemistry" -> "Mineralized Renal Material"
+"Urine Concentration" -> "Urine Chemistry"
+"Urine Flow" -> "Medical Illness"
+"Vehicle Design" -> "Crew Health and Performance System"
+"Vehicle Design" -> Humidity
+"Water Intake" -> "Urine Flow"
+"Water Intake" -> Hydration
+Bisphosphonates -> "Bone Remodeling"
+Evacuation -> "Loss of Crew Life"
+Evacuation -> "Loss of Mission Objectives"
+Humidity -> Hydration
+Hydration -> "Urine Concentration"
+Medications -> "Individual Readiness"
+Medications -> "Long Term Health Outcomes"
+Medications -> "Loss of Crew Life"
+Medications -> "Medical Illness"
+Medications -> Evacuation
+Microbiome -> "Urine Chemistry"
+Nephrolithiasis -> "Detect MRM/Stone"
+Nephrolithiasis -> "Flight Recertification"
+Nephrolithiasis -> Ureterolithiasis
+Nutrients -> "Bone Remodeling"
+Surveillance -> "Detect Long Term Health Outcomes"
+Tamsulosin -> "Urine Flow"
+Thiazides -> "Urine Chemistry"
+Ultrasound -> "Detect MRM/Stone"
+Ultrasound -> "Percutaneous Nephrostomy"
+Ureterolithiasis -> "Urine Flow"
+"Cumulative Mission Duration" -> "Bone Remodeling"
+"Pre-flight Fitness" -> "Resistive Exercise"
+"Mission Era" -> "Distance from Earth"
+"Mission Era" -> "HSIA (Risk)"
+"Mission Era" -> "Vehicle Design"
+"Mission Era" -> "Crew Health and Performance System"
+"Mission Era" -> "Medical Prevention Capability"
+"Mission Era" -> "Medical Treatment Capability"
+"Mission Era" -> "Medical Monitoring Capability"
+"Mission Era" -> "Pharm (Risk)"
+"Mission Era" -> "Hostile Closed Environment"
+"Mission Era" -> Humidity
+"Mission Era" -> "Altered Gravity"
+"Mission Era" -> Surveillance
+"Mission Era" -> "Cumulative Mission Duration"
+}
