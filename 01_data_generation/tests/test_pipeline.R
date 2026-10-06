@@ -56,20 +56,29 @@ test_that("stale calibration is detected when config changes", {
   expect_error(check_calibration_current(read_config(tmp), cal), "make recalibrate")
 })
 
-test_that("pipeline runs end to end at reduced size and checks catch a broken result", {
+test_that("pipeline writes every replicate with distinct seeds, and checks catch a broken result", {
   out_dir <- file.path(tempdir(), "pipeline_out")
-  out <- suppressMessages(run_pipeline(small_cfg(), cal, out_dir))
+  c2 <- small_cfg()
+  out <- suppressMessages(run_pipeline(c2, cal, out_dir))
   expect_true(all(file.exists(file.path(out_dir, c(
-    "full_set.csv", "reference_subsample.csv", "astronaut_set.csv", "feature_sets.csv",
-    "ground_truth_total_effects_full.csv", "ground_truth_total_effects_astronaut.csv",
+    "feature_sets.csv", "ground_truth_total_effects_full.csv", "ground_truth_total_effects_astronaut.csv",
     "data_summary.csv", "provenance.txt")))))
-  expect_equal(ncol(data.table::fread(file.path(out_dir, "full_set.csv"))), 46)
+  for (r in 1:2) {
+    rd <- replicate_dir(out_dir, r)
+    expect_true(all(file.exists(file.path(rd, c("full_set.csv", "reference_subsample.csv", "astronaut_set.csv")))))
+    expect_equal(ncol(data.table::fread(file.path(rd, "full_set.csv"))), 46)
+  }
+  expect_false(identical(data.table::fread(file.path(replicate_dir(out_dir, 1), "full_set.csv")),
+                         data.table::fread(file.path(replicate_dir(out_dir, 2), "full_set.csv"))))
+  expect_equal(nrow(out$summary), 6)
+  expect_equal(replicate_seeds(c2$params, 1)$full_set, c2$params$seeds$full_set)
   ck <- out$checks
   expect_true(ck$pass[ck$check == "non_ancestors_zero_effect"])
-  broken <- out$results; broken$full <- broken$full[1:10]
-  ck2 <- run_checks(broken, small_cfg())
-  expect_false(ck2$pass[ck2$check == "full_set_dims"])
-  expect_equal(ck2$severity[ck2$check == "full_set_dims"], "error")
+  expect_true(ck$pass[ck$check == "replicate_count"] && ck$pass[ck$check == "dataset_sizes"])
+  broken <- out$summary; broken$n[1] <- 10
+  ck2 <- run_checks(broken, out$ground_truth, c2)
+  expect_false(ck2$pass[ck2$check == "dataset_sizes"])
+  expect_equal(ck2$severity[ck2$check == "dataset_sizes"], "error")
   expect_equal(ck2$severity[ck2$check == "ancestor_ranks_resolved"], "warning")
 })
 

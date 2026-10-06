@@ -10,20 +10,21 @@ _(Overview to be written.)_
 
 ## Setup
 
-R is needed for data generation. Package versions (`simcausal`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`.
+R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`.
 
 ```bash
 Rscript -e 'renv::restore()'   # install the pinned R packages
 cp .env.example .env           # then add your API key; .env is git-ignored
 make data                      # generate the data sets
-make test                      # run the generation tests
+make shape                     # structural validation on the generated data
+make test                      # run all tests
 ```
 
-`DATA_DIR` in `.env` (default `./data`) sets where generated files are written; it is git-ignored.
+`DATA_DIR` in `.env` (default `./02_data`) sets where generated files are written; it is git-ignored.
 
 ## Data generation
 
-All code lives in [data_generation/](data_generation/). Three synthetic data sets are drawn from one prespecified DAG with [simcausal](https://cran.r-project.org/package=simcausal), so the true causal structure and total effects are known. The DAG is the NASA Human System Risk Board renal-stone DAG (SA-07566; 51 nodes, 75 edges) with three added nodes (**cumulative mission duration** as the exposure, **mission era** as a root, **pre-flight fitness** as a root), giving 54 nodes and 90 edges. The outcome is **nephrolithiasis** (binary). NASA's DAG specifies structure only: all equations, coefficients, era values and detection parameters here are study design parameters, not estimates of real-world effects.
+All code lives in [01_data_generation/](01_data_generation/). Three synthetic data sets are drawn from one prespecified DAG with [simcausal](https://cran.r-project.org/package=simcausal), so the true causal structure and total effects are known. The DAG is the NASA Human System Risk Board renal-stone DAG (SA-07566; 51 nodes, 75 edges) with three added nodes (**cumulative mission duration** as the exposure, **mission era** as a root, **pre-flight fitness** as a root), giving 54 nodes and 90 edges. The outcome is **nephrolithiasis** (binary). NASA's DAG specifies structure only: all equations, coefficients, era values and detection parameters here are study design parameters, not estimates of real-world effects.
 
 | | Full-set | Reference subsample | Astronaut-set |
 |---|---|---|---|
@@ -31,14 +32,14 @@ All code lives in [data_generation/](data_generation/). Three synthetic data set
 | Source | Simulated from the DAG | Random subsample of the full-set | Same source population, selected by sampling |
 | Selection | None | None | Retained with probability expit(α − 1.0·individual factors + 1.0·pre-flight fitness), α set for ~30% retention |
 | Era mix | 25% 1960s / 75% 2000s | as full-set | not era-dependent |
-| Seed | 20261004 | 20261007 | 20261005 |
+| Seed (replicate 1) | 20261004 | 20261007 | 20261005 |
 | Role | Ideal data, no selection | Separates sample-size from selection effects | Small, selected, astronaut-like cohort |
 
-Ground-truth total effects use seed 20261006. Output files are the same set of 46 observed columns in every data set (7 latent nodes withheld; latent values go to separate `*_latent.csv` debug files).
+Each data set is generated in 50 independent replicates. Replicate r uses the seeds above plus 1000·(r − 1). Ground-truth total effects are population quantities, computed once with seed 20261006. Output files are the same set of 46 observed columns in every data set (7 latent nodes withheld; latent values go to separate `*_latent.csv` debug files).
 
 ### How it works
 
-1. **Config** ([data_generation/config/](data_generation/config/)): the single source of truth.
+1. **Config** ([01_data_generation/config/](01_data_generation/config/)): the single source of truth.
    - `nodes.csv`, `edges.csv`: node roles/scales and every edge with its type and coefficient. Built from the DAG appendix (Supplementary Tables 1–2) by `tools/build_config_tables.py`.
    - `params.yaml`: seeds, sample sizes, era values, uptake probabilities, detection sensitivity/specificity, selection parameters, base rates. Entries marked PROVISIONAL are pending domain-expert confirmation.
    - `dag.txt`: the adapted DAGitty code used to validate the config.
@@ -48,30 +49,110 @@ Ground-truth total effects use seed 20261006. Output files are the same set of 4
    - Mission era is Bernoulli (0.75 for the 2000s). The 10 observed and 2 latent mission-level (context) nodes are fixed by era, so edges among them are kept in the graph but not separately parameterized. Cumulative mission duration is drawn from truncated era-specific distributions (1960s; 2000s Shuttle/ISS mixture).
    - Continuous children: linear combination of parents plus noise, in SD units of the child. Continuous parents enter standardized; binary parents (drugs, procedures) enter as 0/1, so their coefficient is the shift for users vs non-users. Binary children: logistic. Detection nodes use sensitivity/specificity; near-deterministic edges use a 5% flip.
    - Every node has its own uniform noise node, so interventions change a node's formula without shifting any random draws (**common random numbers**).
-5. **Data sets** (`R/pipeline.R`): the full-set is simulated; the reference subsample is a random 900 of it; the astronaut-set simulates a larger source population, retains records by the selection rule and keeps the first 900 retained (`R/select.R`).
-6. **Ground truth** (`R/ground_truth.R`): total effect of each of the 35 features on nephrolithiasis, as a risk difference in the outcome's expected probability under intervention (75th vs 25th percentile for continuous nodes, 1 vs 0 for binary), on 50,000 records, with a Monte Carlo standard error. For the astronaut target, effects are averaged over records retained at baseline, with selection held fixed.
-7. **Checks** (`R/checks.R`): sizes, prevalence, era share, retention, selection-induced association, 35 features and no latent columns, non-ancestors have exactly zero effect. A failed check stops generation. The exception is the ancestor ranking: adjacent ancestors whose effects lie within 2 standard errors of each other are reported as a warning (near-tie). The current parameters give one: water intake and thiazides.
+5. **Data sets** (`R/pipeline.R`): in each replicate:
+   - The full-set is simulated.
+   - The reference subsample is a random 900 of that replicate's full-set.
+   - The astronaut-set simulates a larger source population, retains records by the selection rule and keeps the first 900 retained (`R/select.R`).
+6. **Ground truth** (`R/ground_truth.R`): total effect of each of the 35 features on nephrolithiasis, as a risk difference in the outcome's expected probability under intervention (75th vs 25th percentile of the source population for continuous nodes, 1 vs 0 for binary), on 50,000 records, with a Monte Carlo standard error. For the astronaut target, the same contrasts are averaged over records retained at baseline, with selection held fixed.
+7. **Checks** (`R/checks.R`):
+   - Every replicate has the right sizes.
+   - Prevalence, era share and retention are within tolerance in every replicate, and prevalence is on target averaged over replicates.
+   - Selection induces the individual factors–fitness association on average.
+   - 35 features are present and no latent columns are written.
+   - Non-ancestors have exactly zero effect. A failed check stops generation. The exception is the ancestor ranking: adjacent ancestors whose effects lie within 2 standard errors of each other are reported as a warning (near-tie). The current parameters give one: water intake and thiazides.
 
 ### Run
 
 ```bash
-make data                                   # or: Rscript data_generation/generate_all.R
+make data                                   # or: Rscript 01_data_generation/generate_all.R
 ```
 
-Takes about 2 minutes. Outputs in `data/`:
+Takes about 2 minutes. Outputs in `02_data/` (about 360 MB):
 
 | File | Contents |
 |---|---|
-| `full_set.csv`, `reference_subsample.csv`, `astronaut_set.csv` | Observed columns (46 incl. outcome) |
-| `*_latent.csv` | Latent nodes, for debugging only |
+| `replicates/rNNN/full_set.csv`, `reference_subsample.csv`, `astronaut_set.csv` | Observed columns (46 incl. outcome), one folder per replicate |
+| `replicates/rNNN/*_latent.csv` | Latent nodes, for debugging only |
 | `ground_truth_total_effects_full.csv`, `…_astronaut.csv` | Total effect, SE and rank per feature |
 | `feature_sets.csv` | The 35-feature (all) and 16-feature (ancestor) sets |
-| `data_summary.csv` | n, seed, era share, realized prevalence, retention |
-| `provenance.txt` | Git commit, config hash, R and package versions |
+| `data_summary.csv` | Per replicate and data set: n, seed, era share, realized prevalence, individual factors–fitness correlation, retention |
+| `provenance.txt` | Git commit, config hash, replicate count, R and package versions |
 
 ### Tests
 
-`make test` runs `data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, duration truncation, astronaut selection, ground truth, the checks themselves, an end-to-end run at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
+`make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, duration truncation, astronaut selection, ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
+
+## Shape validation
+
+Code in [03_shape_validation/](03_shape_validation/) asks whether the structure of the DAG is consistent with the data. It tests the DAG's conditional independencies directly, and learns a structure with causal discovery and compares the two. Every analysis is repeated on each of the 50 replicates of each data set, and results are reported as rates or means with Monte Carlo standard errors.
+
+### How it works
+
+1. **Analysis graph** (`R/analysis_graph.R`): the DAG restricted to observed variables.
+   - The ten observed mission-level nodes vary only by era, so they are collapsed into mission era, and their edges are redirected to it.
+   - Edges from the two mission-level nodes that are equal in both eras (altered gravity, humidity) are dropped.
+   - Latent nodes are removed.
+   - Result: 36 variables and 59 edges.
+   - Its equivalence class (CPDAG: 45 compelled, 14 reversible edges) is the reference for scoring orientations.
+2. **Testable implications** (`R/implications.R`): Shipley's d-separation basis set, one implication per non-adjacent pair, X ⊥ Y | pa(X) ∪ pa(Y). That gives 571 implications.
+   - X is the later of the two in topological order.
+   - Each implication is tested with a likelihood-ratio test of Y in the regression of X on Z (linear for continuous X, logistic for binary X; continuous variables standardized). The effect is Y's coefficient per SD.
+   - P values are adjusted with Benjamini–Hochberg at 0.05.
+   - Implications are flagged when X's generating mechanism is not additive linear/logistic, and when they are expected to fail under the astronaut-set's selection (X and Y d-connected given Z and a selection node whose parents are individual factors and pre-flight fitness). Exactly one is: individual factors ⊥ pre-flight fitness.
+3. **Power** (`R/power.R`): a positive control.
+   - Each true edge is deleted in turn, and the single false independence this creates is tested (Bonferroni over the 59 edges).
+   - The detection rate per edge shows which parts of the graph the implication tests can check at each sample size.
+4. **Causal discovery** (`R/discovery.R`): MGM-PC from rCausalMGM, with no background knowledge.
+   - The MGM skeleton's sparsity penalties λ are chosen per data set by StEPS.
+   - PC-Stable is run on that skeleton with four collider-orientation rules: MGM-PC-Stable (sepsets; primary), MGM-CPC-Stable (conservative), MGM-MPC-Stable (majority) and MGM-PC-Max-Stable (max-p).
+   - Binary variables with fewer than 5 records in a category, which rCausalMGM cannot fit, are left out of discovery for that data set and recorded.
+   - Edge stability: the primary variant is rerun on 100 subsamples of floor(0.632·n) records drawn without replacement (first replicate only).
+5. **Comparison** (`R/compare.R`, `R/dsep.R`): each learned CPDAG is extended to a DAG.
+   - A consistent extension is found with the Dor–Tarsi algorithm. All consistent extensions imply the same independencies.
+   - If none exists (conflicting orientations), the comparison is summarized as the median, min and max over acyclic orientations of the undirected edges (enumerated, or sampled beyond 64).
+   - Each graph's implications are checked for d-separation in the other. An analysis-graph implication that fails in the learned graph points to an added edge; a learned implication that fails in the analysis graph points to an omitted edge.
+   - Adjacency precision/recall and orientation agreement with the true CPDAG are reported alongside.
+6. **Checks** (`R/pipeline.R`): the run stops if the data were generated from a different config than the current calibration (stale data), or if the analysis graph does not have 36 nodes, 59 edges, 571 implications and one selection-sensitive implication.
+
+Settings (FDR level, power α, PC-Stable α, variants, StEPS subsamples, stability subsamples, seeds, flagged nodes) are in `config/params.yaml`.
+
+### Run
+
+```bash
+make shape                                  # or: Rscript 03_shape_validation/run_all.R
+Rscript 03_shape_validation/run_all.R --replicates=2 --subsamples=0   # quick check
+```
+
+The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes about 2 hours. It reads `DATA_DIR` and writes to `OUTPUT_DIR/03_shape_validation/` (default `./outputs`, git-ignored):
+
+| File | Contents |
+|---|---|
+| `summary.csv` | Per data set and variant: rates (selection violation detected, any unexpected rejection, comparison available) and mean ± MC SE of every per-replicate metric |
+| `per_replicate.csv` | One row per replicate, data set and variant: rejections by flag, detectable edges, λ, variables left out of discovery, structure metrics, implication comparison |
+| `implication_rejection_rates.csv` | Each of the 571 implications with its flags and rejection rate per data set |
+| `power_by_edge.csv` | Per edge and data set: detection rate and median p in the positive control |
+| `edge_recovery.csv` | Per data set and variant: how often each true edge is found and oriented as in the true CPDAG, and how often each false edge appears |
+| `edge_stability_r001_<dataset>.csv` | Subsampling stability of the primary variant, replicate 1 |
+| `analysis_graph_edges.csv`, `analysis_graph_cpdag.csv` | Analysis graph (with the source edges behind each edge) and its CPDAG |
+| `detail/` | Replicate 1: implication tests and learned CPDAGs per variant |
+| `provenance.txt` | Git commit, data config hash, replicates analysed, R and package versions (with the R version each package was built under) |
+
+### Tests
+
+`make test` also runs `03_shape_validation/tests/`:
+- **Settings:** they parse to the expected types.
+- **Analysis graph:** size and collapsing.
+- **Basis set:** 571 implications, all implied by the graph.
+- **d-separation:** agreement with dagitty.
+- **Selection labelling.**
+- **Likelihood-ratio test:** on planted dependence and independence.
+- **Comparison:** detects an added and an omitted edge.
+- **Consistent extension:** found, or correctly absent for an unchorded 4-cycle; when absent, the comparison reports a range and is deterministic.
+- **Orientation scoring:** against the true CPDAG.
+- **Positive control.**
+- **Stale data:** refused.
+- **Discovery wrapper:** recovers a small mixed-data chain.
+- **End to end:** a run on two generated replicates.
 
 ## License
 

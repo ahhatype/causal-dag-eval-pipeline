@@ -1,0 +1,7 @@
+sv_dir <- normalizePath(file.path(testthat::test_path(), ".."))
+repo_dir <- dirname(sv_dir)
+for (f in c("paths", "model_spec", "calibrate")) source(file.path(repo_dir, "01_data_generation", "R", paste0(f, ".R")))
+for (f in c("analysis_graph", "implications", "dsep", "discovery", "compare", "power", "pipeline")) source(file.path(sv_dir, "R", paste0(f, ".R")))
+params <- yaml::read_yaml(file.path(sv_dir, "config", "params.yaml"))
+cfg <- read_config(file.path(repo_dir, "01_data_generation", "config"))
+ag <- analysis_graph(cfg)

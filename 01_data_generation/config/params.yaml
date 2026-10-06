@@ -8,6 +8,10 @@ seeds:
   reference_subsample: 20261007
   calibration: 20261001
 
+replicates:
+  count: 50
+  seed_stride: 1000          # replicate r uses each data-set seed + stride * (r - 1)
+
 sizes:
   full_set: 10000
   reference_subsample: 900

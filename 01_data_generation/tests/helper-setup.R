@@ -9,5 +9,6 @@ D <- build_dag(cfg, cal)
 small_cfg <- function() {
   c2 <- cfg
   c2$params$sizes[c("full_set", "reference_subsample", "astronaut_set", "ground_truth")] <- list(3000, 300, 300, 3000)
+  c2$params$replicates$count <- 2
   c2
 }

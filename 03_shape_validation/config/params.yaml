@@ -1,0 +1,41 @@
+# PROVISIONAL: pending confirmation of the discovery settings.
+
+datasets: [full_set, reference_subsample, astronaut_set]
+
+fdr: 0.05                    # Benjamini-Hochberg level for implication tests
+
+power:
+  alpha: 0.05                # edge-deletion positive control; Bonferroni over edges
+
+alpha: 0.05                  # PC-Stable conditional-independence test level
+
+# PC-Stable collider-orientation rules run on the same MGM skeleton; the first is primary.
+variants:
+  sepsets: MGM-PC-Stable
+  conservative: MGM-CPC-Stable
+  majority: MGM-MPC-Stable
+  maxp: MGM-PC-Max-Stable
+mgm:
+  lambda_selection: steps    # steps (StEPS, per data set) or fixed
+  steps_subsamples: 20       # StEPS subsamples (package default)
+  lambda: [0.2, 0.2, 0.2]    # used only when lambda_selection is fixed
+threads: -1
+discovery_seed: 20261100     # StEPS subsampling seed is this + replicate number
+
+stability:
+  subsamples: 100            # first analysed replicate, primary variant only; 0 to skip
+  replace: false             # subsamples of floor(0.632 n) without replacement
+  seed: 20261008
+
+orientations:
+  max: 64                    # acyclic orientations of undirected learned edges; sampled beyond this
+  seed: 20261009
+
+selection_on: [individual_factors, pre_flight_fitness]
+
+# Nodes whose generating mechanism is not additive linear/logistic in their parents.
+nonadditive_nodes:
+  - cumulative_mission_duration
+  - detect_mrm_stone
+  - detect_long_term_health_outcomes
+  - loss_of_mission_objectives

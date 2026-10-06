@@ -15,21 +15,14 @@ ground_truth <- function(D, cfg, cal) {
     c(mean(d), sd(d) / sqrt(length(d)))
   }
   rows <- lapply(feature_ids(cfg, "all"), function(f) {
-    if (scale[[f]] == "binary") {
-      vf <- va <- c(0, 1)
-      r <- sim_actions(D, cfg, n, seed, list(lo = list(node = f, value = 0), hi = list(node = f, value = 1)))
-      ef <- eff(r, "lo", "hi", rep(TRUE, n)); ea <- eff(r, "lo", "hi", keep)
-    } else {
-      vf <- unname(quantile(base[[f]], q)); va <- unname(quantile(base[[f]][keep], q))
-      r <- sim_actions(D, cfg, n, seed, list(
-        lo_full = list(node = f, value = vf[1]), hi_full = list(node = f, value = vf[2]),
-        lo_ast = list(node = f, value = va[1]), hi_ast = list(node = f, value = va[2])))
-      ef <- eff(r, "lo_full", "hi_full", rep(TRUE, n)); ea <- eff(r, "lo_ast", "hi_ast", keep)
-    }
+    v <- if (scale[[f]] == "binary") c(0, 1) else unname(quantile(base[[f]], q))
+    r <- sim_actions(D, cfg, n, seed, list(lo = list(node = f, value = v[1]), hi = list(node = f, value = v[2])))
+    ef <- eff(r, "lo", "hi", rep(TRUE, n)); ea <- eff(r, "lo", "hi", keep)
     data.frame(feature = f, ancestor_set = f %in% anc,
-               low_full = vf[1], high_full = vf[2], low_astronaut = va[1], high_astronaut = va[2],
+               low_full = v[1], high_full = v[2], low_astronaut = v[1], high_astronaut = v[2],
                effect_full = ef[1], se_full = ef[2], effect_astronaut = ea[1], se_astronaut = ea[2])
   })
+
   out <- do.call(rbind, rows)
   out$rank_full <- rank(-abs(out$effect_full), ties.method = "min")
   out$rank_astronaut <- rank(-abs(out$effect_astronaut), ties.method = "min")

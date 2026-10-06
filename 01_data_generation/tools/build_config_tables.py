@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build config/nodes.csv and config/edges.csv from Supplementary Tables 1 and 2.
 
-Usage: python3 data_generation/tools/build_config_tables.py <appendix.md> <out_dir>
+Usage: python3 01_data_generation/tools/build_config_tables.py <appendix.md> <out_dir>
 """
 import csv
 import re
