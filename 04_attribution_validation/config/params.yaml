@@ -1,0 +1,37 @@
+# PROVISIONAL: library, budgets and explained-record counts pending runtime check and confirmation.
+
+seed: 20261200               # per-run seeds add replicate and data-set offsets
+datasets: [full_set, reference_subsample, astronaut_set]
+feature_sets: [ancestor, all]
+methods: [standard_shap, ordering_only_shap, ng_causal_shap, interventional_shap]
+
+split:
+  test_fraction: 0.30        # stratified by outcome
+
+explain:
+  records: 64                # held-out records explained by every method
+  min_events: 8              # at least this many outcome events among them
+  background: 128            # training records used as the background sample
+
+super_learner:
+  folds: 10
+
+standard_shap:
+  permutations: 128
+
+ng_causal_shap:
+  samples: 64                # Monte Carlo draws per coalition value (M)
+  iterations: 150            # sampled coalitions per explained record (T)
+
+ordering_only_shap:           # same orders as interventional SHAP; background replacement as the value function
+  orders: 128
+  burn_in: 2000
+  thin: 50
+
+interventional_shap:
+  orders: 128
+  burn_in: 2000              # adjacent-swap steps before the first order
+  thin: 50                   # adjacent-swap steps between orders
+
+evaluation:
+  top_k: 5

@@ -10,13 +10,15 @@ _(Overview to be written.)_
 
 ## Setup
 
-R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`.
+R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python, managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`.
 
 ```bash
 Rscript -e 'renv::restore()'   # install the pinned R packages
+(cd 04_attribution_validation && uv sync)   # install the pinned Python packages
 cp .env.example .env           # then add your API key; .env is git-ignored
 make data                      # generate the data sets
 make shape                     # structural validation on the generated data
+make attribution               # attribution validation on the generated data
 make test                      # run all tests
 ```
 
@@ -153,6 +155,71 @@ The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes abou
 - **Stale data:** refused.
 - **Discovery wrapper:** recovers a small mixed-data chain.
 - **End to end:** a run on two generated replicates.
+
+## Attribution validation
+
+Code in [04_attribution_validation/](04_attribution_validation/) asks whether attribution methods recover the relative importance of the DAG's nodes. Each method's ranking of features is compared with the true total effects from data generation, on every replicate of every data set.
+
+### How it works
+
+1. **Inputs** (`data.py`): the replicate data sets and ground truth from `DATA_DIR`. The analysis graph is built from `01_data_generation/config` with the same rules as shape validation; a test checks the two are identical. The run stops if the data were generated from a different config.
+2. **Feature sets:** all 35 observed features, and the 16 ancestors of nephrolithiasis. The all-features set adds 15 outcome descendants and 4 variables that are neither ancestors nor descendants, all with a true effect of zero.
+3. **Predictive model** (`superlearner.py`): one super learner per data set and feature set.
+   - Library: main-terms logistic regression, L2-penalized logistic regression, random forest, gradient boosting.
+   - Weights: a convex combination chosen to minimize 10-fold cross-validated log loss, then the learners are refit on all training data.
+   - Records are split 70/30, stratified by outcome. Held-out AUC is reported next to the AUC of the true outcome probability, which bounds what any model can reach.
+4. **Explained records:** every method explains the same 64 held-out records (at least 8 outcome events) against the same 128 training records as background. All attributions are on the probability scale and are checked to sum to the model's prediction for each record.
+5. **Methods:**
+   - **Standard SHAP** (`standard.py`): shap's permutation explainer, 128 feature orders (64 antithetic pairs), background features filled in independently of the graph.
+   - **Ordering-only asymmetric SHAP** (`ordering.py`): the same graph-consistent orders as interventional SHAP, but features outside a coalition are taken from the background sample, as in standard SHAP. Comparing it with the other two separates the effect of respecting the graph's order from the effect of propagating interventions.
+   - **Ng et al. causal SHAP** (`ng.py`), following Algorithm 1 of the paper with the analysis graph supplied in place of PC + IDA.
+     - Each edge's strength is the |coefficient| of the parent in one linear regression of the child on all its parents.
+     - A feature's causal weight is the normalized sum, over its directed paths to the outcome, of the product of edge strengths. Non-ancestors get zero.
+     - Coalition values are averaged over 64 graph-respecting Monte Carlo draws, with 150 sampled coalitions per record, then normalized for local accuracy.
+   - **Interventional asymmetric SHAP** (`interventional.py`): a coalition is valued by the model's mean prediction when its features are set by intervention.
+     - A structural causal model is fitted to the training data: each node regressed on its analysis-graph parents, linear for continuous and logistic for binary nodes. It includes non-feature nodes such as the outcome, so interventions propagate to its descendants.
+     - Background records are abducted to exogenous noise; binary noise is drawn uniformly from the range consistent with the observed value.
+     - 128 feature orders are sampled uniformly from the orders consistent with ancestry in the analysis graph, using a Markov chain of adjacent swaps.
+6. **Evaluation** (`evaluation.py`): mean |SHAP| over the explained records gives each feature's importance. On the 16 ancestors in every run:
+   - Kendall's τ_b with |true effect|, and top-5 recovery. True effects that differ by less than 1.96 paired Monte Carlo standard errors are treated as tied: tied features share one value in τ_b, and every feature tied with the fifth counts as a true top-5 feature.
+   - The proximity bias index: importance-weighted mean distance to the outcome under the truth minus under the method. Positive means credit is pooled near the outcome.
+   - All-features runs also report the non-ancestor credit share.
+   - The reference subsample and full-set are scored against the source-population effects, the astronaut-set against the selected-population effects.
+
+Settings (library folds, split, explained records, background size, permutations, Monte Carlo budgets, order sampler, seeds) are in `config/params.yaml`.
+
+### Run
+
+```bash
+make attribution                            # or: cd 04_attribution_validation && uv run python run_all.py
+uv run python run_all.py --replicates 1 --datasets reference_subsample --feature-sets ancestor   # one run
+```
+
+One run (one replicate, data set and feature set) takes about 3.5 minutes on the ancestor set: standard SHAP about 95 s, interventional SHAP about 80 s, Ng about 10 s. Outputs go to `OUTPUT_DIR/04_attribution_validation/`:
+
+| File | Contents |
+|---|---|
+| `summary.csv` | Per data set, feature set and method: mean ± MC SE of each metric, AUCs and runtime |
+| `per_run.csv` | One row per replicate, data set, feature set and method: metrics, super learner weights, AUCs, efficiency error, runtime |
+| `importance.csv` | Each feature's importance in every run |
+
+### Tests
+
+`make test` also runs `04_attribution_validation/tests/`:
+- **Analysis graph:** matches the design and shape validation.
+- **Order sampler:** uniform over consistent orders.
+- **Ancestry constraints:** pass through non-feature nodes.
+- **Structural model:** abduction and simulation round-trip, coefficients recovered.
+- **Ordering-only SHAP:** efficiency, and no credit to an ancestor the model does not use.
+- **Closed form:** on a chain x → m with a model that uses only m, interventional SHAP credits x with 0.8 (x − E x) and ordering-only SHAP credits it with zero.
+- **Tied effects:** treated as tied in τ_b and top-k recovery.
+- **Interventional SHAP:** credits an ancestor acting through a model feature, gives zero to an irrelevant feature, and is efficient.
+- **Ng weights:** zero for non-ancestors, local accuracy.
+- **Permutation SHAP:** efficiency.
+- **Super learner:** weights form a convex combination.
+- **Metrics.**
+- **Stale data:** refused.
+- **End to end:** one run on generated data with small budgets.
 
 ## License
 
