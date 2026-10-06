@@ -24,6 +24,7 @@ dependencies = [
     { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "shap", version = "0.51.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "shap", version = "0.52.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "threadpoolctl" },
 ]
 
 [package.dev-dependencies]
@@ -41,6 +42,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.5,<2" },
     { name = "scipy", specifier = ">=1.12,<2" },
     { name = "shap", specifier = ">=0.46,<0.53" },
+    { name = "threadpoolctl", specifier = ">=3,<4" },
 ]
 
 [package.metadata.requires-dev]

@@ -3,6 +3,7 @@
 datasets: [full_set, reference_subsample, astronaut_set]
 
 fdr: 0.05                    # Benjamini-Hochberg level for implication tests
+calibration: {alpha: 0.05}   # level for the per-replicate uniformity check and raw rejection rate
 
 power:
   alpha: 0.05                # edge-deletion positive control; Bonferroni over edges

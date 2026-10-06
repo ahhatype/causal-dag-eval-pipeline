@@ -10,7 +10,8 @@ from attribution_validation.evaluation import (kendall_tau_b, non_ancestor_share
                                                tie_adjusted_truth, top_k_recovery)
 from attribution_validation.interventional import (LinearLogisticSCM, NodeSpec, OrderSampler, ancestral_pairs, fit_scm,
                                                    interventional_shap)
-from attribution_validation.ng import causal_weights, edge_strengths, ng_causal_shap
+from attribution_validation.ng import (CausalSampler, antithetic_orders, causal_weights, edge_strengths, ng_causal_shap,
+                                      permutation_shapley)
 from attribution_validation.ordering import ordering_only_shap
 from attribution_validation.standard import permutation_shap
 from attribution_validation.superlearner import SuperLearner, default_library
@@ -121,9 +122,49 @@ def test_ng_weights_zero_for_non_ancestors_and_local_accuracy():
     assert w["a"] < w["b"]          # a's path runs through b, product of strengths below 1
     predict = lambda X: 1 / (1 + np.exp(-(-1 + X[:, 1] + 0.5 * X[:, 2])))  # noqa: E731
     expected = float(np.mean(predict(df[feats].to_numpy())))
-    res = ng_causal_shap(predict, df, df.iloc[:10], feats, ag, samples=32, iterations=40, seed=3, expected_value=expected)
+    res = ng_causal_shap(predict, df, df.iloc[:10], feats, ag, samples=32, orders=8, seed=3, expected_value=expected)
     assert np.max(np.abs(res.efficiency_error)) < 1e-10
     assert np.all(res.values["d"] == 0)
+    assert list(res.diagnostics.columns) == ["shapley_total", "weighted_total", "rescale_factor"]
+
+
+def test_permutation_shapley_over_all_orders_is_exact():
+    from itertools import combinations, permutations
+    from math import factorial
+    k = 4
+    rng = np.random.default_rng(5)
+    table = {S: rng.normal() for r in range(k + 1) for S in combinations(range(k), r)}
+    value = lambda C: np.array([table[tuple(np.flatnonzero(c))] for c in C])  # noqa: E731
+    exact = np.zeros(k)
+    for i in range(k):
+        others = [j for j in range(k) if j != i]
+        for r in range(k):
+            for S in combinations(others, r):
+                w = factorial(r) * factorial(k - r - 1) / factorial(k)
+                exact[i] += w * (table[tuple(sorted(S + (i,)))] - table[S])
+    est = permutation_shapley(value, k, [np.array(p) for p in permutations(range(k))])
+    assert np.allclose(est, exact, atol=1e-12)
+    orders = antithetic_orders(k, 6, rng)
+    assert len(orders) == 6 and np.array_equal(orders[1], orders[0][::-1])
+
+
+def test_causal_sampler_keeps_binaries_binary_and_shares_noise():
+    rng = np.random.default_rng(6)
+    n = 3000
+    a = rng.normal(size=n)
+    b = (rng.uniform(size=n) < 1 / (1 + np.exp(-a))).astype(float)
+    df = pd.DataFrame({"a": a, "b": b, "nephrolithiasis": b})
+    ag = D.AnalysisGraph(nodes=["a", "b", "nephrolithiasis"], edges=[("a", "b"), ("b", "nephrolithiasis")],
+                         scale={"a": "continuous", "b": "binary", "nephrolithiasis": "binary"})
+    s = CausalSampler(df, ag, ["a", "b"])
+    noise = s.noise(500, rng)
+    x = {"a": 2.0, "b": 1.0}
+    C = np.array([[False, False], [True, False], [True, True]])
+    draws = s.draw(x, C, noise).reshape(3, 500, 2)
+    assert set(np.unique(draws[..., 1])) <= {0.0, 1.0}
+    assert np.array_equal(draws[0, :, 0], draws[2, :, 0] * 0 + noise["a"])   # same root draws in every coalition
+    assert np.all(draws[1, :, 0] == 2.0) and np.all(draws[2] == [2.0, 1.0])
+    assert draws[1, :, 1].mean() > draws[0, :, 1].mean()                    # fixing a high raises b downstream
 
 
 def test_permutation_shap_efficiency():
@@ -172,17 +213,25 @@ def test_stale_data_refused(tmp_path):
         D.check_data_current(tmp_path, CFG)
 
 
-@pytest.mark.skipif(not (DATA_DIR / "replicates" / "r001").exists(), reason="generated data not present")
-def test_one_run_end_to_end_with_small_budgets():
+def small_params():
     import yaml
-    from attribution_validation.pipeline import run_one
     params = yaml.safe_load((Path(__file__).parents[1] / "config" / "params.yaml").read_text())
     params["super_learner"]["folds"] = 3
     params["explain"].update(records=12, background=16)
     params["standard_shap"]["permutations"] = 4
-    params["ng_causal_shap"].update(samples=8, iterations=10)
+    params["ng_causal_shap"].update(samples=8, orders=4)
     params["ordering_only_shap"].update(orders=4, burn_in=50, thin=5)
     params["interventional_shap"].update(orders=4, burn_in=50, thin=5)
+    return params
+
+
+needs_data = pytest.mark.skipif(not (DATA_DIR / "replicates" / "r001").exists(), reason="generated data not present")
+
+
+@needs_data
+def test_one_run_end_to_end_with_small_budgets():
+    from attribution_validation.pipeline import run_one
+    params = small_params()
     df = D.load_replicate(DATA_DIR, 1, "reference_subsample")
     fs = D.feature_sets(DATA_DIR)
     truth = D.ground_truth(DATA_DIR, "full").loc[fs["ancestor"]]
@@ -193,3 +242,33 @@ def test_one_run_end_to_end_with_small_budgets():
     assert all(r["max_efficiency_error"] < 1e-8 for r in res["rows"])
     assert res["info"]["explained_events"] >= params["explain"]["min_events"]
     assert set(imp["feature"]) == set(fs["ancestor"])
+
+
+@needs_data
+def test_parallel_cells_match_sequential(tmp_path):
+    from attribution_validation.pipeline import run
+    params = small_params()
+    args = dict(replicates=1, datasets=["reference_subsample", "astronaut_set"], feature_sets=["ancestor"])
+    run(params, DATA_DIR, tmp_path / "seq", workers=1, **args)
+    run(params, DATA_DIR, tmp_path / "par", workers=2, **args)
+    seq, par = (pd.read_csv(tmp_path / d / "per_run.csv").drop(columns=["seconds", "fit_seconds"]) for d in ("seq", "par"))
+    assert len(seq) == 2 * len(params["methods"])
+    pd.testing.assert_frame_equal(seq, par, rtol=1e-8)
+    imp = [pd.read_csv(tmp_path / d / "importance.csv") for d in ("seq", "par")]
+    pd.testing.assert_frame_equal(*imp, rtol=1e-8)
+
+
+def test_cell_directory_is_never_silently_reused_or_cleared(tmp_path):
+    from attribution_validation.pipeline import _prepare_cell_dir
+    cells = tmp_path / "cells"
+    want = {"params": {"seed": 1}, "code_hash": "a"}
+    _prepare_cell_dir(cells, want, resume=False, fresh=False)
+    (cells / "r001_x_y_runs.csv").write_text("done")
+    with pytest.raises(RuntimeError, match="--resume"):
+        _prepare_cell_dir(cells, want, resume=False, fresh=False)
+    _prepare_cell_dir(cells, want, resume=True, fresh=False)
+    assert (cells / "r001_x_y_runs.csv").exists()
+    with pytest.raises(RuntimeError, match="different settings"):
+        _prepare_cell_dir(cells, {**want, "code_hash": "b"}, resume=True, fresh=False)
+    _prepare_cell_dir(cells, {**want, "code_hash": "b"}, resume=False, fresh=True)
+    assert not (cells / "r001_x_y_runs.csv").exists()

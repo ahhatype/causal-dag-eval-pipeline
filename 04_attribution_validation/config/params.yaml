@@ -1,4 +1,5 @@
-# PROVISIONAL: library, budgets and explained-record counts pending runtime check and confirmation.
+# PROVISIONAL: library and explained-record counts pending confirmation.
+# Monte Carlo budgets: two independent estimates at these budgets agree closely on every evaluation metric.
 
 seed: 20261200               # per-run seeds add replicate and data-set offsets
 datasets: [full_set, reference_subsample, astronaut_set]
@@ -16,20 +17,22 @@ explain:
 super_learner:
   folds: 10
 
+workers: 7                   # cells run in parallel, each on one core
+
 standard_shap:
-  permutations: 128
+  permutations: 64           # 32 antithetic pairs
 
 ng_causal_shap:
-  samples: 64                # Monte Carlo draws per coalition value (M)
-  iterations: 150            # sampled coalitions per explained record (T)
+  samples: 64                # Monte Carlo draws per coalition value (M), shared by the coalitions of each order
+  orders: 64                 # 32 antithetic pairs
 
-ordering_only_shap:           # same orders as interventional SHAP; background replacement as the value function
-  orders: 128
+ordering_only_shap:          # orders sampled as for interventional SHAP; background replacement as the value function
+  orders: 64
   burn_in: 2000
   thin: 50
 
 interventional_shap:
-  orders: 128
+  orders: 64
   burn_in: 2000              # adjacent-swap steps before the first order
   thin: 50                   # adjacent-swap steps between orders
 

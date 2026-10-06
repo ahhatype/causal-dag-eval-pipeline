@@ -11,6 +11,7 @@ dependencies = [
     "networkx>=3.3,<4",
     "pyyaml>=6,<7",
     "shap>=0.46,<0.53",
+    "threadpoolctl>=3,<4",
     # shap's numba constraint otherwise lets the resolver fall back to versions that cannot build
     "numba>=0.60,<0.63",
 ]

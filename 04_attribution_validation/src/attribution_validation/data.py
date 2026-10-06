@@ -126,7 +126,10 @@ GROUND_TRUTH_TARGET = {"full_set": "full", "reference_subsample": "full", "astro
 
 
 def true_outcome_probability(data: pd.DataFrame, cfg: GenerationConfig) -> np.ndarray:
-    """P(outcome | its generating parents), from the frozen calibration: the bound on achievable discrimination."""
+    """P(outcome | its generating parents), from the frozen calibration.
+
+    It bounds achievable discrimination for the ancestor set only; outcome descendants let a model exceed it.
+    """
     e = cfg.edges[cfg.edges["child"] == OUTCOME]
     lin = cfg.calibration["logit"][OUTCOME] + sum(
         float(c) * data[p].to_numpy(dtype=float) for p, c in zip(e["parent"], e["coef"]))

@@ -42,6 +42,21 @@ test_that("likelihood-ratio test keeps a true independence and rejects a planted
   expect_gt(test_implication(d, "y", "c", "a", TRUE)$p, 0.01)
 })
 
+test_that("implication calibration: uniform p values pass, skewed p values fail, selection implication excluded", {
+  set.seed(3)
+  mk <- function(p) data.frame(p = c(p, 0), expected_under_selection = c(rep(FALSE, length(p)), TRUE))
+  ok <- implication_calibration(mk(runif(500)))
+  expect_equal(ok$calibration_tests, 500)
+  expect_gt(ok$calibration_ks_p, 0.05)
+  expect_equal(ok$calibration_ks_rejected, 0)
+  bad <- implication_calibration(mk(rbeta(500, 0.5, 1)))
+  expect_equal(bad$calibration_ks_rejected, 1)
+  expect_gt(bad$raw_rejection_rate, 0.15)
+  s <- calibration_summary(rbind(cbind(dataset = "a", ok), cbind(dataset = "a", bad)))
+  expect_equal(s$ks_rejection_rate, 0.5)
+  expect_equal(s$raw_rejection_rate_mean, mean(c(ok$raw_rejection_rate, bad$raw_rejection_rate)))
+})
+
 test_that("implication comparison detects an added and an omitted edge", {
   nodes <- c("a", "b", "c")
   truth <- data.frame(parent = c("a", "b"), child = c("b", "c"))
@@ -156,7 +171,9 @@ test_that("shape pipeline runs end to end on generated replicates", {
   expect_true(all(file.exists(file.path(out_dir, c(
     "summary.csv", "per_replicate.csv", "implication_rejection_rates.csv", "power_by_edge.csv",
     "edge_recovery.csv", "analysis_graph_edges.csv", "analysis_graph_cpdag.csv", "provenance.txt",
-    "edge_stability_r001_full_set.csv")))))
+    "edge_stability_r001_full_set.csv", "implication_calibration.csv", "implication_calibration_summary.csv",
+    "detail/implications_r002_astronaut_set.csv")))))
+  expect_equal(nrow(read.csv(file.path(out_dir, "implication_calibration.csv"))), 6)
   expect_equal(nrow(read.csv(file.path(out_dir, "implication_rejection_rates.csv"))), 571)
   expect_true(all(out$per_replicate$tests == 571))
 })

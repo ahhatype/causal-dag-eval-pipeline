@@ -35,7 +35,7 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
   data.table::fwrite(ag$edges, file.path(out_dir, "analysis_graph_edges.csv"))
   data.table::fwrite(cpdag, file.path(out_dir, "analysis_graph_cpdag.csv"))
 
-  rows <- list(); rej <- list(); pow <- list(); edges <- list()
+  rows <- list(); rej <- list(); pow <- list(); edges <- list(); calib <- list()
   for (r in reps) {
     rdir <- file.path(data_dir, "replicates", sprintf("r%03d", r))
     for (ds in params$datasets) {
@@ -49,8 +49,10 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
       fit <- run_mgm_pc(md, params, seed)
       primary <- names(params$variants)[1]
 
+      data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
+      ic <- implication_calibration(tests, params$calibration$alpha)
+      calib[[length(calib) + 1]] <- cbind(replicate = r, dataset = ds, ic)
       if (r == reps[1]) {
-        data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
         if (params$stability$subsamples > 0) {
           message(sprintf("[replicate %d] %s: stability over %d subsamples", r, ds, params$stability$subsamples))
           data.table::fwrite(stability_edges(md, fit$graphs[[primary]], params),
@@ -65,6 +67,7 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
                          rejected_nonadditive = sum(rj & tests$nonadditive_response & !tests$expected_under_selection),
                          rejected_other = sum(rj & !tests$nonadditive_response & !tests$expected_under_selection),
                          edges_detectable = sum(pw$detected),
+                         calibration_ks_rejected = ic$calibration_ks_rejected, raw_rejection_rate = ic$raw_rejection_rate,
                          discovery_dropped = paste(attr(md, "dropped"), collapse = "; "),
                          lambda_cc = fit$lambda[1], lambda_cd = fit$lambda[2], lambda_dd = fit$lambda[3])
       for (v in names(params$variants)) {
@@ -94,6 +97,8 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
   wide <- reshape(rates, idvar = "implication", timevar = "dataset", direction = "wide")
   data.table::fwrite(cbind(imp, wide[order(wide$implication), -1, drop = FALSE]),
                      file.path(out_dir, "implication_rejection_rates.csv"))
+
+  write_calibration(do.call(rbind, calib), out_dir)
 
   pw <- do.call(rbind, pow)
   power <- merge(setNames(aggregate(detected ~ dataset + edge, pw, mean), c("dataset", "edge", "detection_rate")),
@@ -149,4 +154,29 @@ write_shape_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir) {
                        vapply(pkgs, function(x) as.character(utils::packageVersion(x)), ""),
                        vapply(pkgs, function(x) utils::packageDescription(x)$Built, ""))),
              file.path(out_dir, "provenance.txt"))
+}
+
+write_calibration <- function(per_rep, out_dir) {
+  data.table::fwrite(per_rep, file.path(out_dir, "implication_calibration.csv"))
+  summ <- calibration_summary(per_rep)
+  data.table::fwrite(summ, file.path(out_dir, "implication_calibration_summary.csv"))
+  summ
+}
+
+run_calibration <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL) {
+  available <- check_data_current(data_dir, cal)
+  reps <- seq_len(min(available, if (is.null(replicates)) available else replicates))
+  dir.create(file.path(out_dir, "detail"), showWarnings = FALSE, recursive = TRUE)
+  ag <- analysis_graph(cfg)
+  imp <- flag_implications(shipley_basis(ag$nodes, ag$edges), ag, params)
+  check_analysis_graph(ag, imp)
+  calib <- list()
+  for (r in reps) for (ds in params$datasets) {
+    message(sprintf("[replicate %d/%d] %s", r, length(reps), ds))
+    d <- data.table::fread(file.path(data_dir, "replicates", sprintf("r%03d", r), paste0(ds, ".csv")))
+    tests <- test_implications(d, imp, ag, params$fdr)
+    data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
+    calib[[length(calib) + 1]] <- cbind(replicate = r, dataset = ds, implication_calibration(tests, params$calibration$alpha))
+  }
+  write_calibration(do.call(rbind, calib), out_dir)
 }

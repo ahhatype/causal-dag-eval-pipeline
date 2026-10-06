@@ -146,6 +146,7 @@ class AttributionResult:
     values: pd.DataFrame
     baseline: float
     efficiency_error: np.ndarray
+    diagnostics: pd.DataFrame | None = None
 
 
 def interventional_shap(predict: Callable[[np.ndarray], np.ndarray], scm: LinearLogisticSCM, explain: pd.DataFrame,

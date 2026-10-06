@@ -12,7 +12,7 @@ def default_library(seed: int) -> dict:
     return {
         "logistic": LogisticRegression(C=np.inf, max_iter=5000),
         "logistic_l2": LogisticRegression(C=1.0, max_iter=5000),
-        "random_forest": RandomForestClassifier(n_estimators=200, min_samples_leaf=5, n_jobs=-1, random_state=seed),
+        "random_forest": RandomForestClassifier(n_estimators=200, min_samples_leaf=5, n_jobs=1, random_state=seed),
         "gradient_boosting": HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, random_state=seed),
     }
 

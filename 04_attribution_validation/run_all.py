@@ -1,4 +1,5 @@
-"""Usage: uv run python run_all.py [--replicates N] [--methods m1,m2] [--datasets d1,d2] [--feature-sets f1,f2]"""
+"""Usage: uv run python run_all.py [--replicates N] [--methods m1,m2] [--datasets d1,d2] [--feature-sets f1,f2]
+                                  [--workers N] [--resume | --fresh]"""
 
 import argparse
 from pathlib import Path
@@ -14,11 +15,14 @@ ap.add_argument("--replicates", type=int)
 ap.add_argument("--methods")
 ap.add_argument("--datasets")
 ap.add_argument("--feature-sets")
+ap.add_argument("--workers", type=int)
+ap.add_argument("--resume", action="store_true")
+ap.add_argument("--fresh", action="store_true")
 a = ap.parse_args()
 split = lambda s: s.split(",") if s else None  # noqa: E731
 params = yaml.safe_load((here / "config" / "params.yaml").read_text())
 out = D.env_dir("OUTPUT_DIR", "./outputs") / "04_attribution_validation"
 summary = run(params, D.env_dir("DATA_DIR", "./02_data"), out, a.replicates, split(a.methods), split(a.datasets),
-              split(a.feature_sets))
+              split(a.feature_sets), a.workers, a.resume, a.fresh)
 print(summary.to_string())
 print(f"Wrote attribution outputs to {out}")
