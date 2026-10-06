@@ -1,0 +1,48 @@
+generated: 2026-10-06 15:38:11 EDT
+git commit: 8baa82d942b258e872e9fda105adf72e797e3be9 (uncommitted changes)
+code hash: 46f914345ae354b0
+data config hash: b8ce99be00997cbdbf220ff80333f03c
+cells: 300
+workers: 7
+python: 3.12.13
+numpy: 2.3.5
+pandas: 2.3.3
+scikit-learn: 1.9.1
+scipy: 1.18.1
+shap: 0.52.0
+networkx: 3.7
+settings:
+{
+ "evaluation": {
+  "top_k": 5
+ },
+ "explain": {
+  "background": 128,
+  "min_events": 8,
+  "records": 64
+ },
+ "interventional_shap": {
+  "burn_in": 2000,
+  "orders": 64,
+  "thin": 50
+ },
+ "ng_causal_shap": {
+  "orders": 64,
+  "samples": 64
+ },
+ "ordering_only_shap": {
+  "burn_in": 2000,
+  "orders": 64,
+  "thin": 50
+ },
+ "seed": 20261200,
+ "split": {
+  "test_fraction": 0.3
+ },
+ "standard_shap": {
+  "permutations": 64
+ },
+ "super_learner": {
+  "folds": 10
+ }
+}

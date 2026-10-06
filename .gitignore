@@ -14,9 +14,18 @@ venv/
 .mypy_cache/
 .ipynb_checkpoints/
 
-# Data & outputs
-02_data/
-outputs/
+# Data & outputs: ignored, except the small files that are the paper's source data.
+# The full replicate data and per-record attributions are archived with a DOI, not committed.
+02_data/*
+!02_data/data_summary.csv
+!02_data/feature_sets.csv
+!02_data/ground_truth_total_effects_*.csv
+!02_data/provenance.txt
+outputs/*
+!outputs/03_shape_validation/
+!outputs/04_attribution_validation/
+outputs/04_attribution_validation/cells/
+outputs/04_attribution_validation/values.csv.gz
 *.log
 
 # OS / editor

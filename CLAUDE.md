@@ -5,10 +5,10 @@ causal-dag-eval-pipeline: evaluates an established causal DAG (NASA renal-stone 
 
 ## Layout
 - `01_data_generation/` (R): simulates replicate data sets and ground truth from `config/`.
-- `02_data/`: generated data (`DATA_DIR`); git-ignored.
+- `02_data/`: generated data (`DATA_DIR`); git-ignored except the small summary, feature-set, ground-truth and provenance files listed in `.gitignore`.
 - `03_shape_validation/` (R): implication tests, power control, MGM-PC discovery.
 - `04_attribution_validation/` (Python, uv): attribution methods and evaluation.
-- `outputs/` (`OUTPUT_DIR`): analysis outputs; git-ignored.
+- `outputs/` (`OUTPUT_DIR`): analysis outputs; the `03_shape_validation` and `04_attribution_validation` result tables are committed as source data, the per-cell and per-record files are git-ignored.
 - `references/`: drafts and notes; git-ignored, never cite it from README or code.
 
 ## Conventions

@@ -59,16 +59,23 @@ test_implications <- function(d, imp, ag, fdr) {
 }
 
 implication_calibration <- function(tests, alpha = 0.05) {
-  p <- tests$p[!tests$expected_under_selection & !is.na(tests$p)]
-  ks <- suppressWarnings(stats::ks.test(p, "punif")$p.value)
-  data.frame(calibration_tests = length(p), calibration_ks_p = ks, calibration_ks_rejected = as.numeric(ks < alpha),
-             raw_rejection_rate = mean(p < alpha))
+  one <- function(keep, suffix) {
+    p <- tests$p[keep & !is.na(tests$p)]
+    ks <- suppressWarnings(stats::ks.test(p, "punif")$p.value)
+    setNames(data.frame(length(p), ks, as.numeric(ks < alpha), mean(p < alpha)),
+             paste0(c("calibration_tests", "calibration_ks_p", "calibration_ks_rejected", "raw_rejection_rate"), suffix))
+  }
+  null <- !tests$expected_under_selection
+  cbind(one(null, ""), one(null & !tests$nonadditive_response, "_additive"))
 }
 
 calibration_summary <- function(per_rep) {
-  out <- lapply(split(per_rep, per_rep$dataset), function(x)
-    data.frame(dataset = x$dataset[1], replicates = nrow(x), ks_rejection_rate = mean(x$calibration_ks_rejected),
-               raw_rejection_rate_mean = mean(x$raw_rejection_rate), raw_rejection_rate_se = mc_se(x$raw_rejection_rate),
-               ks_p_pooled = suppressWarnings(stats::ks.test(x$calibration_ks_p, "punif")$p.value)))
+  out <- lapply(split(per_rep, per_rep$dataset), function(x) {
+    s <- function(sfx) setNames(data.frame(mean(x[[paste0("calibration_ks_rejected", sfx)]]),
+                                           mean(x[[paste0("raw_rejection_rate", sfx)]]),
+                                           mc_se(x[[paste0("raw_rejection_rate", sfx)]])),
+                                paste0(c("ks_rejection_rate", "raw_rejection_rate_mean", "raw_rejection_rate_se"), sfx))
+    cbind(data.frame(dataset = x$dataset[1], replicates = nrow(x)), s(""), s("_additive"))
+  })
   do.call(rbind, out)
 }

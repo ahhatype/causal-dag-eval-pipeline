@@ -44,9 +44,11 @@ test_that("likelihood-ratio test keeps a true independence and rejects a planted
 
 test_that("implication calibration: uniform p values pass, skewed p values fail, selection implication excluded", {
   set.seed(3)
-  mk <- function(p) data.frame(p = c(p, 0), expected_under_selection = c(rep(FALSE, length(p)), TRUE))
+  mk <- function(p) data.frame(p = c(p, 0, 0.5), expected_under_selection = c(rep(FALSE, length(p)), TRUE, FALSE),
+                               nonadditive_response = c(rep(FALSE, length(p) + 1), TRUE))
   ok <- implication_calibration(mk(runif(500)))
-  expect_equal(ok$calibration_tests, 500)
+  expect_equal(ok$calibration_tests, 501)
+  expect_equal(ok$calibration_tests_additive, 500)
   expect_gt(ok$calibration_ks_p, 0.05)
   expect_equal(ok$calibration_ks_rejected, 0)
   bad <- implication_calibration(mk(rbeta(500, 0.5, 1)))
@@ -55,6 +57,7 @@ test_that("implication calibration: uniform p values pass, skewed p values fail,
   s <- calibration_summary(rbind(cbind(dataset = "a", ok), cbind(dataset = "a", bad)))
   expect_equal(s$ks_rejection_rate, 0.5)
   expect_equal(s$raw_rejection_rate_mean, mean(c(ok$raw_rejection_rate, bad$raw_rejection_rate)))
+  expect_equal(s$ks_rejection_rate_additive, 0.5)
 })
 
 test_that("implication comparison detects an added and an omitted edge", {

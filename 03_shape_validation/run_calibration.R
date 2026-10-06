@@ -20,6 +20,6 @@ cfg_dir <- file.path(repo_dir, "01_data_generation", "config")
 cfg <- read_config(cfg_dir)
 cal <- read_calibration(file.path(cfg_dir, "calibration.yaml"))
 
-summ <- run_calibration(cfg, cal, params, data_dir, out_dir, arg("replicates"))
+summ <- run_calibration(cfg, cal, params, data_dir, out_dir, arg("replicates"), repo_dir)
 print(summ)
 message("Wrote implication calibration to ", out_dir)

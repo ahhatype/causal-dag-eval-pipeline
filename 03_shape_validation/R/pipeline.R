@@ -141,7 +141,7 @@ edge_recovery <- function(learned, cpdag, n_rep) {
   res[order(res$dataset, res$variant, !res$true_edge, -res$adjacency_rate), ]
 }
 
-write_shape_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir) {
+write_shape_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir, file = "provenance.txt") {
   commit <- if (!is.null(repo_dir)) tryCatch(system2("git", c("-C", repo_dir, "rev-parse", "HEAD"), stdout = TRUE,
                                                      stderr = FALSE)[1], error = function(e) NA_character_) else NA
   pkgs <- c("rCausalMGM", "dagitty")
@@ -153,7 +153,7 @@ write_shape_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir) {
                sprintf("%s: %s (built under R %s)", pkgs,
                        vapply(pkgs, function(x) as.character(utils::packageVersion(x)), ""),
                        vapply(pkgs, function(x) utils::packageDescription(x)$Built, ""))),
-             file.path(out_dir, "provenance.txt"))
+             file.path(out_dir, file))
 }
 
 write_calibration <- function(per_rep, out_dir) {
@@ -163,7 +163,7 @@ write_calibration <- function(per_rep, out_dir) {
   summ
 }
 
-run_calibration <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL) {
+run_calibration <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, repo_dir = NULL) {
   available <- check_data_current(data_dir, cal)
   reps <- seq_len(min(available, if (is.null(replicates)) available else replicates))
   dir.create(file.path(out_dir, "detail"), showWarnings = FALSE, recursive = TRUE)
@@ -178,5 +178,6 @@ run_calibration <- function(cfg, cal, params, data_dir, out_dir, replicates = NU
     data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
     calib[[length(calib) + 1]] <- cbind(replicate = r, dataset = ds, implication_calibration(tests, params$calibration$alpha))
   }
+  write_shape_provenance(out_dir, data_dir, cal, length(reps), repo_dir, "implication_calibration_provenance.txt")
   write_calibration(do.call(rbind, calib), out_dir)
 }
