@@ -15,13 +15,18 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from . import data as D
-from .evaluation import (auc, kendall_tau_b, non_ancestor_share, proximity_bias_index, tie_adjusted_truth,
-                         top_k_recovery)
+from .evaluation import (auc, kendall_tau_b, l1_distance, margin_tie_groups, mcse_tie_groups, non_ancestor_share,
+                         proximity_bias_index, tie_adjusted, top_k_recovery, weighted_tau)
 from .interventional import fit_scm, interventional_shap
-from .ng import ng_causal_shap
+from .ng import causal_weights, edge_strengths, fitted_ng_inputs, ng_style_shap
 from .ordering import ordering_only_shap
 from .standard import permutation_shap
 from .superlearner import SuperLearner, default_library
+from .truesim import TrueSampler, TrueSCM
+
+SCOPES = ("with_era", "without_era")
+CONTRASTS = {"order_effect": ("ordering_only_shap", "standard_shap"),
+             "value_function_effect": ("interventional_shap", "ordering_only_shap")}
 
 
 def run_seed(params: dict, replicate: int, dataset: str) -> int:
@@ -29,21 +34,134 @@ def run_seed(params: dict, replicate: int, dataset: str) -> int:
     return params["seed"] + 1000 * replicate + 10 * params["datasets"].index(dataset)
 
 
-def choose_explained(test: pd.DataFrame, n: int, min_events: int, rng: np.random.Generator) -> pd.DataFrame:
-    idx = rng.choice(len(test), size=min(n, len(test)), replace=False)
-    pick = test.iloc[idx]
-    events = test.index[test[D.OUTCOME] == 1].difference(pick.index)
-    short = min_events - int(pick[D.OUTCOME].sum())
-    if short > 0 and len(events):
-        add = rng.choice(events, size=min(short, len(events)), replace=False)
-        drop = rng.choice(pick.index[pick[D.OUTCOME] == 0], size=len(add), replace=False)
-        pick = pd.concat([pick.drop(drop), test.loc[add]])
-    return pick
+def choose_explained(test: pd.DataFrame, n: int, rng: np.random.Generator) -> pd.DataFrame:
+    return test.iloc[rng.choice(len(test), size=min(n, len(test)), replace=False)]
 
 
-def run_one(df: pd.DataFrame, cfg: D.GenerationConfig, ag: D.AnalysisGraph, features: list[str],
-            truth: pd.Series, truth_se: pd.Series, ancestors: set[str], distance: dict, params: dict,
-            seed: int, methods: list[str]) -> tuple[dict, pd.DataFrame]:
+def rule_names(params: dict) -> list[str]:
+    """Tie rules; the first is primary."""
+    return [f"delta{round(100 * d)}" for d in params["evaluation"]["tie_margins"]] + ["mcse"]
+
+
+def truth_context(truth: pd.DataFrame, ancestors: list[str], params: dict) -> dict:
+    """Per (truth_type, population, scope): |truth| over the scored ancestors, its tie groups under each rule and
+    the tie-adjusted values. The without-era scope drops mission era."""
+    ev = params["evaluation"]
+    out = {}
+    for tt in D.TRUTH_TYPES:
+        for pop in D.POPULATIONS:
+            v = D.truth_series(truth, tt, pop)
+            m = D.truth_series(truth, tt, pop, "mcse")
+            for scope in SCOPES:
+                fs = [f for f in ancestors if scope == "with_era" or f != "mission_era"]
+                vals = {f: abs(float(v[f])) for f in fs}
+                top = max(vals.values())
+                groups = {name: margin_tie_groups(vals, d * top) for name, d in zip(rule_names(params), ev["tie_margins"])}
+                groups["mcse"] = mcse_tie_groups(vals, {f: float(m[f]) for f in fs}, ev["tie_z"])
+                out[(tt, pop, scope)] = {"raw": vals, "groups": groups,
+                                         "tied": {k: tie_adjusted(vals, g) for k, g in groups.items()}}
+    return out
+
+
+def tie_group_table(tc: dict) -> pd.DataFrame:
+    rows = []
+    for (tt, pop, scope), t in tc.items():
+        for rule, groups in t["groups"].items():
+            for i, g in enumerate(groups, 1):
+                rows.append({"truth_type": tt, "population": pop, "scope": scope, "rule": rule, "group": i,
+                             "size": len(g), "features": "; ".join(g),
+                             "max_abs_truth": max(t["raw"][f] for f in g), "min_abs_truth": min(t["raw"][f] for f in g)})
+    return pd.DataFrame(rows)
+
+
+def score(imp: dict[str, float], tc: dict, ancestors: set[str], distance: dict, params: dict) -> list[dict]:
+    """Every metric against every truth; rank metrics use tie-adjusted truth, the others raw |truth|."""
+    primary, *others = rule_names(params)
+    rows = []
+    for (tt, pop, scope), t in tc.items():
+        anc = {f: imp[f] for f in t["raw"]}
+        rows.append({"truth_type": tt, "population": pop, "scope": scope,
+                     "kendall_tau_b": kendall_tau_b(anc, t["tied"][primary]),
+                     **{f"kendall_tau_b_{k}": kendall_tau_b(anc, t["tied"][k]) for k in others},
+                     "weighted_tau": weighted_tau(anc, t["raw"]),
+                     "l1_distance": l1_distance(anc, t["raw"]),
+                     "top_k_recovery": top_k_recovery(anc, t["tied"][primary], params["evaluation"]["top_k"]),
+                     "proximity_bias_index": proximity_bias_index(anc, t["raw"], distance),
+                     "non_ancestor_share": non_ancestor_share(imp, ancestors)})
+    return rows
+
+
+def ng_importance(res, threshold: float) -> tuple[dict, dict, float]:
+    """Mean |phi| over records whose |pre-rescaling total| reaches the threshold, over all records, and the share
+    excluded."""
+    keep = res.diagnostics["weighted_total"].abs().to_numpy() >= threshold
+    absv = res.values.abs()
+    kept = absv[keep].mean() if keep.any() else absv.mean() * np.nan
+    return kept.to_dict(), absv.mean().to_dict(), float(1 - keep.mean())
+
+
+def check_oracle_inputs(cfg: D.GenerationConfig, ancestors: list[str]) -> None:
+    """Every parent of the outcome must be an observed member of the ancestor set."""
+    pa = cfg.edges.loc[cfg.edges["child"] == D.OUTCOME, "parent"].tolist()
+    observed = set(cfg.nodes.loc[cfg.nodes["observed"], "id"])
+    bad = [p for p in pa if p not in ancestors or p not in observed]
+    if bad:
+        raise RuntimeError(f"oracle predictor needs outcome parents {bad} in the ancestor set")
+
+
+def oracle_context(cfg: D.GenerationConfig, ag: D.AnalysisGraph, ancestors: list[str], params: dict) -> dict:
+    o = params["oracle"]
+    scm = TrueSCM(cfg)
+    pool = scm.population(o["pool"], np.random.default_rng(o["seed"]))
+    e = cfg.edges[cfg.edges["child"] == D.OUTCOME]
+    idx = [ancestors.index(p) for p in e["parent"]]
+    coef = e["coef"].astype(float).to_numpy()
+    b0 = float(cfg.calibration["logit"][D.OUTCOME])
+
+    def predict(X: np.ndarray) -> np.ndarray:
+        return 1.0 / (1.0 + np.exp(-(b0 + np.asarray(X, dtype=float)[:, idx] @ coef)))
+
+    return {"scm": scm, "pool": pool, "predict": predict,
+            "weights": causal_weights(ag, edge_strengths(pool, ag), ancestors),
+            "expected": float(np.mean(predict(pool[ancestors].to_numpy(dtype=float))))}
+
+
+def method_runners(predict, explain, background, train, features, ag, params, seed, expected, scm, ng_inputs):
+    p = params
+    return {
+        "standard_shap": lambda: permutation_shap(predict, explain, background, features,
+                                                  p["standard_shap"]["permutations"], seed),
+        "ordering_only_shap": lambda: ordering_only_shap(predict, explain, background, features, ag,
+                                                         p["ordering_only_shap"]["orders"],
+                                                         p["ordering_only_shap"]["burn_in"],
+                                                         p["ordering_only_shap"]["thin"], seed),
+        "ng_style_shap": lambda: ng_style_shap(predict, explain, features, *ng_inputs(),
+                                               p["ng_style_shap"]["samples"], p["ng_style_shap"]["orders"], seed,
+                                               expected),
+        "interventional_shap": lambda: interventional_shap(predict, scm(), explain, background, features, ag,
+                                                           p["interventional_shap"]["orders"],
+                                                           p["interventional_shap"]["burn_in"],
+                                                           p["interventional_shap"]["thin"], seed),
+    }
+
+
+def importance_of(m: str, res, params: dict) -> tuple[dict, dict]:
+    """Primary importance plus method-level diagnostics."""
+    info = {"max_efficiency_error": float(np.max(np.abs(res.efficiency_error)))}
+    if m != "ng_style_shap":
+        return res.values.abs().mean().to_dict(), info
+    ng = params["ng_style_shap"]
+    imp, imp_all, excluded = ng_importance(res, ng["exclude_below"])
+    factor = res.diagnostics["rescale_factor"].abs()
+    info.update(ng_excluded_share=excluded, rescale_factor_median_abs=float(factor.median()),
+                rescale_factor_max_abs=float(factor.max()), rescale_flag_share=float((factor > ng["rescale_flag"]).mean()),
+                importance_all_records=imp_all)
+    return imp, info
+
+
+def prepare_run(df: pd.DataFrame, ctx: dict, features: list[str], params: dict, seed: int) -> dict:
+    """Split, super learner fit, explained records and background: shared by every method in a run."""
+    cfg = ctx["cfg"]
     rng = np.random.default_rng(seed)
     train, test = train_test_split(df, test_size=params["split"]["test_fraction"], stratify=df[D.OUTCOME],
                                    random_state=seed % (2**32))
@@ -56,49 +174,67 @@ def run_one(df: pd.DataFrame, cfg: D.GenerationConfig, ag: D.AnalysisGraph, feat
             **{f"weight_{k}": v for k, v in sl.weights_.items()},
             **{f"cv_log_loss_{k}": v for k, v in sl.cv_risk_.items()}}
     ex = params["explain"]
-    explain = choose_explained(test, ex["records"], ex["min_events"], rng)
+    explain = choose_explained(test, ex["records"], rng)
     background = train.iloc[rng.choice(len(train), size=min(ex["background"], len(train)), replace=False)]
-    expected = float(np.mean(sl.predict(background[features].to_numpy(dtype=float))))
     info["explained_events"] = int(explain[D.OUTCOME].sum())
+    info["explained_events_low"] = info["explained_events"] < ex["flag_min_events"]
+    return {"sl": sl, "train": train, "explain": explain, "background": background, "info": info,
+            "expected": float(np.mean(sl.predict(background[features].to_numpy(dtype=float))))}
 
-    ranked_truth = tie_adjusted_truth(truth.to_dict(), truth_se.to_dict())
-    runners = {
-        "standard_shap": lambda: permutation_shap(sl.predict, explain, background, features,
-                                                  params["standard_shap"]["permutations"], seed),
-        "ordering_only_shap": lambda: ordering_only_shap(sl.predict, explain, background, features, ag,
-                                                         params["ordering_only_shap"]["orders"],
-                                                         params["ordering_only_shap"]["burn_in"],
-                                                         params["ordering_only_shap"]["thin"], seed),
-        "ng_causal_shap": lambda: ng_causal_shap(sl.predict, train, explain, features, ag,
-                                                 params["ng_causal_shap"]["samples"],
-                                                 params["ng_causal_shap"]["orders"], seed, expected),
-        "interventional_shap": lambda: interventional_shap(sl.predict, fit_scm(train, ag), explain, background,
-                                                           features, ag, params["interventional_shap"]["orders"],
-                                                           params["interventional_shap"]["burn_in"],
-                                                           params["interventional_shap"]["thin"], seed),
-    }
-    rows, imps, vals = [], [], []
+
+def run_one(df: pd.DataFrame, ctx: dict, features: list[str], params: dict, seed: int, methods: list[str],
+            oracle: dict | None = None) -> tuple[dict, pd.DataFrame]:
+    ag, tc, ancestors = ctx["ag"], ctx["truth"], set(ctx["fsets"]["ancestor"])
+    pr = prepare_run(df, ctx, features, params, seed)
+    sl, train, explain, background, expected, info = (pr[k] for k in ("sl", "train", "explain", "background",
+                                                                         "expected", "info"))
+    runners = method_runners(sl.predict, explain, background, train, features, ag, params, seed, expected,
+                             lambda: fit_scm(train, ag), lambda: fitted_ng_inputs(train, ag, features))
+    rows, imps, vals, fitted = [], [], [], {}
     for m in methods:
         t0 = time.time()
         res = runners[m]()
         secs = time.time() - t0
-        imp = res.values.abs().mean().to_dict()
-        anc = {f: v for f, v in imp.items() if f in ancestors}
-        rows.append({"method": m, "seconds": secs,
-                     "max_efficiency_error": float(np.max(np.abs(res.efficiency_error))),
-                     "kendall_tau_b": kendall_tau_b(anc, ranked_truth),
-                     "top_k_recovery": top_k_recovery(anc, ranked_truth, params["evaluation"]["top_k"]),
-                     "proximity_bias_index": proximity_bias_index(anc, truth.to_dict(), distance),
-                     "non_ancestor_share": non_ancestor_share(imp, ancestors)})
-        if res.diagnostics is not None:
-            factor = res.diagnostics["rescale_factor"].abs()
-            rows[-1].update(rescale_factor_median_abs=float(factor.median()), rescale_factor_max_abs=float(factor.max()))
-        imps.append(pd.DataFrame({"method": m, "feature": list(imp), "importance": list(imp.values())}))
+        imp, minfo = importance_of(m, res, params)
+        fitted[m] = imp
+        extra = {m + "_all_records": minfo.pop("importance_all_records")} if m == "ng_style_shap" else {}
+        for name, im in {m: imp, **extra}.items():
+            rows += [{"method": name, "seconds": secs, **minfo, **r} for r in score(im, tc, ancestors, ctx["distance"], params)]
+            imps.append(pd.DataFrame({"method": name, "feature": list(im), "importance": list(im.values())}))
         v = res.values.copy()
         if res.diagnostics is not None:
             v = v.join(res.diagnostics)
         vals.append(v.assign(method=m, outcome=explain[D.OUTCOME].to_numpy()).rename_axis("record").reset_index())
-    return {"info": info, "rows": rows, "values": pd.concat(vals, ignore_index=True)}, pd.concat(imps, ignore_index=True)
+
+    oracle_rows = []
+    if oracle is not None:
+        o = params["oracle"]
+        orng = np.random.default_rng(o["seed"] + seed)
+        bg = oracle["pool"].iloc[orng.choice(len(oracle["pool"]), size=o["background"], replace=False)]
+        oruns = method_runners(oracle["predict"], explain, bg, train, features, ag, params, seed, oracle["expected"],
+                               lambda: oracle["scm"],
+                               lambda: (oracle["weights"], TrueSampler(oracle["scm"], features)))
+        for m in methods:
+            res = oruns[m]()
+            imp, _ = importance_of(m, res, params)
+            imps.append(pd.DataFrame({"method": m + "_oracle", "feature": list(imp), "importance": list(imp.values())}))
+            v = res.values.copy()
+            if res.diagnostics is not None:
+                v = v.join(res.diagnostics)
+            vals.append(v.assign(method=m + "_oracle", outcome=explain[D.OUTCOME].to_numpy()).rename_axis("record").reset_index())
+            primary = rule_names(params)[0]
+            for (tt, pop, scope), t in tc.items():
+                if scope != "with_era":
+                    continue
+                f_anc = {f: fitted[m][f] for f in t["raw"]}
+                o_anc = {f: imp[f] for f in t["raw"]}
+                oracle_rows.append({"method": m, "truth_type": tt, "population": pop,
+                                    "tau_oracle_truth": kendall_tau_b(o_anc, t["tied"][primary]),
+                                    "tau_fitted_truth": kendall_tau_b(f_anc, t["tied"][primary]),
+                                    "tau_fitted_oracle": kendall_tau_b(f_anc, o_anc),
+                                    "l1_fitted_oracle": l1_distance(f_anc, o_anc)})
+    return ({"info": info, "rows": rows, "values": pd.concat(vals, ignore_index=True), "oracle": oracle_rows},
+            pd.concat(imps, ignore_index=True))
 
 
 _CONTEXT: dict = {}
@@ -112,7 +248,15 @@ def _init_worker(params: dict, data_dir: Path, methods: list[str]) -> None:
     ag = D.analysis_graph(cfg)
     fsets = D.feature_sets(data_dir)
     _CONTEXT.update(params=params, data_dir=data_dir, methods=methods, cfg=cfg, ag=ag, fsets=fsets,
-                    distance=D.distance_to_outcome(ag))
+                    distance=D.distance_to_outcome(ag),
+                    truth=truth_context(D.truth_values(data_dir), fsets["ancestor"], params))
+
+
+def _oracle() -> dict:
+    c = _CONTEXT
+    if "oracle" not in c:
+        c["oracle"] = oracle_context(c["cfg"], c["ag"], c["fsets"]["ancestor"], c["params"])
+    return c["oracle"]
 
 
 def _cell_name(r: int, ds: str, fs: str) -> str:
@@ -132,15 +276,15 @@ def run_cell(cell: tuple[int, str, str], cell_dir: Path) -> tuple[str, str | Non
     try:
         c = _CONTEXT
         fsets = c["fsets"]
-        target = D.GROUND_TRUTH_TARGET[ds]
-        truth = D.ground_truth(c["data_dir"], target).loc[fsets["ancestor"]]
-        truth_se = D.ground_truth_se(c["data_dir"], target).loc[fsets["ancestor"]]
         df = D.load_replicate(c["data_dir"], r, ds)
-        res, imp = run_one(df, c["cfg"], c["ag"], fsets[fs], truth, truth_se, set(fsets["ancestor"]), c["distance"],
-                           c["params"], run_seed(c["params"], r, ds), c["methods"])
+        use_oracle = fs == "ancestor" and r <= c["params"]["oracle"]["replicates"]
+        res, imp = run_one(df, c, fsets[fs], c["params"], run_seed(c["params"], r, ds), c["methods"],
+                           _oracle() if use_oracle else None)
         key = {"replicate": r, "dataset": ds, "feature_set": fs}
         _write(res["values"].assign(**key), cell_dir / f"{name}_values.csv.gz")
         _write(imp.assign(**key), cell_dir / f"{name}_importance.csv")
+        if use_oracle:
+            _write(pd.DataFrame([{**key, **row} for row in res["oracle"]]), cell_dir / f"{name}_oracle.csv")
         _write(pd.DataFrame([{**key, **res["info"], **row} for row in res["rows"]]), cell_dir / f"{name}_runs.csv")
         return name, None
     except Exception:
@@ -212,8 +356,9 @@ def run(params: dict, data_dir: Path, out_dir: Path, replicates: int | None = No
     available = D.check_data_current(data_dir, cfg)
     reps = range(1, min(available, replicates or available) + 1)
     ag = D.analysis_graph(cfg)
-    if (len(ag.nodes), len(ag.edges)) != (36, 59):
-        raise RuntimeError(f"analysis graph has {len(ag.nodes)} nodes and {len(ag.edges)} edges, expected 36 and 59")
+    if (len(ag.nodes), len(ag.edges)) != (36, 63):
+        raise RuntimeError(f"analysis graph has {len(ag.nodes)} nodes and {len(ag.edges)} edges, expected 36 and 63")
+    check_oracle_inputs(cfg, D.feature_sets(data_dir)["ancestor"])
     methods = methods or params["methods"]
     workers = workers or params.get("workers", 1)
     cell_dir = out_dir / "cells"
@@ -253,16 +398,67 @@ def run(params: dict, data_dir: Path, out_dir: Path, replicates: int | None = No
            out_dir / "importance.csv")
     _write(pd.concat([pd.read_csv(cell_dir / f"{n}_values.csv.gz") for n in names], ignore_index=True),
            out_dir / "values.csv.gz")
+    oracle_files = [cell_dir / f"{n}_oracle.csv" for n in names if (cell_dir / f"{n}_oracle.csv").exists()]
+    if oracle_files:
+        _write(pd.concat([pd.read_csv(f) for f in oracle_files], ignore_index=True), out_dir / "oracle_decomposition.csv")
+    tc = truth_context(D.truth_values(data_dir), D.feature_sets(data_dir)["ancestor"], params)
+    _write(tie_group_table(tc), out_dir / "tie_groups.csv")
+    _write(paired_contrasts(per_run), out_dir / "contrasts.csv")
     summary = summarize(per_run)
     _write(summary, out_dir / "summary.csv")
     write_provenance(out_dir, want, len(cells), workers)
     return summary
 
 
+KEY = ["dataset", "feature_set", "method", "truth_type", "population", "scope"]
+
+
 def summarize(per_run: pd.DataFrame) -> pd.DataFrame:
-    metrics = ["kendall_tau_b", "top_k_recovery", "proximity_bias_index", "non_ancestor_share", "auc_model",
-               "auc_true_probability", "max_efficiency_error", "seconds"]
-    g = per_run.groupby(["dataset", "feature_set", "method"])[metrics]
+    """Mean and MCSE over replicates; `primary` marks each data set's own population with mission era included."""
+    metrics = [c for c in ["kendall_tau_b", "kendall_tau_b_delta5", "kendall_tau_b_mcse", "weighted_tau", "l1_distance",
+                           "top_k_recovery", "proximity_bias_index", "non_ancestor_share", "auc_model",
+                           "auc_true_probability", "max_efficiency_error", "ng_excluded_share", "rescale_flag_share",
+                           "explained_events", "seconds"] if c in per_run]
+    g = per_run.groupby(KEY)[metrics]
     mean = g.mean().add_suffix("_mean")
-    se = (g.std() / np.sqrt(g.count())).add_suffix("_se")
-    return pd.concat([g.size().rename("runs"), mean, se], axis=1).reset_index()
+    se = (g.std() / np.sqrt(g.count())).add_suffix("_mcse")
+    out = pd.concat([g.size().rename("runs"), mean, se], axis=1).reset_index()
+    out["primary"] = (out["population"] == out["dataset"].map(D.TRUTH_POPULATION)) & (out["scope"] == "with_era")
+    return out
+
+
+def paired_contrasts(per_run: pd.DataFrame, z: float = 1.96) -> pd.DataFrame:
+    """Order effect tau_b(O) - tau_b(S) and value-function effect tau_b(I) - tau_b(O), paired within replicate.
+
+    A contrast is robust when it has the same sign, with a 95% interval excluding zero, under both co-primary truths
+    (per_unit and pop) for the data set's own population; otherwise truth-dependent.
+    """
+    pr = per_run[per_run["scope"] == "with_era"]
+    key = ["dataset", "feature_set", "truth_type", "population"]
+    wide = pr.pivot_table(index=key + ["replicate"], columns="method", values="kendall_tau_b")
+    rows = []
+    for name, (a, b) in CONTRASTS.items():
+        if a not in wide or b not in wide:
+            continue
+        d = (wide[a] - wide[b]).dropna()
+        for k, g in d.groupby(level=key):
+            n = len(g)
+            m, se = float(g.mean()), float(g.std(ddof=1) / np.sqrt(n)) if n > 1 else float("nan")
+            rows.append({**dict(zip(key, k)), "contrast": name, "mean": m, "mcse": se, "n": n,
+                         "ci_low": m - z * se, "ci_high": m + z * se})
+    out = pd.DataFrame(rows)
+    if out.empty:
+        return out
+
+    def classify(g: pd.DataFrame) -> str:
+        co = g[g["truth_type"].isin(["per_unit", "pop"])]
+        if len(co) < 2:
+            return "incomplete"
+        excl = ((co["ci_low"] > 0) | (co["ci_high"] < 0)).all()
+        same = np.sign(co["mean"]).nunique() == 1
+        return "robust" if excl and same else "truth_dependent"
+
+    cls = out.groupby(["dataset", "feature_set", "contrast", "population"]).apply(classify, include_groups=False)
+    out = out.merge(cls.rename("classification").reset_index(), on=["dataset", "feature_set", "contrast", "population"])
+    out["primary"] = out["population"] == out["dataset"].map(D.TRUTH_POPULATION)
+    return out

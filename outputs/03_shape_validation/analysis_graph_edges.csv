@@ -2,11 +2,13 @@ parent,child,source_edge
 bisphosphonates,bone_remodeling,bisphosphonates -> bone_remodeling
 bone_remodeling,urine_chemistry,bone_remodeling -> urine_chemistry
 crew_capability,task_performance,crew_capability -> task_performance
+cumulative_mission_duration,bisphosphonates,cumulative_mission_duration -> bisphosphonates
 cumulative_mission_duration,bone_remodeling,cumulative_mission_duration -> bone_remodeling
 detect_mrm_stone,ultrasound_manipulation,detect_mrm_stone -> ultrasound_manipulation
 evacuation,loss_of_crew_life,evacuation -> loss_of_crew_life
 evacuation,loss_of_mission_objectives,evacuation -> loss_of_mission_objectives
 hydration,urine_concentration,hydration -> urine_concentration
+individual_factors,k_citrate,individual_factors -> k_citrate
 individual_factors,nephrolithiasis,individual_factors -> nephrolithiasis
 individual_readiness,crew_capability,individual_readiness -> crew_capability
 k_citrate,urine_chemistry,k_citrate -> urine_chemistry
@@ -44,6 +46,7 @@ nephrolithiasis,flight_recertification,nephrolithiasis -> flight_recertification
 nephrolithiasis,ureterolithiasis,nephrolithiasis -> ureterolithiasis
 nutrients,bone_remodeling,nutrients -> bone_remodeling
 percutaneous_nephrostomy,medical_illness,percutaneous_nephrostomy -> medical_illness
+pre_flight_fitness,bisphosphonates,pre_flight_fitness -> bisphosphonates
 pre_flight_fitness,resistive_exercise,pre_flight_fitness -> resistive_exercise
 resistive_exercise,bone_remodeling,resistive_exercise -> bone_remodeling
 tamsulosin,urine_flow,tamsulosin -> urine_flow
@@ -54,6 +57,7 @@ ultrasound,percutaneous_nephrostomy,ultrasound -> percutaneous_nephrostomy
 ultrasound_manipulation,ureterolithiasis,ultrasound_manipulation -> ureterolithiasis
 ureterolithiasis,urine_flow,ureterolithiasis -> urine_flow
 urine_chemistry,mineralized_renal_material,urine_chemistry -> mineralized_renal_material
+urine_concentration,k_citrate,urine_concentration -> k_citrate
 urine_concentration,urine_chemistry,urine_concentration -> urine_chemistry
 urine_flow,medical_illness,urine_flow -> medical_illness
 water_intake,hydration,water_intake -> hydration

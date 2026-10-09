@@ -6,12 +6,13 @@ import pandas as pd
 import pytest
 
 from attribution_validation import data as D
-from attribution_validation.evaluation import (kendall_tau_b, non_ancestor_share, proximity_bias_index,
-                                               tie_adjusted_truth, top_k_recovery)
+from attribution_validation.evaluation import (kendall_tau_b, l1_distance, margin_tie_groups, mcse_tie_groups,
+                                               non_ancestor_share, proximity_bias_index, tie_adjusted,
+                                               tie_adjusted_truth, top_k_recovery, weighted_tau)
 from attribution_validation.interventional import (LinearLogisticSCM, NodeSpec, OrderSampler, ancestral_pairs, fit_scm,
                                                    interventional_shap)
-from attribution_validation.ng import (CausalSampler, antithetic_orders, causal_weights, edge_strengths, ng_causal_shap,
-                                      permutation_shapley)
+from attribution_validation.ng import (CausalSampler, antithetic_orders, causal_weights, edge_strengths,
+                                      fitted_ng_inputs, ng_style_shap, permutation_shapley)
 from attribution_validation.ordering import ordering_only_shap
 from attribution_validation.standard import permutation_shap
 from attribution_validation.superlearner import SuperLearner, default_library
@@ -38,7 +39,8 @@ def toy_data(n=4000, seed=0):
 
 
 def test_analysis_graph_matches_design_and_shape_validation():
-    assert (len(AG.nodes), len(AG.edges)) == (36, 59)
+    assert (len(AG.nodes), len(AG.edges)) == (36, 63)
+    assert ("individual_factors", "k_citrate") in AG.edges and ("pre_flight_fitness", "bisphosphonates") in AG.edges
     r = D.REPO / "outputs" / "03_shape_validation" / "analysis_graph_edges.csv"
     if r.exists():
         e = pd.read_csv(r)
@@ -122,10 +124,15 @@ def test_ng_weights_zero_for_non_ancestors_and_local_accuracy():
     assert w["a"] < w["b"]          # a's path runs through b, product of strengths below 1
     predict = lambda X: 1 / (1 + np.exp(-(-1 + X[:, 1] + 0.5 * X[:, 2])))  # noqa: E731
     expected = float(np.mean(predict(df[feats].to_numpy())))
-    res = ng_causal_shap(predict, df, df.iloc[:10], feats, ag, samples=32, orders=8, seed=3, expected_value=expected)
+    res = ng_style_shap(predict, df.iloc[:10], feats, *fitted_ng_inputs(df, ag, feats), samples=32, orders=8, seed=3,
+                        expected_value=expected)
     assert np.max(np.abs(res.efficiency_error)) < 1e-10
     assert np.all(res.values["d"] == 0)
-    assert list(res.diagnostics.columns) == ["shapley_total", "weighted_total", "rescale_factor"]
+    d = res.diagnostics
+    assert list(d.columns) == ["shapley_total", "weighted_total", "rescale_factor", *[f"pre_{f}" for f in feats]]
+    pre = d[[f"pre_{f}" for f in feats]].to_numpy()
+    assert np.allclose(pre.sum(axis=1), d["weighted_total"])
+    assert np.allclose(pre * d["rescale_factor"].to_numpy()[:, None], res.values.to_numpy())
 
 
 def test_permutation_shapley_over_all_orders_is_exact():
@@ -219,7 +226,8 @@ def small_params():
     params["super_learner"]["folds"] = 3
     params["explain"].update(records=12, background=16)
     params["standard_shap"]["permutations"] = 4
-    params["ng_causal_shap"].update(samples=8, orders=4)
+    params["ng_style_shap"].update(samples=8, orders=4)
+    params["oracle"].update(pool=2000, background=16)
     params["ordering_only_shap"].update(orders=4, burn_in=50, thin=5)
     params["interventional_shap"].update(orders=4, burn_in=50, thin=5)
     return params
@@ -228,31 +236,45 @@ def small_params():
 needs_data = pytest.mark.skipif(not (DATA_DIR / "replicates" / "r001").exists(), reason="generated data not present")
 
 
+def small_context(params):
+    from attribution_validation.pipeline import truth_context
+    fs = D.feature_sets(DATA_DIR)
+    return {"cfg": CFG, "ag": AG, "fsets": fs, "distance": D.distance_to_outcome(AG),
+            "truth": truth_context(D.truth_values(DATA_DIR), fs["ancestor"], params)}
+
+
 @needs_data
-def test_one_run_end_to_end_with_small_budgets():
-    from attribution_validation.pipeline import run_one
+def test_one_run_end_to_end_with_small_budgets_and_oracle():
+    from attribution_validation.pipeline import oracle_context, run_one
     params = small_params()
     df = D.load_replicate(DATA_DIR, 1, "reference_subsample")
-    fs = D.feature_sets(DATA_DIR)
-    truth = D.ground_truth(DATA_DIR, "full").loc[fs["ancestor"]]
-    truth_se = D.ground_truth_se(DATA_DIR, "full").loc[fs["ancestor"]]
-    res, imp = run_one(df, CFG, AG, fs["ancestor"], truth, truth_se, set(fs["ancestor"]), D.distance_to_outcome(AG), params, 7,
-                       params["methods"])
-    assert {r["method"] for r in res["rows"]} == set(params["methods"])
-    assert all(r["max_efficiency_error"] < 1e-8 for r in res["rows"])
-    assert res["info"]["explained_events"] >= params["explain"]["min_events"]
-    assert set(imp["feature"]) == set(fs["ancestor"])
+    ctx = small_context(params)
+    anc = ctx["fsets"]["ancestor"]
+    res, imp = run_one(df, ctx, anc, params, 7, params["methods"], oracle_context(CFG, AG, anc, params))
+    rows = pd.DataFrame(res["rows"])
+    assert set(rows["method"]) == set(params["methods"]) | {"ng_style_shap_all_records"}
+    assert len(rows) == (len(params["methods"]) + 1) * len(D.TRUTH_TYPES) * len(D.POPULATIONS) * 2
+    assert (rows["max_efficiency_error"] < 1e-8).all()
+    assert rows["kendall_tau_b"].between(-1, 1).all() and rows["l1_distance"].between(0, 2).all()
+    assert res["info"]["explained_events"] == int(res["values"].drop_duplicates("record")["outcome"].sum())
+    assert set(imp["feature"]) == set(anc)
+    o = pd.DataFrame(res["oracle"])
+    assert set(o["method"]) == set(params["methods"]) and len(o) == len(params["methods"]) * 6
+    assert o[["tau_oracle_truth", "tau_fitted_truth", "tau_fitted_oracle"]].abs().le(1).all().all()
 
 
 @needs_data
 def test_parallel_cells_match_sequential(tmp_path):
     from attribution_validation.pipeline import run
     params = small_params()
+    params["oracle"]["replicates"] = 1
     args = dict(replicates=1, datasets=["reference_subsample", "astronaut_set"], feature_sets=["ancestor"])
     run(params, DATA_DIR, tmp_path / "seq", workers=1, **args)
     run(params, DATA_DIR, tmp_path / "par", workers=2, **args)
     seq, par = (pd.read_csv(tmp_path / d / "per_run.csv").drop(columns=["seconds", "fit_seconds"]) for d in ("seq", "par"))
-    assert len(seq) == 2 * len(params["methods"])
+    assert len(seq) == 2 * (len(params["methods"]) + 1) * len(D.TRUTH_TYPES) * len(D.POPULATIONS) * 2
+    for f in ("oracle_decomposition.csv", "tie_groups.csv", "contrasts.csv", "summary.csv"):
+        assert (tmp_path / "seq" / f).exists()
     pd.testing.assert_frame_equal(seq, par, rtol=1e-8)
     imp = [pd.read_csv(tmp_path / d / "importance.csv") for d in ("seq", "par")]
     pd.testing.assert_frame_equal(*imp, rtol=1e-8)
@@ -272,3 +294,73 @@ def test_cell_directory_is_never_silently_reused_or_cleared(tmp_path):
         _prepare_cell_dir(cells, {**want, "code_hash": "b"}, resume=True, fresh=False)
     _prepare_cell_dir(cells, {**want, "code_hash": "b"}, resume=False, fresh=True)
     assert not (cells / "r001_x_y_runs.csv").exists()
+
+
+def test_margin_ties_chain_neighbours_and_mcse_ties_use_combined_error():
+    v = {"a": 0.30, "b": 0.295, "c": 0.290, "d": 0.10, "e": -0.099}
+    assert margin_tie_groups(v, 0.006) == [["a", "b", "c"], ["d", "e"]]     # chained: a and c differ by 0.01
+    assert margin_tie_groups(v, 0.001) == [["a"], ["b"], ["c"], ["d"], ["e"]]
+    adj = tie_adjusted(v, margin_tie_groups(v, 0.006))
+    assert adj["a"] == adj["c"] == pytest.approx(0.295) and adj["e"] == pytest.approx(0.0995)
+    g = mcse_tie_groups({"a": 0.3, "b": 0.299, "c": 0.1}, {"a": 1e-3, "b": 1e-3, "c": 1e-3})
+    assert g == [["a", "b"], ["c"]]
+
+
+def test_weighted_tau_weights_top_disagreements_more():
+    truth = {f: v for f, v in zip("abcdef", [6, 5, 4, 3, 2, 1])}
+    assert weighted_tau(dict(truth), truth) == pytest.approx(1)
+    top_swap = {**truth, "a": 5, "b": 6}
+    bottom_swap = {**truth, "e": 1, "f": 2}
+    assert weighted_tau(top_swap, truth) < weighted_tau(bottom_swap, truth) < 1
+    assert kendall_tau_b(top_swap, truth) == pytest.approx(kendall_tau_b(bottom_swap, truth))
+
+
+def test_l1_distance_compares_shares():
+    truth = {"a": 0.3, "b": -0.1}
+    assert l1_distance({"a": 3, "b": 1}, truth) == pytest.approx(0)
+    assert l1_distance({"a": 0, "b": 1}, truth) == pytest.approx(1.5)
+    assert l1_distance({"a": 1, "b": 0}, {"a": 0, "b": 1}) == pytest.approx(2)
+
+
+def test_true_scm_reproduces_simcausal_records():
+    from attribution_validation.truesim import TrueSCM
+    f = DATA_DIR / "scm_check.csv"
+    if not f.exists():
+        pytest.skip("scm_check.csv not generated")
+    s = pd.read_csv(f)
+    scm = TrueSCM(CFG)
+    v = scm.simulate(scm.recover_exogenous(s))
+    for node in scm.order:
+        assert np.allclose(v[node], s[node], atol=1e-9), node
+    assert np.allclose(scm.outcome_probability(v), D.true_outcome_probability(s, CFG))
+
+
+def test_true_sampler_fixes_coalition_and_propagates_downstream():
+    from attribution_validation.truesim import TrueSampler, TrueSCM
+    scm = TrueSCM(CFG)
+    feats = ["hydration", "urine_concentration", "water_intake"]
+    s = TrueSampler(scm, feats)
+    noise = s.noise(400, np.random.default_rng(3))
+    C = np.array([[False, False, False], [True, False, False], [True, True, True]])
+    d = s.draw({"hydration": 2.0, "urine_concentration": 0.0, "water_intake": -1.0}, C, noise).reshape(3, 400, 3)
+    assert np.all(d[1, :, 0] == 2.0) and np.all(d[2] == [2.0, 0.0, -1.0])
+    assert np.array_equal(d[0, :, 2], d[1, :, 2])                 # water intake is upstream of hydration: unchanged
+    assert d[1, :, 1].mean() < d[0, :, 1].mean()                  # more hydration, lower urine concentration
+
+
+def test_paired_contrasts_classify_by_both_truths():
+    from attribution_validation.pipeline import paired_contrasts
+    rows = []
+    for r in range(1, 21):
+        for tt, vf in (("per_unit", 0.05), ("pop", -0.05), ("rec", 0.0)):
+            o = 0.6 + 0.01 * (r % 3)
+            for m, t in (("standard_shap", 0.4), ("ordering_only_shap", o),
+                         ("interventional_shap", o + vf + 0.01 * (r % 2))):
+                rows.append({"dataset": "reference_subsample", "feature_set": "ancestor", "truth_type": tt,
+                             "population": "source", "scope": "with_era", "replicate": r, "method": m,
+                             "kendall_tau_b": t})
+    c = paired_contrasts(pd.DataFrame(rows))
+    order = c[(c["contrast"] == "order_effect") & (c["truth_type"] == "per_unit")]
+    assert order["mean"].iloc[0] == pytest.approx(0.21, abs=0.01) and order["classification"].iloc[0] == "robust"
+    vf = c[c["contrast"] == "value_function_effect"]
+    assert (vf["classification"] == "truth_dependent").all()       # opposite signs under the two truths

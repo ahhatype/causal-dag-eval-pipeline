@@ -1,7 +1,6 @@
 replicate_seeds <- function(p, r) {
   shift <- p$replicates$seed_stride * (r - 1)
-  list(full_set = p$seeds$full_set + shift, reference_subsample = p$seeds$reference_subsample + shift,
-       astronaut_source = p$seeds$astronaut_source + shift)
+  list(full_set = p$seeds$full_set + shift, reference_subsample = p$seeds$reference_subsample + shift)
 }
 
 replicate_dir <- function(out_dir, r) file.path(out_dir, "replicates", sprintf("r%03d", r))
@@ -11,14 +10,14 @@ run_pipeline <- function(cfg, cal, out_dir, repo_dir = NULL) {
   dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
   D <- build_dag(cfg, cal)
 
-  message("[3/4] ground-truth total effects")
-  gt <- ground_truth(D, cfg, cal)
+  message("[3/4] ground truth (n = ", p$sizes$ground_truth, ")")
+  t0 <- Sys.time()
+  gt <- ground_truth(cfg, cal)
   write_feature_sets(cfg, out_dir)
-  gt$name <- cfg$nodes$name[match(gt$feature, cfg$nodes$id)]
-  for (t in c("full", "astronaut")) {
-    cols <- c("feature", "name", "ancestor_set", paste0(c("low_", "high_", "effect_", "se_", "rank_"), t))
-    data.table::fwrite(gt[, cols], file.path(out_dir, sprintf("ground_truth_total_effects_%s.csv", t)))
-  }
+  write_truth(gt, cfg, out_dir)
+  write_scm_check(D, cfg, out_dir)
+  message(sprintf("      %d of %d truth records retained by selection; %.1f min",
+                  gt$retained, gt$n, as.numeric(difftime(Sys.time(), t0, units = "mins"))))
 
   message(sprintf("[4/4] %d replicates of each data set", p$replicates$count))
   rows <- lapply(seq_len(p$replicates$count), function(r) {
@@ -26,7 +25,7 @@ run_pipeline <- function(cfg, cal, out_dir, repo_dir = NULL) {
     full <- sim_source(D, p$sizes$full_set, s$full_set)
     set.seed(s$reference_subsample)
     reference <- full[sort(sample(nrow(full), p$sizes$reference_subsample))]
-    astro <- draw_astronaut_set(D, cfg, cal, p$sizes$astronaut_set, s$astronaut_source)
+    astro <- astronaut_from_full(full, cfg, cal, p$sizes$astronaut_set)
     rd <- replicate_dir(out_dir, r)
     dir.create(rd, showWarnings = FALSE, recursive = TRUE)
     write_dataset(full, "full_set", cfg, rd)
@@ -36,11 +35,12 @@ run_pipeline <- function(cfg, cal, out_dir, repo_dir = NULL) {
     data.frame(
       replicate = r, dataset = names(sets),
       n = vapply(sets, nrow, integer(1)),
-      seed = c(s$full_set, s$reference_subsample, s$astronaut_source),
+      seed = c(s$full_set, s$reference_subsample, s$full_set),
       share_2000s = vapply(sets, function(d) mean(d$mission_era), numeric(1)),
       prevalence = vapply(sets, function(d) mean(d$nephrolithiasis), numeric(1)),
       if_fitness_cor = vapply(sets, function(d) cor(d$individual_factors, d$pre_flight_fitness), numeric(1)),
-      source_n = c(nrow(full), nrow(full), astro$source_n),
+      source_n = c(nrow(full), nrow(full), nrow(full)),
+      retained = c(NA, NA, astro$retained),
       retention = c(NA, NA, astro$source_retention))
   })
   summ <- do.call(rbind, rows)
@@ -48,7 +48,21 @@ run_pipeline <- function(cfg, cal, out_dir, repo_dir = NULL) {
   data.table::fwrite(summ, file.path(out_dir, "data_summary.csv"))
   write_provenance(cfg, cal, out_dir, repo_dir)
 
-  list(summary = summ, ground_truth = gt, checks = run_checks(summ, gt, cfg))
+  list(summary = summ, ground_truth = gt, checks = run_checks(summ, gt$values, cfg))
+}
+
+write_truth <- function(gt, cfg, out_dir) {
+  v <- gt$values
+  v$name <- cfg$nodes$name[match(v$feature, cfg$nodes$id)]
+  cols <- c("feature", "name", "ancestor_set", "truth_type", "population", "value", "mcse", "low", "high")
+  data.table::fwrite(v[, cols], file.path(out_dir, "truth_values.csv"))
+  data.table::fwrite(gt$binary_checks, file.path(out_dir, "truth_binary_checks.csv"))
+}
+
+# A few simcausal records with their noise draws, so other modules can check their own copy of the equations.
+write_scm_check <- function(D, cfg, out_dir, n = 500, seed = 1) {
+  s <- sim_source(D, n, seed)
+  data.table::fwrite(s[, c(cfg$order, paste0("U_", noise_ids(cfg))), with = FALSE], file.path(out_dir, "scm_check.csv"))
 }
 
 write_provenance <- function(cfg, cal, out_dir, repo_dir = NULL) {

@@ -3,7 +3,6 @@
 
 seeds:
   full_set: 20261004
-  astronaut_source: 20261005
   ground_truth: 20261006
   reference_subsample: 20261007
   calibration: 20261001
@@ -15,8 +14,8 @@ replicates:
 sizes:
   full_set: 10000
   reference_subsample: 900
-  astronaut_set: 900
-  ground_truth: 50000
+  astronaut_set: 900          # first retained records of the same replicate's full-set
+  ground_truth: 500000
   calibration: 200000
 
 era:
@@ -45,10 +44,12 @@ duration:
     shuttle: {mean: 12, sd: 2, min: 9, max: 16}
     iss: {mean: 170, sd: 25, min: 120, max: 215}
 
-# Uptake probability: [1960s, 2000s]
+# Uptake probability within era: [1960s, 2000s]. Nonzero 1960s uptake is a simulation device (the drugs were not in
+# use), so that every record has both treated and untreated counterparts. Drugs with parents in
+# simulation_edges.csv take logistic uptake whose era intercepts are calibrated to these values.
 uptake:
-  bisphosphonates: [0.0, 0.05]
-  k_citrate: [0.0, 0.15]
+  bisphosphonates: [0.05, 0.15]
+  k_citrate: [0.05, 0.15]
   thiazides: [0.0, 0.02]
 
 # Default residual SD: sqrt(1 - var(linear predictor)), floored
@@ -90,5 +91,7 @@ selection:
   target_retention: 0.30
 
 ground_truth:
-  low_quantile: 0.25
+  low_quantile: 0.25         # per-unit contrast: 25th vs 75th percentile of the source population
   high_quantile: 0.75
+  grid_points: 20            # population-scaled truth: within-era equal-probability bins (midpoints)
+  batches: 20                # batch-means Monte Carlo standard errors

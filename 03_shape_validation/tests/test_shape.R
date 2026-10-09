@@ -7,9 +7,9 @@ test_that("settings parse to the expected types", {
   expect_true(all(params$selection_on %in% cfg$nodes$id))
 })
 
-test_that("analysis graph: 36 observed variables, 59 edges, acyclic, era-fixed nodes collapsed", {
+test_that("analysis graph: 36 observed variables, 63 edges, acyclic, era-fixed nodes collapsed", {
   expect_length(ag$nodes, 36)
-  expect_equal(nrow(ag$edges), 59)
+  expect_equal(nrow(ag$edges), 63)
   expect_true(dagitty::isAcyclic(as_dagitty(ag$nodes, ag$edges)))
   expect_false(any(c(ag$collapsed, ag$constant) %in% c(ag$nodes, ag$edges$parent, ag$edges$child)))
   expect_setequal(ag$constant, c("altered_gravity", "humidity"))
@@ -18,7 +18,7 @@ test_that("analysis graph: 36 observed variables, 59 edges, acyclic, era-fixed n
 
 test_that("Shipley basis set: one implication per non-adjacent pair, all implied by the graph", {
   imp <- shipley_basis(ag$nodes, ag$edges)
-  expect_equal(nrow(imp), choose(36, 2) - 59)
+  expect_equal(nrow(imp), choose(36, 2) - 63)
   expect_false(anyDuplicated(paste(pmin(imp$X, imp$Y), pmax(imp$X, imp$Y))) > 0)
   expect_true(all(holds_in(imp, dag_matrix(ag$nodes, ag$edges))))
 })
@@ -166,7 +166,7 @@ test_that("shape pipeline runs end to end on generated replicates", {
   suppressMessages(dg$run_pipeline(c2, cal, data_dir))
   p2 <- modifyList(params, list(mgm = list(lambda_selection = "fixed"), stability = list(subsamples = 2),
                                 orientations = list(max = 8)))
-  out <- suppressMessages(run_shape(cfg, cal, p2, data_dir, out_dir))
+  out <- suppressMessages(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir))
   nv <- length(params$variants)
   expect_equal(nrow(out$per_replicate), 6 * nv)
   expect_equal(nrow(out$summary), 3 * nv)
@@ -177,6 +177,32 @@ test_that("shape pipeline runs end to end on generated replicates", {
     "edge_stability_r001_full_set.csv", "implication_calibration.csv", "implication_calibration_summary.csv",
     "detail/implications_r002_astronaut_set.csv")))))
   expect_equal(nrow(read.csv(file.path(out_dir, "implication_calibration.csv"))), 6)
-  expect_equal(nrow(read.csv(file.path(out_dir, "implication_rejection_rates.csv"))), 571)
-  expect_true(all(out$per_replicate$tests == 571))
+  expect_equal(nrow(read.csv(file.path(out_dir, "implication_rejection_rates.csv"))), 567)
+  expect_true(all(out$per_replicate$tests == 567))
+
+  # resume: finished units are kept and give identical results; changed settings or an untouched run are refused
+  # rCausalMGM's sepset collider rule has no seed: repeat runs keep the skeleton but can orient colliders differently,
+  # so MGM-PC-Stable is compared on adjacency only and the other three variants exactly.
+  same_results <- function(a, b) {
+    det <- a$variant != "MGM-PC-Stable"
+    adj <- c("learned_edges", "adjacency_precision", "adjacency_recall", "shared_edges", "true_edges")
+    identical(a[det, ], b[det, ]) && identical(a[!det, adj], b[!det, adj])
+  }
+  expect_error(suppressMessages(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir)), "--resume")
+  msgs <- character(0)
+  again <- withCallingHandlers(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
+                               message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
+  expect_equal(sum(grepl("kept from an earlier run", msgs)), 6)
+  expect_true(same_results(again$per_replicate, out$per_replicate))
+  unlink(file.path(out_dir, "units", "r002_astronaut_set.rds"))
+  msgs <- character(0)
+  partial <- withCallingHandlers(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
+                                 message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
+  expect_equal(sum(grepl("kept from an earlier run", msgs)), 5)
+  expect_true(same_results(partial$per_replicate, out$per_replicate))
+  p3 <- modifyList(p2, list(fdr = 0.01))
+  expect_error(suppressMessages(run_shape(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE)),
+               "different settings")
+  fresh <- suppressMessages(run_shape(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, fresh = TRUE))
+  expect_equal(nrow(fresh$per_replicate), 6 * nv)
 })

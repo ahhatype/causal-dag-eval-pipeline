@@ -1,4 +1,4 @@
-"""Causal SHAP of Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
+"""Ng-style causal SHAP, after Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
 
 Attribution phi_i = gamma_i * Shapley_i(v_c), rescaled for local accuracy. The Shapley values of the causal value
 function v_c are estimated from sampled feature orders (antithetic pairs), with common random numbers across the
@@ -119,17 +119,19 @@ def permutation_shapley(value: Callable[[np.ndarray], np.ndarray], k: int, order
     return phi / len(orders)
 
 
-def ng_causal_shap(predict: Callable[[np.ndarray], np.ndarray], train: pd.DataFrame, explain: pd.DataFrame,
-                   features: Sequence[str], ag: AnalysisGraph, samples: int, orders: int, seed: int,
-                   expected_value: float) -> AttributionResult:
+def ng_style_shap(predict: Callable[[np.ndarray], np.ndarray], explain: pd.DataFrame, features: Sequence[str],
+                  weights: dict[str, float], sampler, samples: int, orders: int, seed: int,
+                  expected_value: float) -> AttributionResult:
+    """`weights` are the path weights gamma; `sampler` draws features outside a coalition (CausalSampler for the
+    fitted arm, truesim.TrueSampler for the oracle). Diagnostics keep each record's totals, rescaling factor and its
+    attributions before rescaling (pre_<feature>)."""
     features = list(features)
     k = len(features)
-    weights = causal_weights(ag, edge_strengths(train, ag), features)
     gamma = np.array([weights[f] for f in features])
-    sampler = CausalSampler(train, ag, features)
     rng = np.random.default_rng(seed)
     preds = predict(explain[features].to_numpy(dtype=float))
     out = np.zeros((len(explain), k))
+    pre = np.full((len(explain), k), np.nan)
     diag = np.full((len(explain), 3), np.nan)
     if gamma.sum() > 0:
         for r, (_, row) in enumerate(explain[features].iterrows()):
@@ -144,7 +146,13 @@ def ng_causal_shap(predict: Callable[[np.ndarray], np.ndarray], train: pd.DataFr
             total = weighted.sum()
             scale = (preds[r] - expected_value) / total if total != 0 else 0.0
             out[r] = weighted * scale
+            pre[r] = weighted
             diag[r] = (phi.sum(), total, scale)
     eff = out.sum(axis=1) + expected_value - preds if gamma.sum() > 0 else np.zeros(len(explain))
-    diagnostics = pd.DataFrame(diag, columns=["shapley_total", "weighted_total", "rescale_factor"], index=explain.index)
+    diagnostics = pd.concat([pd.DataFrame(diag, columns=["shapley_total", "weighted_total", "rescale_factor"], index=explain.index),
+                             pd.DataFrame(pre, columns=[f"pre_{f}" for f in features], index=explain.index)], axis=1)
     return AttributionResult(pd.DataFrame(out, columns=features, index=explain.index), expected_value, eff, diagnostics)
+
+
+def fitted_ng_inputs(train: pd.DataFrame, ag: AnalysisGraph, features: Sequence[str]) -> tuple[dict, CausalSampler]:
+    return causal_weights(ag, edge_strengths(train, ag), features), CausalSampler(train, ag, features)

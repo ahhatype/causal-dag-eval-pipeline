@@ -2,7 +2,7 @@
 name = "attribution-validation"
 version = "0.1.0"
 description = "Standard and causal SHAP attributions on the replicate data sets, evaluated against simulated total effects."
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "numpy>=1.26,<3",
     "pandas>=2.2,<3",
@@ -14,6 +14,8 @@ dependencies = [
     "threadpoolctl>=3,<4",
     # shap's numba constraint otherwise lets the resolver fall back to versions that cannot build
     "numba>=0.60,<0.63",
+    "tabpfn>=9.1,<10",
+    "shapiq[proxy]>=1.7,<2",
 ]
 
 [dependency-groups]

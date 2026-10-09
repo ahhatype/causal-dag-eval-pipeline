@@ -5,13 +5,9 @@ retention_mask <- function(df, cfg, cal) {
                             s$b_fitness * df$pre_flight_fitness)
 }
 
-draw_astronaut_set <- function(D, cfg, cal, n_target, seed) {
-  n_src <- ceiling(n_target / cfg$params$selection$target_retention * 1.2)
-  repeat {
-    src <- sim_source(D, n_src, seed)
-    keep <- retention_mask(src, cfg, cal)
-    if (sum(keep) >= n_target) break
-    n_src <- ceiling(n_src * 1.5)
-  }
-  list(data = src[keep][seq_len(n_target)], source_n = n_src, source_retention = mean(keep))
+# The astronaut-set is the first n_target retained records of the same replicate's full-set, so the two are paired.
+astronaut_from_full <- function(full, cfg, cal, n_target) {
+  keep <- retention_mask(full, cfg, cal)
+  if (sum(keep) < n_target) stop(sprintf("only %d of %d full-set records retained; need %d", sum(keep), nrow(full), n_target))
+  list(data = full[keep][seq_len(n_target)], retained = sum(keep), source_retention = mean(keep))
 }

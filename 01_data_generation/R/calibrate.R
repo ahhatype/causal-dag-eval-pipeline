@@ -4,7 +4,7 @@ calibrate <- function(cfg, out_file = NULL) {
   set.seed(p$seeds$calibration)
   env <- new.env()
   for (id in noise_ids(cfg)) assign(paste0("U_", id), runif(n), envir = env)
-  cal <- list(cont = list(), logit = list())
+  cal <- list(cont = list(), logit = list(), uptake = list())
   ev <- function(f) eval(parse(text = f), envir = env)
 
   for (id in cfg$order) {
@@ -21,6 +21,15 @@ calibrate <- function(cfg, out_file = NULL) {
       lin <- ev(lin_expr(id, cfg))
       cal$logit[[id]] <- uniroot(function(b) mean(plogis(b + lin)) - p$base_rates[[id]],
                                  c(-30, 30), tol = 1e-10)$root
+    } else if (rule == "uptake_logit") {
+      lin <- ev(lin_expr(id, cfg))
+      later <- ev("medical_prevention_capability") > 0
+      cal$uptake[[id]] <- vapply(1:2, function(k) {
+        target <- p$uptake[[id]][k]
+        if (target <= 0) return(-Inf)
+        m <- if (k == 2) later else !later
+        uniroot(function(a) mean(plogis(a + lin[m])) - target, c(-30, 30), tol = 1e-10)$root
+      }, numeric(1))
     } else if (rule == "lmo") {
       evac <- ev("evacuation") == 0
       lin <- coef_of("task_performance", id, cfg) * ev("task_performance")[evac]
@@ -45,7 +54,8 @@ config_hash <- function(cfg_dir) {
   on.exit(unlink(f))
   writeLines(c(yaml::as.yaml(yaml::read_yaml(file.path(cfg_dir, "params.yaml"))),
                readLines(file.path(cfg_dir, "nodes.csv")),
-               readLines(file.path(cfg_dir, "edges.csv"))), f)
+               readLines(file.path(cfg_dir, "edges.csv")),
+               readLines(file.path(cfg_dir, "simulation_edges.csv"))), f)
   unname(tools::md5sum(f))
 }
 

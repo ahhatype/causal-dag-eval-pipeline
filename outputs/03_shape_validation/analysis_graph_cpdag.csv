@@ -1,9 +1,9 @@
 from,to,type
-bisphosphonates,mission_era,undir
 bisphosphonates,bone_remodeling,dir
 bone_remodeling,urine_chemistry,dir
 crew_capability,task_performance,dir
 cumulative_mission_duration,mission_era,undir
+cumulative_mission_duration,bisphosphonates,dir
 cumulative_mission_duration,bone_remodeling,dir
 detect_mrm_stone,ultrasound_manipulation,dir
 evacuation,loss_of_crew_life,undir
@@ -11,9 +11,9 @@ evacuation,loss_of_mission_objectives,dir
 hydration,mission_era,undir
 hydration,urine_concentration,undir
 hydration,water_intake,undir
+individual_factors,k_citrate,dir
 individual_factors,nephrolithiasis,dir
 individual_readiness,crew_capability,dir
-k_citrate,mission_era,undir
 k_citrate,urine_chemistry,dir
 long_term_health_outcomes,detect_long_term_health_outcomes,dir
 loss_of_mission_objectives,loss_of_mission,dir
@@ -35,8 +35,10 @@ mission_era,tamsulosin,undir
 mission_era,thiazides,undir
 mission_era,ultrasound,undir
 mission_era,water_intake,undir
+mission_era,bisphosphonates,dir
 mission_era,bone_remodeling,dir
 mission_era,detect_long_term_health_outcomes,dir
+mission_era,k_citrate,dir
 mission_era,resistive_exercise,dir
 mission_era,ultrasound_manipulation,dir
 mission_era,urine_chemistry,dir
@@ -46,6 +48,7 @@ nephrolithiasis,ureterolithiasis,dir
 nutrients,bone_remodeling,dir
 percutaneous_nephrostomy,ultrasound,undir
 percutaneous_nephrostomy,medical_illness,dir
+pre_flight_fitness,bisphosphonates,dir
 pre_flight_fitness,resistive_exercise,dir
 resistive_exercise,bone_remodeling,dir
 tamsulosin,urine_flow,dir
@@ -55,6 +58,7 @@ ultrasound,detect_mrm_stone,dir
 ultrasound_manipulation,ureterolithiasis,dir
 ureterolithiasis,urine_flow,dir
 urine_chemistry,mineralized_renal_material,dir
+urine_concentration,k_citrate,dir
 urine_concentration,urine_chemistry,dir
 urine_flow,medical_illness,dir
 water_intake,urine_flow,dir

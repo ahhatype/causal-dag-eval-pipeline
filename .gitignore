@@ -19,7 +19,8 @@ venv/
 02_data/*
 !02_data/data_summary.csv
 !02_data/feature_sets.csv
-!02_data/ground_truth_total_effects_*.csv
+!02_data/truth_values.csv
+!02_data/truth_binary_checks.csv
 !02_data/provenance.txt
 outputs/*
 !outputs/03_shape_validation/
@@ -34,3 +35,5 @@ outputs/04_attribution_validation/values.csv.gz
 .vscode/
 references/
 references/*
+
+outputs/03_shape_validation/units/

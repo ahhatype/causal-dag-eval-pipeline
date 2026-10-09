@@ -1,8 +1,8 @@
-run_checks <- function(summ, gt, cfg) {
+run_checks <- function(summ, truth, cfg) {
   p <- cfg$params
   obs <- observed_ids(cfg)
   feats <- feature_ids(cfg, "all")
-  anc_eff <- gt[gt$ancestor_set, ]
+  pu <- truth[truth$truth_type == "per_unit", ]
   ck <- function(name, ok, detail, severity = "error") {
     data.frame(check = name, pass = isTRUE(ok), severity = severity, detail = detail)
   }
@@ -25,12 +25,12 @@ run_checks <- function(summ, gt, cfg) {
        sprintf("astronaut %s; full %s", rng(ast$if_fitness_cor), rng(full$if_fitness_cor))),
     ck("feature_count_35", length(feats) == 35 && all(feats %in% obs), sprintf("%d", length(feats))),
     ck("no_latent_columns", !any(cfg$nodes$id[!cfg$nodes$observed] %in% obs), "latent nodes excluded"),
-    ck("non_ancestors_zero_effect", all(abs(gt$effect_full[!gt$ancestor_set]) < 1e-12) &&
-         all(abs(gt$effect_astronaut[!gt$ancestor_set]) < 1e-12),
-       sprintf("%d non-ancestors", sum(!gt$ancestor_set))),
-    ck("ancestors_nonzero_effect", all(abs(anc_eff$effect_full) > 0), sprintf("%d ancestors", nrow(anc_eff))),
+    ck("non_ancestors_zero_effect", all(abs(truth$value[!truth$ancestor_set]) < 1e-12),
+       sprintf("%d non-ancestors", length(unique(truth$feature[!truth$ancestor_set])))),
+    ck("ancestors_nonzero_effect", all(abs(truth$value[truth$ancestor_set]) > 0),
+       sprintf("%d ancestors", length(unique(truth$feature[truth$ancestor_set])))),
     {
-      u <- c(unresolved_pairs(gt, "full"), unresolved_pairs(gt, "astronaut"))
+      u <- c(unresolved_pairs(truth, "source"), unresolved_pairs(truth, "selected"))
       ck("ancestor_ranks_resolved", !length(u),
          if (length(u)) paste("within 2 SE:", paste(unique(u), collapse = "; ")) else "all adjacent gaps > 2 SE",
          severity = "warning")

@@ -14,15 +14,91 @@ check_data_current <- function(data_dir, cal) {
 }
 
 check_analysis_graph <- function(ag, imp) {
-  ok <- c(nodes_36 = length(ag$nodes) == 36, edges_59 = nrow(ag$edges) == 59,
-          implications_571 = nrow(imp) == 571, selection_flag_1 = sum(imp$expected_under_selection) == 1)
+  ok <- c(nodes_36 = length(ag$nodes) == 36, edges_63 = nrow(ag$edges) == 63,
+          implications_567 = nrow(imp) == 567, selection_flag_1 = sum(imp$expected_under_selection) == 1)
   if (!all(ok)) stop("analysis graph check failed: ", paste(names(ok)[!ok], collapse = ", "), call. = FALSE)
   invisible(TRUE)
 }
 
 mc_se <- function(x) if (sum(!is.na(x)) > 1) sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x))) else NA_real_
 
-run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, repo_dir = NULL) {
+shape_manifest <- function(params, cal, ag, sv_dir) {
+  f <- tempfile()
+  on.exit(unlink(f))
+  code <- list.files(file.path(sv_dir, "R"), pattern = "\\.R$", full.names = TRUE)
+  writeLines(c(yaml::as.yaml(params), cal$config_hash, paste(ag$nodes, collapse = ","),
+               unlist(lapply(sort(code), function(x) paste(basename(x), unname(tools::md5sum(x)))))), f)
+  unname(tools::md5sum(f))
+}
+
+# Each (replicate, data set) is one unit, saved when complete. `resume` keeps units written under the same
+# settings, config and code; `fresh` discards them; with neither, existing units are an error.
+prepare_units <- function(unit_dir, manifest, resume, fresh) {
+  mf <- file.path(unit_dir, "manifest.txt")
+  existing <- list.files(unit_dir, pattern = "\\.rds$", full.names = TRUE)
+  if (fresh) unlink(existing)
+  else if (length(existing)) {
+    if (!resume) stop(unit_dir, " already holds results: pass --resume to continue them or --fresh to discard them", call. = FALSE)
+    if (!file.exists(mf) || !identical(readLines(mf, n = 1), manifest))
+      stop(unit_dir, " was written with different settings, config or code: pass --fresh to discard it", call. = FALSE)
+  }
+  dir.create(unit_dir, showWarnings = FALSE, recursive = TRUE)
+  writeLines(manifest, mf)
+}
+
+save_unit <- function(x, file) {
+  tmp <- paste0(file, ".tmp")
+  saveRDS(x, tmp)
+  file.rename(tmp, file)
+}
+
+run_unit <- function(r, ds, n_rep, first, data_dir, out_dir, params, ag, imp, del, cpdag) {
+  d <- data.table::fread(file.path(data_dir, "replicates", sprintf("r%03d", r), paste0(ds, ".csv")))
+  seed <- params$discovery_seed + r
+
+  tests <- test_implications(d, imp, ag, params$fdr)
+  pw <- edge_power(d, del, ag, params$power$alpha)
+  md <- mgm_data(d, ag)
+  fit <- run_mgm_pc(md, params, seed)
+  primary <- names(params$variants)[1]
+
+  data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
+  ic <- implication_calibration(tests, params$calibration$alpha)
+  if (first && params$stability$subsamples > 0) {
+    message(sprintf("[replicate %d] %s: stability over %d subsamples", r, ds, params$stability$subsamples))
+    data.table::fwrite(stability_edges(md, fit$graphs[[primary]], params),
+                       file.path(out_dir, sprintf("edge_stability_r%03d_%s.csv", r, ds)))
+  }
+
+  rj <- tests$rejected
+  base <- data.frame(replicate = r, dataset = ds, n = nrow(d), tests = sum(!is.na(tests$p)),
+                     rejected = sum(rj),
+                     selection_violation_detected = sum(rj & tests$expected_under_selection),
+                     rejected_nonadditive = sum(rj & tests$nonadditive_response & !tests$expected_under_selection),
+                     rejected_other = sum(rj & !tests$nonadditive_response & !tests$expected_under_selection),
+                     edges_detectable = sum(pw$detected),
+                     calibration_ks_rejected = ic$calibration_ks_rejected, raw_rejection_rate = ic$raw_rejection_rate,
+                     discovery_dropped = paste(attr(md, "dropped"), collapse = "; "),
+                     lambda_cc = fit$lambda[1], lambda_cd = fit$lambda[2], lambda_dd = fit$lambda[3])
+  rows <- list(); edges <- list()
+  for (v in names(params$variants)) {
+    learned <- learned_edges(fit$graphs[[v]])
+    cmp <- compare_learned(ag$nodes, ag$edges, learned, params, imp[, c("X", "Y", "Z")])
+    if (first)
+      data.table::fwrite(learned, file.path(out_dir, "detail", sprintf("learned_cpdag_r%03d_%s_%s.csv", r, ds, v)))
+    rows[[length(rows) + 1]] <- cbind(base, variant = params$variants[[v]],
+                                      structure_metrics(cpdag, learned), cmp$summary)
+    edges[[length(edges) + 1]] <- data.frame(dataset = ds, variant = params$variants[[v]], replicate = r,
+                                             key = edge_key(learned$from, learned$to),
+                                             mark = edge_mark(learned$from, learned$to, learned$type))
+  }
+  list(rows = rows, edges = edges, calib = cbind(replicate = r, dataset = ds, ic),
+       rej = data.frame(dataset = ds, implication = seq_len(nrow(tests)), rejected = rj),
+       pow = cbind(dataset = ds, pw))
+}
+
+run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, repo_dir = NULL,
+                      resume = FALSE, fresh = FALSE, sv_dir = file.path(repo_dir, "03_shape_validation")) {
   available <- check_data_current(data_dir, cal)
   reps <- seq_len(min(available, if (is.null(replicates)) available else replicates))
   dir.create(file.path(out_dir, "detail"), showWarnings = FALSE, recursive = TRUE)
@@ -35,54 +111,23 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
   data.table::fwrite(ag$edges, file.path(out_dir, "analysis_graph_edges.csv"))
   data.table::fwrite(cpdag, file.path(out_dir, "analysis_graph_cpdag.csv"))
 
+  unit_dir <- file.path(out_dir, "units")
+  prepare_units(unit_dir, shape_manifest(params, cal, ag, sv_dir), resume, fresh)
+
   rows <- list(); rej <- list(); pow <- list(); edges <- list(); calib <- list()
   for (r in reps) {
-    rdir <- file.path(data_dir, "replicates", sprintf("r%03d", r))
     for (ds in params$datasets) {
-      message(sprintf("[replicate %d/%d] %s", r, length(reps), ds))
-      d <- data.table::fread(file.path(rdir, paste0(ds, ".csv")))
-      seed <- params$discovery_seed + r
-
-      tests <- test_implications(d, imp, ag, params$fdr)
-      pw <- edge_power(d, del, ag, params$power$alpha)
-      md <- mgm_data(d, ag)
-      fit <- run_mgm_pc(md, params, seed)
-      primary <- names(params$variants)[1]
-
-      data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
-      ic <- implication_calibration(tests, params$calibration$alpha)
-      calib[[length(calib) + 1]] <- cbind(replicate = r, dataset = ds, ic)
-      if (r == reps[1]) {
-        if (params$stability$subsamples > 0) {
-          message(sprintf("[replicate %d] %s: stability over %d subsamples", r, ds, params$stability$subsamples))
-          data.table::fwrite(stability_edges(md, fit$graphs[[primary]], params),
-                             file.path(out_dir, sprintf("edge_stability_r%03d_%s.csv", r, ds)))
-        }
+      f <- file.path(unit_dir, sprintf("r%03d_%s.rds", r, ds))
+      if (file.exists(f)) {
+        message(sprintf("[replicate %d/%d] %s (kept from an earlier run)", r, length(reps), ds))
+        u <- readRDS(f)
+      } else {
+        message(sprintf("[replicate %d/%d] %s", r, length(reps), ds))
+        u <- run_unit(r, ds, length(reps), r == reps[1], data_dir, out_dir, params, ag, imp, del, cpdag)
+        save_unit(u, f)
       }
-
-      rj <- tests$rejected
-      base <- data.frame(replicate = r, dataset = ds, n = nrow(d), tests = sum(!is.na(tests$p)),
-                         rejected = sum(rj),
-                         selection_violation_detected = sum(rj & tests$expected_under_selection),
-                         rejected_nonadditive = sum(rj & tests$nonadditive_response & !tests$expected_under_selection),
-                         rejected_other = sum(rj & !tests$nonadditive_response & !tests$expected_under_selection),
-                         edges_detectable = sum(pw$detected),
-                         calibration_ks_rejected = ic$calibration_ks_rejected, raw_rejection_rate = ic$raw_rejection_rate,
-                         discovery_dropped = paste(attr(md, "dropped"), collapse = "; "),
-                         lambda_cc = fit$lambda[1], lambda_cd = fit$lambda[2], lambda_dd = fit$lambda[3])
-      for (v in names(params$variants)) {
-        learned <- learned_edges(fit$graphs[[v]])
-        cmp <- compare_learned(ag$nodes, ag$edges, learned, params, imp[, c("X", "Y", "Z")])
-        if (r == reps[1])
-          data.table::fwrite(learned, file.path(out_dir, "detail", sprintf("learned_cpdag_r%03d_%s_%s.csv", r, ds, v)))
-        rows[[length(rows) + 1]] <- cbind(base, variant = params$variants[[v]],
-                                          structure_metrics(cpdag, learned), cmp$summary)
-        edges[[length(edges) + 1]] <- data.frame(dataset = ds, variant = params$variants[[v]], replicate = r,
-                                                 key = edge_key(learned$from, learned$to),
-                                                 mark = edge_mark(learned$from, learned$to, learned$type))
-      }
-      rej[[length(rej) + 1]] <- data.frame(dataset = ds, implication = seq_len(nrow(tests)), rejected = rj)
-      pow[[length(pow) + 1]] <- cbind(dataset = ds, pw)
+      rows <- c(rows, u$rows); edges <- c(edges, u$edges)
+      calib[[length(calib) + 1]] <- u$calib; rej[[length(rej) + 1]] <- u$rej; pow[[length(pow) + 1]] <- u$pow
     }
   }
 

@@ -39,7 +39,8 @@ class GenerationConfig:
 def load_generation_config() -> GenerationConfig:
     return GenerationConfig(
         nodes=pd.read_csv(DG_CONFIG / "nodes.csv"),
-        edges=pd.read_csv(DG_CONFIG / "edges.csv"),
+        edges=pd.concat([pd.read_csv(DG_CONFIG / "edges.csv"), pd.read_csv(DG_CONFIG / "simulation_edges.csv")],
+                        ignore_index=True),
         params=yaml.safe_load((DG_CONFIG / "params.yaml").read_text()),
         calibration=yaml.safe_load((DG_CONFIG / "calibration.yaml").read_text()),
     )
@@ -110,19 +111,25 @@ def feature_sets(data_dir: Path) -> dict[str, list[str]]:
             "all": f.loc[truthy(f["in_all_features_set"]), "id"].tolist()}
 
 
-def ground_truth(data_dir: Path, target: str) -> pd.Series:
-    """True total effects (risk difference) for the source population ("full") or the selected one ("astronaut")."""
-    g = pd.read_csv(data_dir / f"ground_truth_total_effects_{target}.csv")
-    return g.set_index("feature")[f"effect_{target}"]
+TRUTH_TYPES = ("per_unit", "pop", "rec")
+POPULATIONS = ("source", "selected")
+# The population each data set was drawn from; the astronaut-set is also scored against the source population.
+TRUTH_POPULATION = {"full_set": "source", "reference_subsample": "source", "astronaut_set": "selected"}
 
 
-def ground_truth_se(data_dir: Path, target: str) -> pd.Series:
-    """Paired Monte Carlo standard errors of the true total effects."""
-    g = pd.read_csv(data_dir / f"ground_truth_total_effects_{target}.csv")
-    return g.set_index("feature")[f"se_{target}"]
+def truth_values(data_dir: Path) -> pd.DataFrame:
+    """Long table: feature, truth_type (per_unit, pop, rec), population (source, selected), value, mcse.
+
+    per_unit is a signed risk difference; pop and rec are non-negative. Rankings use |value|.
+    """
+    t = pd.read_csv(data_dir / "truth_values.csv")
+    t["ancestor_set"] = t["ancestor_set"].astype(str).str.upper() == "TRUE"
+    return t
 
 
-GROUND_TRUTH_TARGET = {"full_set": "full", "reference_subsample": "full", "astronaut_set": "astronaut"}
+def truth_series(truth: pd.DataFrame, truth_type: str, population: str, column: str = "value") -> pd.Series:
+    t = truth[(truth["truth_type"] == truth_type) & (truth["population"] == population)]
+    return t.set_index("feature")[column]
 
 
 def true_outcome_probability(data: pd.DataFrame, cfg: GenerationConfig) -> np.ndarray:

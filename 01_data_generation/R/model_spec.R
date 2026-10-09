@@ -13,7 +13,8 @@ read_config <- function(cfg_dir) {
     dir    = cfg_dir,
     params = yaml::read_yaml(file.path(cfg_dir, "params.yaml")),
     nodes  = read.csv(file.path(cfg_dir, "nodes.csv"), stringsAsFactors = FALSE),
-    edges  = read.csv(file.path(cfg_dir, "edges.csv"), stringsAsFactors = FALSE)
+    edges  = rbind(read.csv(file.path(cfg_dir, "edges.csv"), stringsAsFactors = FALSE),
+                   read.csv(file.path(cfg_dir, "simulation_edges.csv"), stringsAsFactors = FALSE))
   )
   sim_ids <- cfg$nodes$id[cfg$nodes$simulate]
   cfg$edges <- cfg$edges[cfg$edges$parent %in% sim_ids & cfg$edges$child %in% sim_ids, ]
@@ -60,7 +61,10 @@ node_rule <- function(id, cfg) {
                loss_of_mission_objectives = "lmo", loss_of_mission = "lm")
   if (id %in% names(special)) return(special[[id]])
   if (id %in% names(p$era_values)) return("era_fixed")
-  if (id %in% names(p$uptake)) return("era_prob")
+  if (id %in% names(p$uptake)) {
+    e <- parents_of(id, cfg)
+    return(if (any(!is.na(e$coef))) "uptake_logit" else "era_prob")
+  }
   if (nrow(parents_of(id, cfg)) == 0) return("root_normal")
   scale <- cfg$nodes$scale[cfg$nodes$id == id]
   if (scale == "continuous") return("cont")
@@ -107,6 +111,11 @@ node_formula <- function(id, cfg, cal) {
     era_prob = {
       u <- p$uptake[[id]]
       sprintf("as.numeric(%s < (%s + (%s) * (medical_prevention_capability > 0)))", U, num(u[1]), num(u[2] - u[1]))
+    },
+    uptake_logit = {
+      a <- cal$uptake[[id]]
+      sprintf("as.numeric(%s < plogis(ifelse(medical_prevention_capability > 0, %s, %s) + %s))",
+              U, num(a[2]), num(a[1]), lin_expr(id, cfg))
     },
     ultrasound = sprintf("as.numeric(%s < ifelse(medical_monitoring_capability > 0, %s, %s))",
                          U, num(1 - p$flip), num(p$flip)),
