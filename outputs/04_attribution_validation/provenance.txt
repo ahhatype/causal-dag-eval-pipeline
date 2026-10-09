@@ -1,7 +1,7 @@
-generated: 2026-10-06 15:38:11 EDT
-git commit: 8baa82d942b258e872e9fda105adf72e797e3be9 (uncommitted changes)
-code hash: 46f914345ae354b0
-data config hash: b8ce99be00997cbdbf220ff80333f03c
+generated: 2026-10-08 23:00:28 EDT
+git commit: e21ec413daf513f418f4ceb0fb98332f90a76249 (uncommitted changes)
+code hash: c1393f61aa31dc85
+data config hash: d2671ab6dc028eccc7a32b0cc8312afc
 cells: 300
 workers: 7
 python: 3.12.13
@@ -13,12 +13,31 @@ shap: 0.52.0
 networkx: 3.7
 settings:
 {
+ "confounding_shap": {
+  "budget": 64,
+  "datasets": [
+   "reference_subsample",
+   "astronaut_set"
+  ],
+  "enabled": false,
+  "replicates": 10,
+  "tabpfn_version": "v2.5",
+  "treatments": [
+   "k_citrate",
+   "bisphosphonates"
+  ]
+ },
  "evaluation": {
+  "tie_margins": [
+   0.02,
+   0.05
+  ],
+  "tie_z": 1.96,
   "top_k": 5
  },
  "explain": {
   "background": 128,
-  "min_events": 8,
+  "flag_min_events": 4,
   "records": 64
  },
  "interventional_shap": {
@@ -26,9 +45,27 @@ settings:
   "orders": 64,
   "thin": 50
  },
- "ng_causal_shap": {
+ "ng_convergence": {
+  "max_budget_factor": 4,
+  "min_correlation": 0.95,
+  "min_tau_b": 0.9,
+  "orders": [
+   150,
+   300
+  ],
+  "seed": 20261400
+ },
+ "ng_style_shap": {
+  "exclude_below": 0.001,
   "orders": 64,
+  "rescale_flag": 50,
   "samples": 64
+ },
+ "oracle": {
+  "background": 128,
+  "pool": 20000,
+  "replicates": 10,
+  "seed": 20261300
  },
  "ordering_only_shap": {
   "burn_in": 2000,

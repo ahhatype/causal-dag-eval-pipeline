@@ -364,3 +364,6 @@ def test_paired_contrasts_classify_by_both_truths():
     assert order["mean"].iloc[0] == pytest.approx(0.21, abs=0.01) and order["classification"].iloc[0] == "robust"
     vf = c[c["contrast"] == "value_function_effect"]
     assert (vf["classification"] == "truth_dependent").all()       # opposite signs under the two truths
+    flat = pd.DataFrame([{**r, "kendall_tau_b": 0.4 + (0.01 if r["method"] != "standard_shap" else 0) * (-1) ** r["replicate"]}
+                         for r in rows])
+    assert (paired_contrasts(flat)["classification"] == "inconclusive").all()      # no effect under either truth

@@ -1,4 +1,4 @@
-.PHONY: data recalibrate shape attribution test
+.PHONY: data recalibrate shape attribution convergence test
 
 data:            ## generate all replicate data sets + ground truth (uses frozen calibration)
 	Rscript 01_data_generation/generate_all.R
@@ -11,6 +11,9 @@ shape:           ## structural validation: implication tests, power control and 
 
 attribution:     ## standard and causal SHAP against simulated total effects
 	cd 04_attribution_validation && uv run python run_all.py
+
+convergence:     ## Ng-style convergence on phi: two independent halves at increasing order budgets
+	cd 04_attribution_validation && uv run python run_ng_convergence.py
 
 test:
 	Rscript -e 'testthat::test_dir("01_data_generation/tests"); testthat::test_dir("03_shape_validation/tests")'

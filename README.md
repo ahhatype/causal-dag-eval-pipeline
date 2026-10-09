@@ -10,7 +10,7 @@ _(Overview to be written.)_
 
 ## Setup
 
-R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python, managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`.
+R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python (3.12), managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`; the lockfile also pins `tabpfn` and `shapiq`, installed for ConfoundingSHAP, which is not yet run. TabPFN-2.5 weights are licensed non-commercially and need a free Prior Labs login: accept the licence at ux.priorlabs.ai and set `TABPFN_TOKEN` before running ConfoundingSHAP.
 
 ```bash
 Rscript -e 'renv::restore()'   # install the pinned R packages
@@ -19,6 +19,7 @@ cp .env.example .env           # then add your API key; .env is git-ignored
 make data                      # generate the data sets
 make shape                     # structural validation on the generated data
 make attribution               # attribution validation on the generated data
+make convergence               # Ng-style convergence study (after make attribution)
 make test                      # run all tests
 ```
 
@@ -65,7 +66,7 @@ Each data set is generated in 50 independent replicates. Replicate r uses the se
    - **Record-level** (`rec`, sensitivity): the same centre computed record by record with each record's own noise, then mean |P_j(observed) − centre_j|, mirroring how mean |SHAP| takes absolute values per record.
    - Each is computed for the **source** population (all records) and the **selected** population (records retained at baseline, membership held fixed, then intervened on).
    - Standard errors: paired across records for per-unit and record-level; batch means over 20 batches for population-scaled.
-   - For binary features, the within-era population-scaled truth is compared with 2p(1 − p) times the observational contrast; a gap beyond 3 MCSE flags confounding (`truth_binary_checks.csv`). K+ citrate and bisphosphonates are flagged; thiazides is not.
+   - For binary features, the within-era population-scaled truth is compared with 2p(1 − p) times the observational contrast; a gap beyond 3 MCSE flags confounding (`truth_binary_checks.csv`). K+ citrate is flagged in both eras and both populations, bisphosphonates in the 2000s only, and thiazides never.
 7. **Checks** (`R/checks.R`):
    - Every replicate has the right sizes.
    - Prevalence, era share and retention are within tolerance in every replicate, and prevalence is on target averaged over replicates.
@@ -79,7 +80,7 @@ Each data set is generated in 50 independent replicates. Replicate r uses the se
 make data                                   # or: Rscript 01_data_generation/generate_all.R
 ```
 
-Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (about 360 MB):
+Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (about 390 MB):
 
 | File | Contents |
 |---|---|
@@ -89,7 +90,7 @@ Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (ab
 | `truth_binary_checks.csv` | Per binary feature, population and era: prevalence, population-scaled truth, its observational counterpart and the confounding flag |
 | `scm_check.csv` | 500 simcausal records with their noise draws, for checking other copies of the equations |
 | `feature_sets.csv` | The 35-feature (all) and 16-feature (ancestor) sets |
-| `data_summary.csv` | Per replicate and data set: n, seed, era share, realized prevalence, individual factors–fitness correlation, retention |
+| `data_summary.csv` | Per replicate and data set: n, seed, era share, realized prevalence, individual factors–fitness correlation; for the astronaut-set, records retained from the full-set and the retention share |
 | `provenance.txt` | Git commit, config hash, replicate count, R and package versions |
 
 ### Tests
@@ -173,6 +174,7 @@ The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes abou
 - **Stale data:** refused.
 - **Discovery wrapper:** recovers a small mixed-data chain.
 - **End to end:** a run on two generated replicates.
+- **Resume:** finished units are kept and reproduce the same results (MGM-PC-Stable on adjacency only), a run on top of existing units is refused, changed settings are refused, `--fresh` discards.
 
 ## Attribution validation
 
@@ -212,8 +214,8 @@ Code in [04_attribution_validation/](04_attribution_validation/) asks whether at
    - Descriptive: top-5 recovery (every feature tied with the fifth counts as a true top-5 feature).
    - The proximity bias index: importance-weighted mean distance to the outcome under the truth minus under the method. Positive means credit is pooled near the outcome.
    - All-features runs also report the non-ancestor credit share.
-   - Paired contrasts within replicate: the order effect τ_b(ordering-only) − τ_b(standard) and the value-function effect τ_b(interventional) − τ_b(ordering-only). A contrast is **robust** if it has the same sign and a 95% interval excluding zero under both co-primary truths, otherwise **truth-dependent**.
-8. **Ng-style convergence** (`run_ng_convergence.py`): on replicate 1 of each data set and feature set, two independent halves at 150 and 300 orders are compared by the correlation of per-feature mean |φ|, its largest difference and τ_b (criterion: τ_b ≥ 0.9 and correlation ≥ 0.95). If 300 fails, the budget is doubled until it passes or a run exceeds 4 times the production runtime.
+   - Paired contrasts within replicate: the order effect τ_b(ordering-only) − τ_b(standard) and the value-function effect τ_b(interventional) − τ_b(ordering-only). A contrast is **robust** if it has the same sign and a 95% interval excluding zero under both co-primary truths, **inconclusive** if both intervals include zero, and **truth-dependent** otherwise (opposite signs, or only one truth excludes zero).
+8. **Ng-style convergence** (`run_ng_convergence.py`): on replicate 1 of each data set and feature set, two independent halves at 150 and 300 orders are compared by the correlation of per-feature mean |φ|, its largest difference and τ_b (criterion: τ_b ≥ 0.9 and correlation ≥ 0.95). If 300 fails, the budget is doubled until it passes or a run exceeds 4 times the production runtime. Both budgets passed in all six cells; production runs use 64 orders, which this study does not test.
 9. **ConfoundingSHAP** (Brockschmidt et al. 2026): not yet run. The confounded drugs in the data-generating process are in place; settings are reserved in `config/params.yaml` (`confounding_shap`, disabled). <!-- TO BE ADDED: ConfoundingSHAP method and results -->
 
 Settings (library folds, split, explained records, background size, permutations, Monte Carlo budgets, order sampler, seeds) are in `config/params.yaml`.
@@ -223,17 +225,18 @@ Settings (library folds, split, explained records, background size, permutations
 ```bash
 make attribution                            # or: cd 04_attribution_validation && uv run python run_all.py
 uv run python run_all.py --resume           # continue an interrupted run
+uv run python run_all.py --fresh            # discard saved cells and start again
 uv run python run_all.py --replicates 1 --datasets reference_subsample --feature-sets ancestor --workers 1   # one cell
-uv run python run_ng_convergence.py         # Ng-style convergence study
+uv run python run_ng_convergence.py         # Ng-style convergence study (or: make convergence)
 ```
 
-Each replicate × data set × feature set is one cell, seeded on its own and run single-threaded, so results do not depend on the number of workers (7 by default). Finished cells are kept in `cells/`. A later run refuses to touch them unless given `--resume` (continue, only if settings and code are unchanged) or `--fresh` (discard). A failed cell is logged and the others continue; outputs are combined once every cell is complete. On 7 cores the full design (300 cells) takes about 5–7 hours; the slowest cell (full-set, all features) about 15 minutes. Outputs go to `OUTPUT_DIR/04_attribution_validation/`:
+Each replicate × data set × feature set is one cell, seeded on its own and run single-threaded, so results do not depend on the number of workers (7 by default). Finished cells are kept in `cells/`. A later run refuses to touch them unless given `--resume` (continue, only if settings and code are unchanged) or `--fresh` (discard). A failed cell is logged and the others continue; outputs are combined once every cell is complete. On 7 workers of an 8-core laptop the full design (300 cells) took about 10 hours 20 minutes of wall-clock time; typical cells take 5–15 minutes (median 8), the all-features cells longest. The convergence study takes about 35 minutes. Recorded per-method seconds are wall-clock, so they include any time the machine was asleep. Outputs go to `OUTPUT_DIR/04_attribution_validation/`:
 
 | File | Contents |
 |---|---|
 | `summary.csv` | Per data set, feature set, method, truth type, population and scope: mean and MC SE of each metric, AUCs and runtime; `primary` marks each data set's own population with mission era included |
 | `per_run.csv` | Long format, one row per replicate, data set, feature set, method, truth type, population and scope: metrics, seed, super learner weights and cross-validated log loss per learner, AUCs, efficiency error, explained events, runtime; for Ng-style, the share of records excluded and the rescaling factor's median, maximum and share above 50 |
-| `contrasts.csv` | Paired order and value-function effects, mean, MC SE, 95% interval and robust/truth-dependent classification |
+| `contrasts.csv` | Paired order and value-function effects, mean, MC SE, 95% interval and robust / inconclusive / truth-dependent classification |
 | `oracle_decomposition.csv` | Per method, replicate (1–10), data set, truth type and population: τ_b of oracle and fitted against truth, and fitted against oracle (τ_b and L1) |
 | `tie_groups.csv` | Tie groups of the truth under each rule |
 | `ng_convergence.csv` | Ng-style convergence study |
@@ -254,7 +257,7 @@ Each replicate × data set × feature set is one cell, seeded on its own and run
 - **Tied effects:** treated as tied in τ_b and top-k recovery; margin ties chain between neighbours, MCSE ties use the combined error.
 - **Weighted τ:** disagreements at the top cost more than at the bottom. **L1 distance:** compares shares.
 - **True model copy:** reproduces simcausal's records node by node; the true sampler fixes a coalition and propagates only downstream.
-- **Paired contrasts:** robust only when both co-primary truths agree.
+- **Paired contrasts:** robust only when both co-primary truths agree; inconclusive when neither interval excludes zero.
 - **Interventional SHAP:** credits an ancestor acting through a model feature, gives zero to an irrelevant feature, and is efficient.
 - **Ng weights:** zero for non-ancestors, local accuracy; pre-rescaling attributions sum to the weighted total and rescale to the reported values.
 - **Shapley estimator:** averaging over all orders reproduces exact Shapley values.
@@ -271,9 +274,9 @@ Each replicate × data set × feature set is one cell, seeded on its own and run
 
 **Committed.** Code, configuration, seeds and the frozen calibration (`01_data_generation/config`), plus the small files that are the source data for the paper's tables and figures:
 - `02_data/`: `data_summary.csv` (realized prevalence, era share and selection-induced correlation per replicate), `feature_sets.csv`, `truth_values.csv`, `truth_binary_checks.csv` and `provenance.txt`.
-- `outputs/03_shape_validation/` and `outputs/04_attribution_validation/`: the summary, per-replicate and per-run tables, and per-edge and per-implication results. Each folder's `provenance.txt` records the code commit and data config hash.
+- `outputs/03_shape_validation/` and `outputs/04_attribution_validation/`: the summary, per-replicate and per-run tables, and per-edge and per-implication results. Each folder's `provenance.txt` records the code commit and data config hash. For attribution validation this includes `summary.csv`, `per_run.csv`, `contrasts.csv`, `oracle_decomposition.csv`, `tie_groups.csv`, `importance.csv` and `ng_convergence.csv`; `units/` (shape) and `cells/` and `values.csv.gz` (attribution) are not committed.
 
-**Archived, not committed.** The 50 replicate data sets per data set (about 360 MB as CSV), the per-cell results and the per-record attributions (`values.csv.gz`) are deposited in a DOI-minting repository with the tagged release: <!-- TO BE WRITTEN BY THE AUTHOR: DOI and repository at submission -->.
+**Archived, not committed.** The 50 replicate data sets per data set (about 390 MB as CSV), the per-cell results and the per-record attributions (`values.csv.gz`) are deposited in a DOI-minting repository with the tagged release: <!-- TO BE WRITTEN BY THE AUTHOR: DOI and repository at submission -->.
 
 **Regenerating.** The data are fully determined by the config and seeds; `make data` rebuilds them and every analysis refuses to run on data from a different config hash. Check `02_data/provenance.txt` against the archived copy before comparing results across machines, because random number generation can differ across platforms.
 

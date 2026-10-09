@@ -430,8 +430,9 @@ def summarize(per_run: pd.DataFrame) -> pd.DataFrame:
 def paired_contrasts(per_run: pd.DataFrame, z: float = 1.96) -> pd.DataFrame:
     """Order effect tau_b(O) - tau_b(S) and value-function effect tau_b(I) - tau_b(O), paired within replicate.
 
-    A contrast is robust when it has the same sign, with a 95% interval excluding zero, under both co-primary truths
-    (per_unit and pop) for the data set's own population; otherwise truth-dependent.
+    Classification, over the data set's own population: **robust** when both co-primary truths (per_unit and pop)
+    give the same sign with a 95% interval excluding zero; **inconclusive** when both intervals include zero;
+    **truth_dependent** otherwise (opposite signs, or only one truth excludes zero).
     """
     pr = per_run[per_run["scope"] == "with_era"]
     key = ["dataset", "feature_set", "truth_type", "population"]
@@ -454,9 +455,10 @@ def paired_contrasts(per_run: pd.DataFrame, z: float = 1.96) -> pd.DataFrame:
         co = g[g["truth_type"].isin(["per_unit", "pop"])]
         if len(co) < 2:
             return "incomplete"
-        excl = ((co["ci_low"] > 0) | (co["ci_high"] < 0)).all()
-        same = np.sign(co["mean"]).nunique() == 1
-        return "robust" if excl and same else "truth_dependent"
+        excl = (co["ci_low"] > 0) | (co["ci_high"] < 0)
+        if not excl.any():
+            return "inconclusive"
+        return "robust" if excl.all() and np.sign(co["mean"]).nunique() == 1 else "truth_dependent"
 
     cls = out.groupby(["dataset", "feature_set", "contrast", "population"]).apply(classify, include_groups=False)
     out = out.merge(cls.rename("classification").reset_index(), on=["dataset", "feature_set", "contrast", "population"])
