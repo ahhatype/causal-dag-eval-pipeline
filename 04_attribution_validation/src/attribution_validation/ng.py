@@ -1,4 +1,4 @@
-"""Ng-style causal SHAP, after Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
+"""Causal predictive SHAP, after Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
 
 Attribution phi_i = gamma_i * Shapley_i(v_c), rescaled for local accuracy. The Shapley values of the causal value
 function v_c are estimated from sampled feature orders (antithetic pairs), with common random numbers across the

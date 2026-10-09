@@ -50,19 +50,24 @@ oracle:
   background: 128
   seed: 20261300
 
-# Ng-style convergence on phi: two independent halves per order budget, replicate 1 of each data set.
+# Causal predictive SHAP convergence on phi: two independent halves per order budget, replicate 1 of each data set.
 ng_convergence:
-  orders: [150, 300]
+  orders: [64, 150, 300]
   min_tau_b: 0.9
   min_correlation: 0.95
   max_budget_factor: 4       # keep doubling past the last budget until it passes or exceeds this x current runtime
   seed: 20261400
 
-# ConfoundingSHAP (Brockschmidt et al. 2026): not yet run; the data-generating changes it needs are in place.
+# ConfoundingSHAP (Brockschmidt et al. 2026), run by run_confounding_shap.py on both confounded drugs.
 confounding_shap:
-  enabled: false
   treatments: [k_citrate, bisphosphonates]
   datasets: [reference_subsample, astronaut_set]
   replicates: 10
-  budget: 64                 # coalitions, shapiq RegressionMSR
-  tabpfn_version: v2.5
+  budget: 64                 # coalitions per run, shapiq RegressionMSR (exact computation when budget >= 2^covariates)
+  n_estimators: 1            # TabPFN estimators per fit, as in the paper's synthetic experiments
+  proxy_model: tree          # RegressionMSR proxy; shapiq's default xgboost segfaults alongside torch on this Mac
+  model_version: v2.5        # the paper's model; needs licence acceptance and a Hugging Face login (see README)
+  reference:                 # reference credits from the true model: records simulated, permutations, seed
+    records: 50000
+    permutations: 100
+    seed: 20261500

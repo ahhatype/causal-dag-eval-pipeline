@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,33 @@ def env_dir(key: str, default: str) -> Path:
                 break
     path = Path(value)
     return path if path.is_absolute() else REPO / value.removeprefix("./")
+
+
+# Tokens read from .env by name, never printed: environment variable that libraries expect -> names accepted in .env.
+_SECRET_KEYS = {"TABPFN_TOKEN": ("TABPFN_TOKEN", "TabPFNAPI"), "HF_TOKEN": ("HF_TOKEN", "HuggingFace", "HUGGINGFACE_TOKEN")}
+
+
+def load_secret_env(env_file: Path | None = None) -> list[str]:
+    """Export the TabPFN and Hugging Face tokens from .env to the environment if they are set there and not already
+    exported. Only these named keys are read, and their values are never logged. Returns the variables set."""
+    env = env_file or REPO / ".env"
+    if not env.exists():
+        return []
+    values = {}
+    for line in env.read_text().splitlines():
+        m = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$", line)
+        if m:
+            values[m.group(1)] = m.group(2).strip().strip("'\"")
+    done = []
+    for var, names in _SECRET_KEYS.items():
+        if os.environ.get(var):
+            continue
+        for name in names:
+            if values.get(name):
+                os.environ[var] = values[name]
+                done.append(var)
+                break
+    return done
 
 
 @dataclass(frozen=True)

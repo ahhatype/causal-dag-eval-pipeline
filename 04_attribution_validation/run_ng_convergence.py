@@ -1,9 +1,10 @@
-"""Usage: uv run python run_ng_convergence.py [--workers N]
+"""Usage: uv run python run_ng_convergence.py [--workers N] [--orders 64,150]
 
-Ng-style convergence on phi (replicate 1 of each data set, both feature sets): two independent halves at each order
+Causal predictive SHAP convergence on phi (replicate 1 of each data set, both feature sets): two independent halves at each order
 budget, compared by the correlation of per-feature mean |phi|, its largest absolute difference, and tau-b. If the last
 configured budget fails, it is doubled until it passes or a run exceeds `max_budget_factor` times the runtime at the
-production budget."""
+production budget. `--orders` replaces the configured budgets; rows for the budgets it runs replace the same
+rows in an existing ng_convergence.csv, and other rows are kept."""
 
 import argparse
 import time
@@ -61,8 +62,11 @@ def main() -> None:
     here = Path(__file__).resolve().parent
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--orders", help="comma-separated order budgets, replacing ng_convergence.orders")
     a = ap.parse_args()
     params = yaml.safe_load((here / "config" / "params.yaml").read_text())
+    if a.orders:
+        params["ng_convergence"]["orders"] = [int(x) for x in a.orders.split(",")]
     data_dir = D.env_dir("DATA_DIR", "./02_data")
     D.check_data_current(data_dir, D.load_generation_config())
     jobs = [(params, data_dir, ds, fs) for ds in params["datasets"] for fs in params["feature_sets"]]
@@ -71,7 +75,14 @@ def main() -> None:
     out = D.env_dir("OUTPUT_DIR", "./outputs") / "04_attribution_validation"
     out.mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(rows)
-    df.to_csv(out / "ng_convergence.csv", index=False)
+    f = out / "ng_convergence.csv"
+    if a.orders and f.exists():
+        old = pd.read_csv(f)
+        key = ["dataset", "feature_set", "orders"]
+        old = old[~old.set_index(key).index.isin(df.set_index(key).index)]
+        df = pd.concat([old, df], ignore_index=True)
+    df = df.sort_values(["dataset", "feature_set", "orders"], ignore_index=True)
+    df.to_csv(f, index=False)
     print(df.to_string())
 
 

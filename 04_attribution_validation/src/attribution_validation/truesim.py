@@ -155,12 +155,29 @@ class TrueSCM:
         u = self.noise(n, rng)
         return pd.DataFrame({**self.simulate(u), **u})
 
+    def propensity(self, drug: str, v: Mapping[str, np.ndarray]) -> np.ndarray:
+        """P(drug = 1 | its parents) for each record, from the generating equation."""
+        r = self.rule[drug]
+        if r == "uptake_logit":
+            a60, a00 = (float(x) for x in self.cal["uptake"][drug])
+            return _expit(np.where(v["medical_prevention_capability"] > 0, a00, a60) + self._linear(drug, v))
+        if r == "era_prob":
+            a, b = self.p["uptake"][drug]
+            return a + (b - a) * (v["medical_prevention_capability"] > 0)
+        raise ValueError(f"{drug} is not a drug node")
+
+    def selected(self, v: Mapping[str, np.ndarray], u: Mapping[str, np.ndarray]) -> np.ndarray:
+        """Astronaut selection: records retained at baseline."""
+        s = self.p["selection"]
+        return u["U_selection"] < _expit(self.cal["selection_alpha"] + s["b_individual_factors"] * v["individual_factors"]
+                                         + s["b_fitness"] * v["pre_flight_fitness"])
+
     def outcome_probability(self, v: Mapping[str, np.ndarray]) -> np.ndarray:
         return _expit(self.cal["logit"][OUTCOME] + self._linear(OUTCOME, v))
 
 
 class TrueSampler:
-    """Ng-style sampler using the true equations: features outside a coalition are generated in causal order with the
+    """Causal predictive SHAP sampler using the true equations: features outside a coalition are generated in causal order with the
     coalition's features fixed. Same interface as ng.CausalSampler."""
 
     def __init__(self, scm: TrueSCM, features: list[str]):

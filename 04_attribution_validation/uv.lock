@@ -61,8 +61,8 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.5,<2" },
     { name = "scipy", specifier = ">=1.12,<2" },
     { name = "shap", specifier = ">=0.46,<0.53" },
-    { name = "shapiq", extras = ["proxy"], specifier = ">=1.7,<2" },
-    { name = "tabpfn", specifier = ">=9.1,<10" },
+    { name = "shapiq", extras = ["proxy"], specifier = "==1.7.0" },
+    { name = "tabpfn", specifier = "==9.1.0" },
     { name = "threadpoolctl", specifier = ">=3,<4" },
 ]
 
