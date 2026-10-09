@@ -10,20 +10,42 @@ _(Overview to be written.)_
 
 ## Setup
 
-R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python (3.12), managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`; the lockfile also pins `tabpfn` and `shapiq`, installed for ConfoundingSHAP, which is not yet run. TabPFN-2.5 weights are licensed non-commercially and need a free Prior Labs login: accept the licence at ux.priorlabs.ai and set `TABPFN_TOKEN` before running ConfoundingSHAP.
+R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python (3.12), managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`; the lockfile also pins `tabpfn` and `shapiq`, used by ConfoundingSHAP. TabPFN-2.5 weights (the model the paper used) are gated and licensed non-commercially; see [TabPFN-2.5 access](#tabpfn-25-access) below before running ConfoundingSHAP with that model.
 
 ```bash
 Rscript -e 'renv::restore()'   # install the pinned R packages
 (cd 04_attribution_validation && uv sync)   # install the pinned Python packages
-cp .env.example .env           # then add your API key; .env is git-ignored
+cp .env.example .env           # then fill in the settings below; .env is git-ignored and never committed
 make data                      # generate the data sets
 make shape                     # structural validation on the generated data
 make attribution               # attribution validation on the generated data
-make convergence               # Ng-style convergence study (after make attribution)
+make convergence               # causal predictive SHAP convergence study (after make attribution)
+make confounding               # ConfoundingSHAP reference credits, then the TabPFN runs
 make test                      # run all tests
 ```
 
 `DATA_DIR` in `.env` (default `./02_data`) sets where generated files are written; the full data are git-ignored (see [Data and results availability](#data-and-results-availability)).
+
+### Settings in `.env`
+
+| Key | Used for |
+|---|---|
+| `DATA_DIR` (default `./02_data`), `OUTPUT_DIR` (default `./outputs`) | Where generated data and analysis outputs are written. Read by every module. |
+| `TabPFNAPI` (also accepted: `TABPFN_TOKEN`) | Your Prior Labs API key. Used only by ConfoundingSHAP with TabPFN-2.5. |
+| `HuggingFace` (also accepted: `HF_TOKEN`) | A Hugging Face read token. Used only by ConfoundingSHAP with TabPFN-2.5. Not needed if you have run `hf auth login`. |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`, `RANDOM_SEED`, `LOG_LEVEL` | Not read by this pipeline's code. Seeds are in each module's `config/params.yaml`. |
+
+Only the named keys above are read, by name; values are never printed or logged. A value already exported in your shell is not overridden. `.env.example` lists every key with empty values; never put real values in it.
+
+### TabPFN-2.5 access
+
+ConfoundingSHAP (Brockschmidt et al. 2026) used TabPFN-2.5, whose weights are gated and licensed non-commercially. With `tabpfn` 9.1.0 three things are needed, once:
+
+1. **A Hugging Face account that can read the gated repository.** Create a read token (Settings → Access Tokens), then either run `uv run hf auth login` in `04_attribution_validation` and paste it, or put it in `.env` as `HuggingFace`.
+2. **A Prior Labs account and API key.** Register and log in at https://ux.priorlabs.ai, copy the API key from the account page, and put it in `.env` as `TabPFNAPI`.
+3. **Accept the licence on the Prior Labs site.** At https://ux.priorlabs.ai open the Licenses tab and accept the TabPFN-2.5 licence (tabpfn-2.5-license-v1.1). Having the key and the Hugging Face login is not enough: the first run fails with "TabPFN requires a one-time license acceptance" until this is done.
+
+Check without running anything heavy: `uv run python -c "from attribution_validation.data import load_secret_env; load_secret_env(); from tabpfn import browser_auth as b; from tabpfn.settings import settings; t=b.get_cached_token(); print(b.verify_token(t, settings.tabpfn.auth_api_url), b.check_license_accepted(t, settings.tabpfn.auth_api_url, b._get_license_name('tabpfn_2_5')))"` should print `True True`. The first fit then downloads the weights into the Hugging Face cache. TabPFN-2 weights (Apache 2.0 with attribution) need none of this, and `--model-version v2` selects them; the model version is recorded in every output row. The pipeline sets `TABPFN_NO_BROWSER`, so it never opens a browser: it fails with a clear error instead.
 
 ## Data generation
 
@@ -188,11 +210,11 @@ Code in [04_attribution_validation/](04_attribution_validation/) asks whether at
    - Library: main-terms logistic regression, L2-penalized logistic regression, random forest, gradient boosting.
    - Weights: a convex combination chosen to minimize 10-fold cross-validated log loss, then the learners are refit on all training data.
    - Records are split 70/30, stratified by outcome. Held-out AUC is reported next to the AUC of the true outcome probability. That bounds what a model can reach on the ancestor set; with all features, outcome descendants let a model exceed it.
-4. **Explained records:** within a replicate and data set, both feature sets use the same split, and every method explains the same 64 held-out records, drawn at random, against the same 128 training records as background. Records are not swapped to guarantee outcome events; runs with fewer than 4 events among them are flagged (`explained_events_low`). All attributions are on the probability scale. Standard, ordering-only and interventional attributions are checked to sum to the model's prediction for each record; Ng-style attributions are rescaled to do so.
+4. **Explained records:** within a replicate and data set, both feature sets use the same split, and every method explains the same 64 held-out records, drawn at random, against the same 128 training records as background. Records are not swapped to guarantee outcome events; runs with fewer than 4 events among them are flagged (`explained_events_low`). All attributions are on the probability scale. Standard, ordering-only and interventional attributions are checked to sum to the model's prediction for each record; causal predictive SHAP attributions are rescaled to do so.
 5. **Methods:**
    - **Standard SHAP** (`standard.py`): shap's permutation explainer, 64 feature orders (32 antithetic pairs), background features filled in independently of the graph.
    - **Ordering-only asymmetric SHAP** (`ordering.py`), a marginal value function with causal order: the same graph-consistent orders as interventional SHAP, but features outside a coalition are taken from the background sample, as in standard SHAP. Comparing it with the other two separates the effect of respecting the graph's order from the effect of propagating interventions.
-   - **Ng-style causal SHAP** (`ng.py`), after Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
+   - **Causal predictive SHAP** (`ng.py`), after Ng et al. (arXiv:2509.00846), with the analysis graph supplied in place of PC + IDA.
      - Each edge's strength is the |coefficient| of the parent in one linear regression of the child on all its parents.
      - A feature's causal weight is the normalized sum, over its directed paths to the outcome, of the product of edge strengths. Non-ancestors get zero.
      - The causal value of a coalition averages the model over 64 draws of the other features in graph order: roots from their empirical distribution, continuous features from a linear and binary features from a logistic regression on their feature parents.
@@ -204,7 +226,7 @@ Code in [04_attribution_validation/](04_attribution_validation/) asks whether at
      - 64 feature orders are sampled uniformly from the orders consistent with ancestry in the analysis graph, using a Markov chain of adjacent swaps.
 6. **Oracle reference** (`truesim.py`): on the ancestor set, for replicates 1–10 of every data set, each method is rerun with the true model in place of the fitted one, on the same explained records.
    - The predictor is the true outcome probability, P(nephrolithiasis | individual factors, mineralized renal material); both parents are observed members of the ancestor set (checked before the run).
-   - Standard and ordering-only SHAP use 128 background records drawn from 20,000 simulated from the true model. Ng-style SHAP draws out-of-coalition features from the true structural equations, with path weights from that simulated population. Interventional SHAP uses the true structural equations and the true noise of those background records.
+   - Standard and ordering-only SHAP use 128 background records drawn from 20,000 simulated from the true model. Causal predictive SHAP draws out-of-coalition features from the true structural equations, with path weights from that simulated population. Interventional SHAP uses the true structural equations and the true noise of those background records.
    - `truesim.py` is a Python copy of the generating equations; a test checks it reproduces simcausal's records node by node.
    - This separates the estimand gap (oracle against truth) from estimation error (fitted against oracle).
 7. **Evaluation** (`evaluation.py`): mean |SHAP| over the explained records gives each feature's importance. On the 16 ancestors in every run, against every truth type (per-unit, population-scaled, record-level) and both populations (source, selected), with mission era included (primary) and excluded:
@@ -215,8 +237,17 @@ Code in [04_attribution_validation/](04_attribution_validation/) asks whether at
    - The proximity bias index: importance-weighted mean distance to the outcome under the truth minus under the method. Positive means credit is pooled near the outcome.
    - All-features runs also report the non-ancestor credit share.
    - Paired contrasts within replicate: the order effect τ_b(ordering-only) − τ_b(standard) and the value-function effect τ_b(interventional) − τ_b(ordering-only). A contrast is **robust** if both co-primary truths give the same sign with a 95% interval excluding zero (this takes precedence); otherwise **truth-dependent** if the truths substantively disagree (opposite signs with both intervals excluding zero, or a within-replicate paired difference between the truths' contrasts, per-unit minus population-scaled, whose 95% interval excludes zero); otherwise **inconclusive**, which includes one truth excluding zero and the other not. Record-level rows are a sensitivity and are not classified.
-8. **Ng-style convergence** (`run_ng_convergence.py`): on replicate 1 of each data set and feature set, two independent halves at 150 and 300 orders are compared by the correlation of per-feature mean |φ|, its largest difference and τ_b (criterion: τ_b ≥ 0.9 and correlation ≥ 0.95). If 300 fails, the budget is doubled until it passes or a run exceeds 4 times the production runtime. Both budgets passed in all six cells; production runs use 64 orders, which this study does not test.
-9. **ConfoundingSHAP** (Brockschmidt et al. 2026): not yet run. The confounded drugs in the data-generating process are in place; settings are reserved in `config/params.yaml` (`confounding_shap`, disabled). <!-- TO BE ADDED: ConfoundingSHAP method and results -->
+8. **Causal predictive SHAP convergence** (`run_ng_convergence.py`): on replicate 1 of each data set and feature set, two independent halves at 64 (production), 150 and 300 orders are compared by the correlation of per-feature mean |φ|, its largest difference and τ_b (criterion: τ_b ≥ 0.9 and correlation ≥ 0.95). If 300 fails, the budget is doubled until it passes or a run exceeds 4 times the production runtime. All budgets passed in all six cells, including 64, the production budget (`--orders 64` runs a single budget and merges it into the table).
+9. **ConfoundingSHAP** (Brockschmidt et al. 2026; `confounding.py`, `reference_key.py`, `run_confounding_shap.py`): which measured covariates carry the confounding of one treatment's effect on the outcome. Run separately for each of the two confounded drugs (K+ citrate and bisphosphonates), on the reference subsample and the astronaut-set, replicates 1–10.
+   - **Game:** the signed global game v(S) = −E[δ_S − τ_S] (the contrast adjusted for S only, minus the fully adjusted effect projected onto S), as shapiq 1.7.0's released `GlobalConfoundingXAI`: one TabPFN S-learner of the outcome on (X_S, A) per coalition, one estimator, target power transform disabled (the paper's Supplement D). The credits sum to the crude contrast minus the fully adjusted effect.
+   - **Covariates:** the pretreatment ancestors of the outcome, excluding the treatment, its descendants and the other drugs (11 for K+ citrate, 10 for bisphosphonates).
+   - **Credits:** 64 coalitions per run by shapiq's RegressionMSR (exact computation when the budget covers all 2^p coalitions). The proxy is a decision tree: shapiq's default xgboost proxy segfaults in the same process as torch on this machine (two OpenMP runtimes), and the proxy affects only the estimator's variance.
+   - **TabPFN model:** `confounding_shap.model_version`, TabPFN-2.5 as in the paper (access steps in Setup, [TabPFN-2.5 access](#tabpfn-25-access)); every row of `confounding_runs.csv` states the model version used.
+   - **Reading the credits:** a covariate's credit is the bias it removes on average over adjustment orders. A treatment-only covariate can get a negative credit (bias amplification), a collider a positive one, a zero credit is not proof of innocence, and the set is assumed sufficient. Credits are on the risk scale (the outcome is binary).
+   - **Metrics against the DAG:** confounder mass (share of absolute credit on the true confounders) and confounder recovery (share of the confounders among the top-|C| covariates), the paper's Supplement E metrics, for two label sets: direct common causes (parents of the treatment that reach the outcome) and all common causes (adds upstream causes such as hydration and water intake, whose effect on the treatment runs through urine concentration). Labels are an approximation of what the game rewards.
+   - **Reference credits** (`run_confounding_shap.py key`): the game computed from the true model on 50,000 simulated records (source and selected populations). The true propensity and potential-outcome probabilities are known for every record, so δ_S is a smoothing of noise-free quantities (gradient boosting); credits are estimated from 100 random permutations. v(all) is zero for the exact game, so its value shows the smoother's error.
+   - **Results:** the 40 runs took 1.5 hours in total (about 2.3 minutes each on CPU). v(all) is exactly zero in every run, as the game requires. See the notes for the results and for how to read mass and recovery against chance.
+   - **Expected difficulty at n = 900:** the bias to be shared out is +0.052 for K+ citrate (about 1.6 sampling standard errors) and about zero for bisphosphonates, where the two confounders' effects cancel. Noisy credits are expected and are part of what is tested.
 
 Settings (library folds, split, explained records, background size, permutations, Monte Carlo budgets, order sampler, seeds) are in `config/params.yaml`.
 
@@ -227,7 +258,9 @@ make attribution                            # or: cd 04_attribution_validation &
 uv run python run_all.py --resume           # continue an interrupted run
 uv run python run_all.py --fresh            # discard saved cells and start again
 uv run python run_all.py --replicates 1 --datasets reference_subsample --feature-sets ancestor --workers 1   # one cell
-uv run python run_ng_convergence.py         # Ng-style convergence study (or: make convergence)
+uv run python run_ng_convergence.py         # causal predictive SHAP convergence study (or: make convergence)
+uv run python run_confounding_shap.py key   # ConfoundingSHAP reference credits from the true model
+uv run python run_confounding_shap.py run --model-version v2   # ConfoundingSHAP on the replicates (--resume / --fresh)
 ```
 
 Each replicate × data set × feature set is one cell, seeded on its own and run single-threaded, so results do not depend on the number of workers (7 by default). Finished cells are kept in `cells/`. A later run refuses to touch them unless given `--resume` (continue, only if settings and code are unchanged) or `--fresh` (discard). A failed cell is logged and the others continue; outputs are combined once every cell is complete. On 7 workers of an 8-core laptop the full design (300 cells) took about 10 hours 20 minutes of wall-clock time; typical cells take 5–15 minutes (median 8), the all-features cells longest. The convergence study takes about 35 minutes. Recorded per-method seconds are wall-clock, so they include any time the machine was asleep. Outputs go to `OUTPUT_DIR/04_attribution_validation/`:
@@ -235,13 +268,15 @@ Each replicate × data set × feature set is one cell, seeded on its own and run
 | File | Contents |
 |---|---|
 | `summary.csv` | Per data set, feature set, method, truth type, population and scope: mean and MC SE of each metric, AUCs and runtime; `primary` marks each data set's own population with mission era included |
-| `per_run.csv` | Long format, one row per replicate, data set, feature set, method, truth type, population and scope: metrics, seed, super learner weights and cross-validated log loss per learner, AUCs, efficiency error, explained events, runtime; for Ng-style, the share of records excluded and the rescaling factor's median, maximum and share above 50 |
+| `per_run.csv` | Long format, one row per replicate, data set, feature set, method, truth type, population and scope: metrics, seed, super learner weights and cross-validated log loss per learner, AUCs, efficiency error, explained events, runtime; for causal predictive SHAP, the share of records excluded and the rescaling factor's median, maximum and share above 50 |
 | `contrasts.csv` | Paired order and value-function effects, mean, MC SE, 95% interval, the paired difference between truths (`truth_diff_*`), and the robust / truth-dependent / inconclusive classification; `role` marks record-level rows as sensitivity |
 | `oracle_decomposition.csv` | Per method, replicate (1–10), data set, truth type and population: τ_b of oracle and fitted against truth, and fitted against oracle (τ_b and L1) |
 | `tie_groups.csv` | Tie groups of the truth under each rule |
-| `ng_convergence.csv` | Ng-style convergence study |
+| `ng_convergence.csv` | causal predictive SHAP convergence study |
+| `confounding_credits.csv`, `confounding_runs.csv`, `confounding_summary.csv` | ConfoundingSHAP: credit of every covariate per replicate, data set and drug; per run: confounder mass and recovery (both label sets), v(∅), v(all), crude contrast, adjusted effect, TabPFN model version, budget, runtime; per data set and drug: means and MC SEs |
+| `confounding_reference_credits.csv`, `confounding_reference_meta.json` | Reference credits from the true model (source and selected populations) and their diagnostics (ATE, crude contrast, v(∅), v(all)) |
 | `importance.csv` | Each feature's importance in every run |
-| `values.csv.gz` | Signed attribution of every feature for every explained record and run (oracle runs as `<method>_oracle`), with the record's outcome; for Ng-style, each record's Shapley total, weighted (pre-rescaling) total, rescaling factor and pre-rescaling attributions (`pre_<feature>`) |
+| `values.csv.gz` | Signed attribution of every feature for every explained record and run (oracle runs as `<method>_oracle`), with the record's outcome; for causal predictive SHAP, each record's Shapley total, weighted (pre-rescaling) total, rescaling factor and pre-rescaling attributions (`pre_<feature>`) |
 | `provenance.txt` | Git commit, code hash, data config hash, package versions and settings |
 | `cells/` | Per-cell results and the run's settings manifest |
 
@@ -269,6 +304,7 @@ Each replicate × data set × feature set is one cell, seeded on its own and run
 - **End to end:** one run on generated data with small budgets, including the oracle.
 - **Parallel runs:** identical to sequential.
 - **Cell directory:** never reused with changed settings or code, never cleared without `--fresh`.
+- **ConfoundingSHAP:** metrics, covariate selection (no descendants, no other drugs), the exact game reproduces the collaborators' tutorial answer key (C 0.332, Z −0.020, P 0) with a linear learner, a randomized treatment gives near-zero credits, the approximator path is efficient and finds the confounder, the true propensity matches realized uptake, the reference key's identities.
 
 ## Data and results availability
 
