@@ -430,37 +430,65 @@ def summarize(per_run: pd.DataFrame) -> pd.DataFrame:
 def paired_contrasts(per_run: pd.DataFrame, z: float = 1.96) -> pd.DataFrame:
     """Order effect tau_b(O) - tau_b(S) and value-function effect tau_b(I) - tau_b(O), paired within replicate.
 
-    Classification, over the data set's own population: **robust** when both co-primary truths (per_unit and pop)
-    give the same sign with a 95% interval excluding zero; **inconclusive** when both intervals include zero;
-    **truth_dependent** otherwise (opposite signs, or only one truth excludes zero).
+    Intervals are mean +/- z SD / sqrt(n) over replicates. Classification per data set, feature set and contrast, in
+    each population (the data set's own is `primary`), from the two co-primary truths (per_unit and pop):
+
+    - **robust**: both intervals exclude zero, with the same sign (takes precedence);
+    - **truth_dependent**: the truths substantively disagree, either opposite signs with both intervals excluding
+      zero, or a within-replicate paired difference between the truths' contrasts (per_unit minus pop) whose interval
+      excludes zero;
+    - **inconclusive**: everything else, including one truth excluding zero and the other not, with no paired
+      difference.
+
+    Record-level (`rec`) rows are a sensitivity (`role`) and do not enter the classification. Every row carries the
+    paired difference between truths of its group: truth_diff_mean, truth_diff_ci_low, truth_diff_ci_high.
     """
     pr = per_run[per_run["scope"] == "with_era"]
     key = ["dataset", "feature_set", "truth_type", "population"]
     wide = pr.pivot_table(index=key + ["replicate"], columns="method", values="kendall_tau_b")
-    rows = []
+    grp = ["dataset", "feature_set", "contrast", "population"]
+
+    def interval(x: pd.Series) -> tuple[float, float, float, float, int]:
+        n = int(x.notna().sum())
+        m = float(x.mean())
+        se = float(x.std(ddof=1) / np.sqrt(n)) if n > 1 else float("nan")
+        return m, se, m - z * se, m + z * se, n
+
+    rows, diffs = [], []
     for name, (a, b) in CONTRASTS.items():
         if a not in wide or b not in wide:
             continue
         d = (wide[a] - wide[b]).dropna()
         for k, g in d.groupby(level=key):
-            n = len(g)
-            m, se = float(g.mean()), float(g.std(ddof=1) / np.sqrt(n)) if n > 1 else float("nan")
-            rows.append({**dict(zip(key, k)), "contrast": name, "mean": m, "mcse": se, "n": n,
-                         "ci_low": m - z * se, "ci_high": m + z * se})
+            m, se, lo, hi, n = interval(g)
+            rows.append({**dict(zip(key, k)), "contrast": name, "mean": m, "mcse": se, "n": n, "ci_low": lo, "ci_high": hi})
+        co = d.reset_index().rename(columns={0: "d"})
+        co = co[co["truth_type"].isin(["per_unit", "pop"])].pivot_table(
+            index=["dataset", "feature_set", "population", "replicate"], columns="truth_type", values="d").dropna()
+        for k, g in (co["per_unit"] - co["pop"]).groupby(level=["dataset", "feature_set", "population"]):
+            m, se, lo, hi, n = interval(g)
+            diffs.append({"dataset": k[0], "feature_set": k[1], "population": k[2], "contrast": name,
+                          "truth_diff_mean": m, "truth_diff_ci_low": lo, "truth_diff_ci_high": hi})
     out = pd.DataFrame(rows)
     if out.empty:
         return out
+    out = out.merge(pd.DataFrame(diffs), on=grp, how="left")
 
     def classify(g: pd.DataFrame) -> str:
         co = g[g["truth_type"].isin(["per_unit", "pop"])]
-        if len(co) < 2:
+        if len(co) < 2 or pd.isna(co["truth_diff_ci_low"]).any():
             return "incomplete"
         excl = (co["ci_low"] > 0) | (co["ci_high"] < 0)
-        if not excl.any():
-            return "inconclusive"
-        return "robust" if excl.all() and np.sign(co["mean"]).nunique() == 1 else "truth_dependent"
+        same_sign = np.sign(co["mean"]).nunique() == 1
+        if excl.all() and same_sign:
+            return "robust"
+        diff_excl = bool((co["truth_diff_ci_low"].iloc[0] > 0) or (co["truth_diff_ci_high"].iloc[0] < 0))
+        if (excl.all() and not same_sign) or diff_excl:
+            return "truth_dependent"
+        return "inconclusive"
 
-    cls = out.groupby(["dataset", "feature_set", "contrast", "population"]).apply(classify, include_groups=False)
-    out = out.merge(cls.rename("classification").reset_index(), on=["dataset", "feature_set", "contrast", "population"])
+    cls = out.groupby(grp).apply(classify, include_groups=False)
+    out = out.merge(cls.rename("classification").reset_index(), on=grp)
+    out["role"] = np.where(out["truth_type"].isin(["per_unit", "pop"]), "co_primary", "sensitivity")
     out["primary"] = out["population"] == out["dataset"].map(D.TRUTH_POPULATION)
     return out

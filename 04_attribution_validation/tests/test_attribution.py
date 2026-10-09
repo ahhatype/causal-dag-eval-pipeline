@@ -367,3 +367,69 @@ def test_paired_contrasts_classify_by_both_truths():
     flat = pd.DataFrame([{**r, "kendall_tau_b": 0.4 + (0.01 if r["method"] != "standard_shap" else 0) * (-1) ** r["replicate"]}
                          for r in rows])
     assert (paired_contrasts(flat)["classification"] == "inconclusive").all()      # no effect under either truth
+
+
+def _order_effect_runs(per_unit, pop, rec=None, reps=50, dataset="reference_subsample", population="source"):
+    """per-run frame in which the order effect equals the given per-replicate values under each truth type."""
+    rows = []
+    for r in range(1, reps + 1):
+        for tt, f in (("per_unit", per_unit), ("pop", pop), ("rec", rec or pop)):
+            for m, t in (("standard_shap", 0.3), ("ordering_only_shap", 0.3 + f(r))):
+                rows.append({"dataset": dataset, "feature_set": "ancestor", "truth_type": tt, "population": population,
+                             "scope": "with_era", "replicate": r, "method": m, "kendall_tau_b": t})
+    return pd.DataFrame(rows)
+
+
+def _co_primary_class(runs):
+    from attribution_validation.pipeline import paired_contrasts
+    c = paired_contrasts(runs)
+    cls = c[c["contrast"] == "order_effect"]["classification"].unique()
+    assert len(cls) == 1
+    return cls[0], c
+
+
+def test_contrast_class_one_interval_excludes_zero_and_null_paired_difference_is_inconclusive():
+    sign = lambda r: (-1) ** r                                    # noqa: E731
+    runs = _order_effect_runs(per_unit=lambda r: 0.012 + 0.01 * sign(r), pop=lambda r: 0.012 + 0.1 * sign(r))
+    cls, c = _co_primary_class(runs)
+    pu = c[(c["truth_type"] == "per_unit") & (c["contrast"] == "order_effect")].iloc[0]
+    po = c[(c["truth_type"] == "pop") & (c["contrast"] == "order_effect")].iloc[0]
+    assert pu["ci_low"] > 0 and po["ci_low"] < 0 < po["ci_high"]       # one truth excludes zero, the other does not
+    assert pu["truth_diff_ci_low"] < 0 < pu["truth_diff_ci_high"]      # and the truths do not differ
+    assert cls == "inconclusive"
+
+
+def test_contrast_class_robust_takes_precedence_over_a_significant_truth_difference():
+    sign = lambda r: (-1) ** r                                    # noqa: E731
+    runs = _order_effect_runs(per_unit=lambda r: 0.3 + 0.01 * sign(r), pop=lambda r: 0.1 + 0.01 * sign(r))
+    cls, c = _co_primary_class(runs)
+    d = c[(c["truth_type"] == "per_unit") & (c["contrast"] == "order_effect")].iloc[0]
+    assert d["truth_diff_mean"] == pytest.approx(0.2) and d["truth_diff_ci_low"] > 0      # significant paired difference
+    assert cls == "robust"
+
+
+def test_contrast_class_significant_truth_difference_without_robustness_is_truth_dependent():
+    sign = lambda r: (-1) ** r                                    # noqa: E731
+    runs = _order_effect_runs(per_unit=lambda r: 0.05 + 0.01 * sign(r), pop=lambda r: 0.1 * sign(r))
+    cls, c = _co_primary_class(runs)
+    po = c[(c["truth_type"] == "pop") & (c["contrast"] == "order_effect")].iloc[0]
+    d = c[(c["truth_type"] == "per_unit") & (c["contrast"] == "order_effect")].iloc[0]
+    assert po["ci_low"] < 0 < po["ci_high"] and d["truth_diff_ci_low"] > 0
+    assert cls == "truth_dependent"
+
+
+def test_contrast_class_opposite_signs_with_both_intervals_excluding_zero_is_truth_dependent():
+    sign = lambda r: (-1) ** r                                    # noqa: E731
+    runs = _order_effect_runs(per_unit=lambda r: 0.05 + 0.01 * sign(r), pop=lambda r: -0.05 + 0.01 * sign(r))
+    assert _co_primary_class(runs)[0] == "truth_dependent"
+
+
+def test_contrast_class_both_null_is_inconclusive_and_rec_rows_are_labelled_sensitivity():
+    sign = lambda r: (-1) ** r                                    # noqa: E731
+    runs = _order_effect_runs(per_unit=lambda r: 0.05 * sign(r), pop=lambda r: 0.05 * sign(r),
+                              rec=lambda r: 0.3 + 0.01 * sign(r))                   # rec would be robust, and is ignored
+    cls, c = _co_primary_class(runs)
+    assert cls == "inconclusive"
+    assert set(c.loc[c["truth_type"] == "rec", "role"]) == {"sensitivity"}
+    assert set(c.loc[c["truth_type"] != "rec", "role"]) == {"co_primary"}
+    assert {"truth_diff_mean", "truth_diff_ci_low", "truth_diff_ci_high"} <= set(c.columns)
