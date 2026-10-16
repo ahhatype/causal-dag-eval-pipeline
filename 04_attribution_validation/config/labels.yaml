@@ -1,0 +1,14 @@
+# Manuscript labels for the table scripts. Internal keys and the columns of the existing outputs are unchanged.
+truth_type:
+  per_unit: "Intervention-contrast"
+  pop: "Population-scaled"
+  rec: "Record-level"
+methods:
+  standard_shap: "Standard SHAP"
+  ordering_only_shap: "Ordering-only SHAP"
+  ng_style_shap: "Causal predictive SHAP"
+  interventional_shap: "Causal interventional SHAP"
+datasets:
+  full_set: "Full-set"
+  reference_subsample: "Reference-set"
+  astronaut_set: "Astronaut-set"

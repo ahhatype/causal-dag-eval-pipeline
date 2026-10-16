@@ -1,0 +1,36 @@
+id,name,scale,role,in_ancestor_set,in_all_features_set
+cumulative_mission_duration,cumulative mission duration,continuous,Exposure (added),TRUE,TRUE
+mission_era,mission era,binary,Era (added),TRUE,TRUE
+bisphosphonates,bisphosphonates,binary,Ancestor,TRUE,TRUE
+bone_remodeling,bone remodeling,continuous,Ancestor,TRUE,TRUE
+hydration,hydration,continuous,Ancestor,TRUE,TRUE
+individual_factors,individual factors,continuous,Ancestor,TRUE,TRUE
+k_citrate,K+ citrate,binary,Ancestor,TRUE,TRUE
+microbiome,microbiome,continuous,Ancestor,TRUE,TRUE
+mineralized_renal_material,mineralized renal material,continuous,Ancestor,TRUE,TRUE
+nutrients,nutrients,continuous,Ancestor,TRUE,TRUE
+pre_flight_fitness,pre-flight fitness,continuous,Ancestor,TRUE,TRUE
+resistive_exercise,resistive exercise,continuous,Ancestor,TRUE,TRUE
+thiazides,thiazides,binary,Ancestor,TRUE,TRUE
+urine_chemistry,urine chemistry,continuous,Ancestor,TRUE,TRUE
+urine_concentration,urine concentration,continuous,Ancestor,TRUE,TRUE
+water_intake,water intake,continuous,Ancestor,TRUE,TRUE
+medications,medications,binary,Neither,FALSE,TRUE
+percutaneous_nephrostomy,percutaneous nephrostomy,binary,Neither,FALSE,TRUE
+tamsulosin,tamsulosin,binary,Neither,FALSE,TRUE
+ultrasound,ultrasound,binary,Neither,FALSE,TRUE
+crew_capability,crew capability,continuous,Descendant,FALSE,TRUE
+detect_long_term_health_outcomes,detect long term health outcomes,binary,Descendant,FALSE,TRUE
+detect_mrm_stone,detect MRM/stone,binary,Descendant,FALSE,TRUE
+evacuation,evacuation,binary,Descendant,FALSE,TRUE
+flight_recertification,flight recertification,binary,Descendant,FALSE,TRUE
+individual_readiness,individual readiness,continuous,Descendant,FALSE,TRUE
+long_term_health_outcomes,long term health outcomes,continuous,Descendant,FALSE,TRUE
+loss_of_crew_life,loss of crew life,binary,Descendant,FALSE,TRUE
+loss_of_mission,loss of mission,binary,Descendant,FALSE,TRUE
+loss_of_mission_objectives,loss of mission objectives,binary,Descendant,FALSE,TRUE
+medical_illness,medical illness,continuous,Descendant,FALSE,TRUE
+task_performance,task performance,continuous,Descendant,FALSE,TRUE
+ultrasound_manipulation,ultrasound manipulation,binary,Descendant,FALSE,TRUE
+ureterolithiasis,ureterolithiasis,binary,Descendant,FALSE,TRUE
+urine_flow,urine flow,continuous,Descendant,FALSE,TRUE

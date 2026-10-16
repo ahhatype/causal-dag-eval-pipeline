@@ -1,0 +1,568 @@
+X,Y,Z,nonadditive_response,expected_under_selection,stat,p,effect,fit_warning,p_bh,rejected
+individual_factors,mission_era,"",FALSE,FALSE,3.04495901554401,0.0809881601085042,0.0174484826669862,"",0.835994217648425,FALSE
+microbiome,mission_era,"",FALSE,FALSE,0.286020075767738,0.592782320910078,0.00534804623628511,"",0.963099194989734,FALSE
+microbiome,individual_factors,"",FALSE,FALSE,2.79382220469415e-05,0.995782671589226,5.28566462214757e-05,"",0.999089749008409,FALSE
+nutrients,mission_era,"",FALSE,FALSE,0.507217283851787,0.476345960175433,0.00712182856194902,"",0.937520787024677,FALSE
+nutrients,individual_factors,"",FALSE,FALSE,0.388303544234077,0.533192481414831,0.00623134018792487,"",0.963099194989734,FALSE
+nutrients,microbiome,"",FALSE,FALSE,0.0938995803226135,0.759276977115356,-0.00306429664711423,"",0.989093354026907,FALSE
+pre_flight_fitness,mission_era,"",FALSE,FALSE,0.909747404752125,0.340181448548795,0.00953785103705781,"",0.92752661097855,FALSE
+pre_flight_fitness,individual_factors,"",FALSE,TRUE,0.102657254483347,0.74866383095102,-0.00320400885708509,"",0.989093354026907,FALSE
+pre_flight_fitness,microbiome,"",FALSE,FALSE,1.84511130593091,0.174353050613159,0.013582860871695,"",0.835994217648425,FALSE
+pre_flight_fitness,nutrients,"",FALSE,FALSE,1.92744580307044,0.165038157959636,-0.0138825792370644,"",0.835994217648425,FALSE
+cumulative_mission_duration,individual_factors,mission_era,TRUE,FALSE,0.0839631161761645,0.77199686923331,0.00266892026304654,"",0.989093354026907,FALSE
+cumulative_mission_duration,microbiome,mission_era,TRUE,FALSE,1.78180896144113,0.18192735320161,0.0122925943625205,"",0.838640725734251,FALSE
+cumulative_mission_duration,nutrients,mission_era,TRUE,FALSE,0.138025595289946,0.710251780808957,-0.00342149134607526,"",0.989093354026907,FALSE
+cumulative_mission_duration,pre_flight_fitness,mission_era,TRUE,FALSE,0.00967575321192271,0.921642142978548,-0.000905916470912488,"",0.989093354026907,FALSE
+medications,individual_factors,mission_era,FALSE,FALSE,1.0675783235547,0.301493086469946,-0.0234419684019538,"",0.902503251563678,FALSE
+medications,microbiome,mission_era,FALSE,FALSE,0.00713524186903669,0.932682467181843,0.00191662708786038,"",0.989093354026907,FALSE
+medications,nutrients,mission_era,FALSE,FALSE,0.0240121695078415,0.876853950839609,0.00353453980293289,"",0.989093354026907,FALSE
+medications,pre_flight_fitness,mission_era,FALSE,FALSE,0.10336505597661,0.747828205785907,0.00731311992704345,"",0.989093354026907,FALSE
+medications,cumulative_mission_duration,mission_era,FALSE,FALSE,1.40097606470044,0.236560213966132,0.0266607557298808,"",0.887525228135364,FALSE
+tamsulosin,individual_factors,mission_era,FALSE,FALSE,7.20084307521938,0.00728693399687362,0.0690814683391376,"",0.622108671213261,FALSE
+tamsulosin,microbiome,mission_era,FALSE,FALSE,0.229427436730475,0.631948700854162,0.0123285334886591,"",0.989093354026907,FALSE
+tamsulosin,nutrients,mission_era,FALSE,FALSE,0.321800494137278,0.57052761778177,-0.0146888169396005,"",0.963099194989734,FALSE
+tamsulosin,pre_flight_fitness,mission_era,FALSE,FALSE,1.13519403941064,0.286670146449035,0.0275034698856462,"",0.902503251563678,FALSE
+tamsulosin,cumulative_mission_duration,mission_era,FALSE,FALSE,0.0116596007319458,0.914011849755178,-0.00273525710441023,"",0.989093354026907,FALSE
+tamsulosin,medications,mission_era,FALSE,FALSE,0.160859750898453,0.688366195617326,0.0100705168396612,"",0.989093354026907,FALSE
+thiazides,individual_factors,mission_era,FALSE,FALSE,9.312138893775,0.00227640577105676,-0.26168960248431,"",0.258144414437837,FALSE
+thiazides,microbiome,mission_era,FALSE,FALSE,0.0383806576719508,0.8446807507626,-0.0167739412020243,"",0.989093354026907,FALSE
+thiazides,nutrients,mission_era,FALSE,FALSE,1.32748807874691,0.249252583232998,0.099541333962707,"",0.902503251563678,FALSE
+thiazides,pre_flight_fitness,mission_era,FALSE,FALSE,0.304347529306597,0.581169660177505,-0.047422383181479,"",0.963099194989734,FALSE
+thiazides,cumulative_mission_duration,mission_era,FALSE,FALSE,0.553594620712602,0.456852642498264,0.059514755432976,"",0.928442467012602,FALSE
+thiazides,medications,mission_era,FALSE,FALSE,9.4810171472916,0.00207608831455077,0.243242034436598,"",0.258144414437837,FALSE
+thiazides,tamsulosin,mission_era,FALSE,FALSE,0.261148901498245,0.609331940626347,-0.0413025861478832,"",0.967762493935963,FALSE
+ultrasound,individual_factors,mission_era,FALSE,FALSE,0.28406389723159,0.594049881810186,-0.0253176532938626,"",0.963099194989734,FALSE
+ultrasound,microbiome,mission_era,FALSE,FALSE,0.0187889927278775,0.890973135974218,0.00650972197722705,"",0.989093354026907,FALSE
+ultrasound,nutrients,mission_era,FALSE,FALSE,0.615546709776481,0.432706986688791,-0.0372799684198815,"",0.92752661097855,FALSE
+ultrasound,pre_flight_fitness,mission_era,FALSE,FALSE,0.0970164722180016,0.75543979360928,0.0147919906692137,"",0.989093354026907,FALSE
+ultrasound,cumulative_mission_duration,mission_era,FALSE,FALSE,0.000500422199365858,0.982152716409116,-0.0011526715482621,"",0.992362825292478,FALSE
+ultrasound,medications,mission_era,FALSE,FALSE,0.0292448979344044,0.864214804027595,0.00842869132163021,"",0.989093354026907,FALSE
+ultrasound,tamsulosin,mission_era,FALSE,FALSE,0.338062828991951,0.560949533638072,0.0284703696257829,"",0.963099194989734,FALSE
+ultrasound,thiazides,mission_era,FALSE,FALSE,1.12188093554732,0.2895138001093,0.0582992808606172,"",0.902503251563678,FALSE
+water_intake,individual_factors,mission_era,FALSE,FALSE,0.0922110820756643,0.761384819341999,0.00242026960073826,"",0.989093354026907,FALSE
+water_intake,microbiome,mission_era,FALSE,FALSE,0.345318789277371,0.556775087609482,-0.00468295121742091,"",0.963099194989734,FALSE
+water_intake,nutrients,mission_era,FALSE,FALSE,0.0709348224409041,0.789980511406451,0.00212249685014888,"",0.989093354026907,FALSE
+water_intake,pre_flight_fitness,mission_era,FALSE,FALSE,0.196266669030592,0.657751310482652,0.00353059553214026,"",0.989093354026907,FALSE
+water_intake,cumulative_mission_duration,mission_era,FALSE,FALSE,0.00291217469566618,0.956963393016979,0.000466970701975775,"",0.989093354026907,FALSE
+water_intake,medications,mission_era,FALSE,FALSE,2.45101129388786,0.117449177999088,-0.012940005003472,"",0.835994217648425,FALSE
+water_intake,tamsulosin,mission_era,FALSE,FALSE,1.47977986358819,0.223808967860515,0.00991140125576051,"",0.880047920906799,FALSE
+water_intake,thiazides,mission_era,FALSE,FALSE,0.00492577207478462,0.944047332574952,-0.000560611639461222,"",0.989093354026907,FALSE
+water_intake,ultrasound,mission_era,FALSE,FALSE,1.4620233467067,0.226608459351663,-0.0204045221007609,"",0.880047920906799,FALSE
+resistive_exercise,individual_factors,mission_era; pre_flight_fitness,FALSE,FALSE,0.989161116696778,0.319947491357448,-0.00651299723632045,"",0.907362526396274,FALSE
+resistive_exercise,microbiome,mission_era; pre_flight_fitness,FALSE,FALSE,0.0890991407759429,0.765325550532914,0.0019546603307398,"",0.989093354026907,FALSE
+resistive_exercise,nutrients,mission_era; pre_flight_fitness,FALSE,FALSE,0.00497789153814665,0.943752582930016,0.000462024995647297,"",0.989093354026907,FALSE
+resistive_exercise,cumulative_mission_duration,mission_era; pre_flight_fitness,FALSE,FALSE,2.17903431998639,0.139902219867458,0.0104947476056131,"",0.835994217648425,FALSE
+resistive_exercise,medications,mission_era; pre_flight_fitness,FALSE,FALSE,3.29172150568411,0.0696299819292245,-0.0123210836392689,"",0.835994217648425,FALSE
+resistive_exercise,tamsulosin,mission_era; pre_flight_fitness,FALSE,FALSE,0.355560545005574,0.550982193117777,-0.00399220263716982,"",0.963099194989734,FALSE
+resistive_exercise,thiazides,mission_era; pre_flight_fitness,FALSE,FALSE,0.269981548262876,0.603344150138887,0.0034101868835931,"",0.963150799847929,FALSE
+resistive_exercise,ultrasound,mission_era; pre_flight_fitness,FALSE,FALSE,0.465123347890767,0.495239253167521,-0.00945646314188773,"",0.942284082369076,FALSE
+resistive_exercise,water_intake,mission_era; pre_flight_fitness,FALSE,FALSE,2.65960386915685,0.102926364915804,-0.0133988129443944,"",0.835994217648425,FALSE
+bisphosphonates,individual_factors,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,1.98720373553988,0.15863356072155,0.0458583171752113,"",0.835994217648425,FALSE
+bisphosphonates,microbiome,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.896641000694217,0.343683981861128,-0.0309666754544485,"",0.92752661097855,FALSE
+bisphosphonates,nutrients,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.349738373927721,0.554261267606672,-0.019344107500241,"",0.963099194989734,FALSE
+bisphosphonates,medications,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.0214759180998954,0.88348987282463,-0.00473494917396659,"",0.989093354026907,FALSE
+bisphosphonates,tamsulosin,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.762451605560273,0.382562386295826,0.0276216456822638,"",0.92752661097855,FALSE
+bisphosphonates,thiazides,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,1.50574097556273,0.219790127703265,0.0347970843912491,"",0.880047920906799,FALSE
+bisphosphonates,ultrasound,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.00345251446378825,0.953144781118645,0.00410160513562385,"",0.989093354026907,FALSE
+bisphosphonates,water_intake,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,2.87537876611896,0.0899438105118034,0.0698753587909223,"",0.835994217648425,FALSE
+bisphosphonates,resistive_exercise,mission_era; pre_flight_fitness; cumulative_mission_duration,FALSE,FALSE,0.0466453724438907,0.829006924729098,-0.0107852249421077,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,individual_factors,mission_era; ultrasound,FALSE,FALSE,0.217234381411799,0.641155309117167,-0.0213610695988484,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,microbiome,mission_era; ultrasound,FALSE,FALSE,2.69008316106647,0.100974544002097,-0.0751405062008235,"",0.835994217648425,FALSE
+percutaneous_nephrostomy,nutrients,mission_era; ultrasound,FALSE,FALSE,5.50384450666752,0.0189747131116847,-0.108460559091096,"",0.622108671213261,FALSE
+percutaneous_nephrostomy,pre_flight_fitness,mission_era; ultrasound,FALSE,FALSE,0.117331905302763,0.731946464876696,0.0157547232955394,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,cumulative_mission_duration,mission_era; ultrasound,FALSE,FALSE,0.000390609156056598,0.98423176809421,0.000859440980569249,"",0.992362825292478,FALSE
+percutaneous_nephrostomy,medications,mission_era; ultrasound,FALSE,FALSE,0.188025260680206,0.664565282982323,-0.0190278664051359,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,tamsulosin,mission_era; ultrasound,FALSE,FALSE,3.19844344896228,0.0737083912834453,0.0743087238736531,"",0.835994217648425,FALSE
+percutaneous_nephrostomy,thiazides,mission_era; ultrasound,FALSE,FALSE,0.200103037544977,0.654637689938152,-0.0187322047390879,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,water_intake,mission_era; ultrasound,FALSE,FALSE,0.130101468728299,0.718326855867667,-0.0208238225152961,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,resistive_exercise,mission_era; pre_flight_fitness; ultrasound,FALSE,FALSE,0.0163629422295344,0.898214090380074,-0.00896110098770761,"",0.989093354026907,FALSE
+percutaneous_nephrostomy,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; ultrasound,FALSE,FALSE,2.24380315737653,0.13415066878231,0.0667047958509393,"",0.835994217648425,FALSE
+hydration,individual_factors,mission_era; water_intake,FALSE,FALSE,0.0391401044180384,0.843171358878874,0.00159219129709622,"",0.989093354026907,FALSE
+hydration,microbiome,mission_era; water_intake,FALSE,FALSE,1.53330200163327,0.215617548872526,-0.00996385666230317,"",0.880047920906799,FALSE
+hydration,nutrients,mission_era; water_intake,FALSE,FALSE,0.580513335855358,0.446111179991118,0.00613096603398962,"",0.92752661097855,FALSE
+hydration,pre_flight_fitness,mission_era; water_intake,FALSE,FALSE,0.00443120795171126,0.946926163717656,0.000535675264942142,"",0.989093354026907,FALSE
+hydration,cumulative_mission_duration,mission_era; water_intake,FALSE,FALSE,2.90985148945038,0.0880399814162714,0.0149037077197025,"",0.835994217648425,FALSE
+hydration,medications,mission_era; water_intake,FALSE,FALSE,0.0320993891546095,0.857809696512671,0.00149554383927933,"",0.989093354026907,FALSE
+hydration,tamsulosin,mission_era; water_intake,FALSE,FALSE,0.505167180210265,0.477238464265317,0.00584798528161421,"",0.937520787024677,FALSE
+hydration,thiazides,mission_era; water_intake,FALSE,FALSE,1.95703769227475,0.161830486572234,0.0112826976912146,"",0.835994217648425,FALSE
+hydration,ultrasound,mission_era; water_intake,FALSE,FALSE,1.54820591483076,0.213400491966572,-0.0212033233881454,"",0.880047920906799,FALSE
+hydration,resistive_exercise,mission_era; pre_flight_fitness; water_intake,FALSE,FALSE,0.137721963772492,0.710556273755483,0.00456125965005252,"",0.989093354026907,FALSE
+hydration,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; water_intake,FALSE,FALSE,0.954127220822556,0.328670969044808,0.00840644320592929,"",0.922556630932703,FALSE
+hydration,percutaneous_nephrostomy,mission_era; ultrasound; water_intake,FALSE,FALSE,0.51637819307507,0.472390744146439,-0.00582992058940421,"",0.937520787024677,FALSE
+bone_remodeling,individual_factors,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.252195966066211,0.615533057198827,0.00402201741910646,"",0.974880568245069,FALSE
+bone_remodeling,microbiome,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.109932692921575,0.740220776956595,0.00265513743331706,"",0.989093354026907,FALSE
+bone_remodeling,pre_flight_fitness,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,2.29088183560816,0.130135966743722,-0.0157970625271362,"",0.835994217648425,FALSE
+bone_remodeling,medications,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,4.63911390456269,0.0312511343677567,0.0178882790936309,"",0.622108671213261,FALSE
+bone_remodeling,tamsulosin,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.0829515131772496,0.773336754323892,0.00235788438740395,"",0.989093354026907,FALSE
+bone_remodeling,thiazides,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.44984786025816,0.502407211947849,0.00538353299000661,"",0.945746165882615,FALSE
+bone_remodeling,ultrasound,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.0240279573299631,0.876813796791863,0.0026283117529194,"",0.989093354026907,FALSE
+bone_remodeling,water_intake,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates,FALSE,FALSE,0.49166933514789,0.483183595825063,-0.00704634706763268,"",0.937520787024677,FALSE
+bone_remodeling,percutaneous_nephrostomy,mission_era; nutrients; cumulative_mission_duration; ultrasound; resistive_exercise; bisphosphonates,FALSE,FALSE,0.14723305311054,0.701193700420786,0.00309894117054727,"",0.989093354026907,FALSE
+bone_remodeling,hydration,mission_era; nutrients; cumulative_mission_duration; water_intake; resistive_exercise; bisphosphonates,FALSE,FALSE,1.16666564586922,0.280087421207753,-0.0107492247501574,"",0.902503251563678,FALSE
+urine_concentration,mission_era,hydration,FALSE,FALSE,5.34743495590737,0.02075277920752,-0.0215411560190579,"",0.622108671213261,FALSE
+urine_concentration,individual_factors,hydration,FALSE,FALSE,0.488274285344232,0.484698117726655,0.00565069643254696,"",0.937520787024677,FALSE
+urine_concentration,microbiome,hydration,FALSE,FALSE,0.656474733295909,0.417807260637009,-0.00655191456090638,"",0.92752661097855,FALSE
+urine_concentration,nutrients,hydration,FALSE,FALSE,0.0629794944397872,0.801847233435272,0.00202941510736844,"",0.989093354026907,FALSE
+urine_concentration,pre_flight_fitness,hydration,FALSE,FALSE,0.138550906463934,0.709725878150834,0.00300996093863646,"",0.989093354026907,FALSE
+urine_concentration,cumulative_mission_duration,mission_era; hydration,FALSE,FALSE,1.90571779771562,0.167439709459867,-0.0121190887575277,"",0.835994217648425,FALSE
+urine_concentration,medications,mission_era; hydration,FALSE,FALSE,0.0142824555368861,0.904871929680176,0.0010021165441791,"",0.989093354026907,FALSE
+urine_concentration,tamsulosin,mission_era; hydration,FALSE,FALSE,0.000336612585670082,0.985362029346852,0.000151659428300203,"",0.992362825292478,FALSE
+urine_concentration,thiazides,mission_era; hydration,FALSE,FALSE,0.561203638597362,0.453775684448139,-0.00607070201371762,"",0.92752661097855,FALSE
+urine_concentration,ultrasound,mission_era; hydration,FALSE,FALSE,0.667482261495024,0.41393078477771,-0.0139880935326467,"",0.92752661097855,FALSE
+urine_concentration,water_intake,mission_era; hydration,FALSE,FALSE,0.407191579990467,0.523398401234595,-0.00698227102252811,"",0.960410658576101,FALSE
+urine_concentration,resistive_exercise,mission_era; pre_flight_fitness; hydration,FALSE,FALSE,2.13033476643977,0.14440921423434,0.0180194408169343,"",0.835994217648425,FALSE
+urine_concentration,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; hydration,FALSE,FALSE,2.80974662466542,0.0936931727530458,0.0144918338774265,"",0.835994217648425,FALSE
+urine_concentration,percutaneous_nephrostomy,mission_era; ultrasound; hydration,FALSE,FALSE,0.800965016482223,0.370805002004298,-0.0072950432402911,"",0.92752661097855,FALSE
+urine_concentration,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; hydration,FALSE,FALSE,0.516772278479039,0.472221793153488,-0.00725627429061796,"",0.937520787024677,FALSE
+k_citrate,microbiome,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.563850604326944,0.452712922775317,0.0243310576030312,"",0.92752661097855,FALSE
+k_citrate,nutrients,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.0202775354791811,0.886764685051462,-0.00464074671820284,"",0.989093354026907,FALSE
+k_citrate,pre_flight_fitness,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.677145557644508,0.410571377339382,0.0269167175744406,"",0.92752661097855,FALSE
+k_citrate,cumulative_mission_duration,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.568225651180001,0.450964858018971,-0.0246056154096106,"",0.92752661097855,FALSE
+k_citrate,medications,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.0140758682728119,0.905559175760845,0.00380720743571591,"",0.989093354026907,FALSE
+k_citrate,tamsulosin,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.0728488474742335,0.787233143127035,-0.00843953042445721,"",0.989093354026907,FALSE
+k_citrate,thiazides,mission_era; individual_factors; urine_concentration,FALSE,FALSE,2.52429186987411,0.112105096297757,0.0482260963540473,"",0.835994217648425,FALSE
+k_citrate,ultrasound,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.866432019037347,0.351944974087333,0.0648600387995491,"",0.92752661097855,FALSE
+k_citrate,water_intake,mission_era; individual_factors; urine_concentration,FALSE,FALSE,0.0983743799506556,0.753789232072516,-0.0131096766025673,"",0.989093354026907,FALSE
+k_citrate,resistive_exercise,mission_era; individual_factors; pre_flight_fitness; urine_concentration,FALSE,FALSE,0.584318254207574,0.444624663532129,-0.0377377507325219,"",0.92752661097855,FALSE
+k_citrate,bisphosphonates,mission_era; individual_factors; pre_flight_fitness; cumulative_mission_duration; urine_concentration,FALSE,FALSE,0.982194516990603,0.321657615177515,0.0326912708451669,"",0.907362526396274,FALSE
+k_citrate,percutaneous_nephrostomy,mission_era; individual_factors; ultrasound; urine_concentration,FALSE,FALSE,0.0218335293966447,0.882530811311377,-0.00452593493204781,"",0.989093354026907,FALSE
+k_citrate,hydration,mission_era; individual_factors; water_intake; urine_concentration,FALSE,FALSE,0.635158291931475,0.425469507369207,-0.0369195633475388,"",0.92752661097855,FALSE
+k_citrate,bone_remodeling,mission_era; individual_factors; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; urine_concentration,FALSE,FALSE,0.0266384087217375,0.870350910981679,0.00668903713147286,"",0.989093354026907,FALSE
+urine_chemistry,individual_factors,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.0464119483985996,0.82942871073313,-0.00122127016272001,"",0.989093354026907,FALSE
+urine_chemistry,nutrients,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,2.16020351991756,0.141625930860675,0.00838153646161088,"",0.835994217648425,FALSE
+urine_chemistry,pre_flight_fitness,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.220623100409284,0.638565556744282,-0.00259657049370931,"",0.989093354026907,FALSE
+urine_chemistry,cumulative_mission_duration,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,1.16855706078422,0.279697924118721,-0.00753105077548185,"",0.902503251563678,FALSE
+urine_chemistry,medications,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.334611595211754,0.562956148803057,0.00331015902239,"",0.963099194989734,FALSE
+urine_chemistry,tamsulosin,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.0751071776321624,0.784040904530045,0.00154454855186874,"",0.989093354026907,FALSE
+urine_chemistry,ultrasound,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.341413702604768,0.559014340463358,-0.00682052602480043,"",0.963099194989734,FALSE
+urine_chemistry,water_intake,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,3.03928377760894,0.0812717677252805,-0.0123130293880411,"",0.835994217648425,FALSE
+urine_chemistry,resistive_exercise,mission_era; microbiome; pre_flight_fitness; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,2.02461351863167,0.154768293505571,-0.0120288292269633,"",0.835994217648425,FALSE
+urine_chemistry,bisphosphonates,mission_era; microbiome; pre_flight_fitness; cumulative_mission_duration; thiazides; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.145822466456593,0.702559959850079,-0.00227258513254812,"",0.989093354026907,FALSE
+urine_chemistry,percutaneous_nephrostomy,mission_era; microbiome; thiazides; ultrasound; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,0.177164739270665,0.673821226787608,-0.00233960964639535,"",0.989093354026907,FALSE
+urine_chemistry,hydration,mission_era; microbiome; thiazides; water_intake; bone_remodeling; urine_concentration; k_citrate,FALSE,FALSE,2.26093645558285,0.132673811276106,0.01186824650401,"",0.835994217648425,FALSE
+mineralized_renal_material,mission_era,urine_chemistry,FALSE,FALSE,0.477781691188284,0.489428841198068,0.00607789815842166,"",0.937520787024677,FALSE
+mineralized_renal_material,individual_factors,urine_chemistry,FALSE,FALSE,2.13065638828266,0.144378918321117,-0.0116097794274671,"",0.835994217648425,FALSE
+mineralized_renal_material,microbiome,urine_chemistry,FALSE,FALSE,0.801324047970411,0.370697795570742,0.00727366406667793,"",0.92752661097855,FALSE
+mineralized_renal_material,nutrients,urine_chemistry,FALSE,FALSE,0.2879609710144,0.591530160581144,0.00428943493877159,"",0.963099194989734,FALSE
+mineralized_renal_material,pre_flight_fitness,urine_chemistry,FALSE,FALSE,0.78722197407842,0.374941463566327,0.00705700988261193,"",0.92752661097855,FALSE
+mineralized_renal_material,cumulative_mission_duration,mission_era; urine_chemistry,FALSE,FALSE,0.0120527776016388,0.912579774062863,-0.00096936053794099,"",0.989093354026907,FALSE
+mineralized_renal_material,medications,mission_era; urine_chemistry,FALSE,FALSE,0.111013636098505,0.738993063572065,0.00274765206934614,"",0.989093354026907,FALSE
+mineralized_renal_material,tamsulosin,mission_era; urine_chemistry,FALSE,FALSE,0.338283392498852,0.560821760124539,0.00472733535279183,"",0.963099194989734,FALSE
+mineralized_renal_material,thiazides,mission_era; urine_chemistry,FALSE,FALSE,0.615404026368196,0.432760323792037,0.00625485676086168,"",0.92752661097855,FALSE
+mineralized_renal_material,ultrasound,mission_era; urine_chemistry,FALSE,FALSE,0.00183614305933588,0.965820915093359,-0.000721353762651811,"",0.989093354026907,FALSE
+mineralized_renal_material,water_intake,mission_era; urine_chemistry,FALSE,FALSE,0.791653888114524,0.373600494152753,-0.00895854989599195,"",0.92752661097855,FALSE
+mineralized_renal_material,resistive_exercise,mission_era; pre_flight_fitness; urine_chemistry,FALSE,FALSE,1.09729418088682,0.294860686243109,0.0127260988519581,"",0.902503251563678,FALSE
+mineralized_renal_material,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; urine_chemistry,FALSE,FALSE,0.098305742656521,0.753872360720414,-0.00266962672609887,"",0.989093354026907,FALSE
+mineralized_renal_material,percutaneous_nephrostomy,mission_era; ultrasound; urine_chemistry,FALSE,FALSE,0.0787558560405159,0.778990569391915,-0.00224954182151595,"",0.989093354026907,FALSE
+mineralized_renal_material,hydration,mission_era; water_intake; urine_chemistry,FALSE,FALSE,1.21574926865287,0.270196475743602,-0.0113803902233162,"",0.902503251563678,FALSE
+mineralized_renal_material,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; urine_chemistry,FALSE,FALSE,1.98444921592454,0.158922474757888,-0.0150094703429479,"",0.835994217648425,FALSE
+mineralized_renal_material,urine_concentration,hydration; urine_chemistry,FALSE,FALSE,0.28075886053557,0.596204263565073,-0.0061145090932279,"",0.963099194989734,FALSE
+mineralized_renal_material,k_citrate,mission_era; individual_factors; urine_concentration; urine_chemistry,FALSE,FALSE,0.708400848150632,0.39997520323828,-0.00722666855202496,"",0.92752661097855,FALSE
+nephrolithiasis,mission_era,individual_factors; mineralized_renal_material,FALSE,FALSE,0.621366341451903,0.430539997727934,0.0275003565615254,"",0.92752661097855,FALSE
+nephrolithiasis,microbiome,individual_factors; mineralized_renal_material,FALSE,FALSE,1.7160607274227,0.190200906531294,0.0483609059421792,"",0.860591469318669,FALSE
+nephrolithiasis,nutrients,individual_factors; mineralized_renal_material,FALSE,FALSE,0.411264197567107,0.521328545082728,0.0234548497908254,"",0.959718457993204,FALSE
+nephrolithiasis,pre_flight_fitness,individual_factors; mineralized_renal_material,FALSE,FALSE,0.947138590035138,0.33044871560978,-0.0355661133812395,"",0.922977447048007,FALSE
+nephrolithiasis,cumulative_mission_duration,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,0.00941733830313751,0.922692269205209,0.00396071065290491,"",0.989093354026907,FALSE
+nephrolithiasis,medications,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,3.41804713324837,0.0644872562793371,0.0710919276309099,"",0.826634825390925,FALSE
+nephrolithiasis,tamsulosin,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,0.488998093579539,0.48437457263698,0.0264676038199636,"",0.937520787024677,FALSE
+nephrolithiasis,thiazides,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,0.225734746009039,0.634704645459929,-0.02127967200835,"",0.989093354026907,FALSE
+nephrolithiasis,ultrasound,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,0.661206264187058,0.416134409429376,-0.060404453519613,"",0.92752661097855,FALSE
+nephrolithiasis,water_intake,mission_era; individual_factors; mineralized_renal_material,FALSE,FALSE,0.110737622547276,0.739305920787353,-0.0151754154206427,"",0.989093354026907,FALSE
+nephrolithiasis,resistive_exercise,mission_era; individual_factors; pre_flight_fitness; mineralized_renal_material,FALSE,FALSE,0.0867300781919767,0.768376086275326,-0.0164976336052157,"",0.989093354026907,FALSE
+nephrolithiasis,bisphosphonates,mission_era; individual_factors; pre_flight_fitness; cumulative_mission_duration; mineralized_renal_material,FALSE,FALSE,0.136416519111663,0.711869790674426,0.0145185652228239,"",0.989093354026907,FALSE
+nephrolithiasis,percutaneous_nephrostomy,mission_era; individual_factors; ultrasound; mineralized_renal_material,FALSE,FALSE,0.0347542201561737,0.852111616071083,-0.00734488034947454,"",0.989093354026907,FALSE
+nephrolithiasis,hydration,mission_era; individual_factors; water_intake; mineralized_renal_material,FALSE,FALSE,0.204827026677776,0.6508524997444,0.0206584106584928,"",0.989093354026907,FALSE
+nephrolithiasis,bone_remodeling,mission_era; individual_factors; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; mineralized_renal_material,FALSE,FALSE,0.0375026798019462,0.846445178788534,0.00895672868825449,"",0.989093354026907,FALSE
+nephrolithiasis,urine_concentration,individual_factors; hydration; mineralized_renal_material,FALSE,FALSE,1.4903078965126,0.222168694110804,-0.0575845219536189,"",0.880047920906799,FALSE
+nephrolithiasis,k_citrate,mission_era; individual_factors; urine_concentration; mineralized_renal_material,FALSE,FALSE,0.297869213018203,0.585221326579328,-0.0202922736955577,"",0.963099194989734,FALSE
+nephrolithiasis,urine_chemistry,mission_era; individual_factors; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; mineralized_renal_material,FALSE,FALSE,0.695036429336142,0.404456569130406,0.0600479085465111,"",0.92752661097855,FALSE
+detect_mrm_stone,mission_era,ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,1.26830950613021,0.26008405509394,-0.0753555257958919,"",0.902503251563678,FALSE
+detect_mrm_stone,individual_factors,ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.517735847922268,0.471809106043298,0.0211260752811047,"",0.937520787024677,FALSE
+detect_mrm_stone,microbiome,ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,6.23519918008242e-05,0.993699707480735,0.000228893536266538,"",0.998985344222654,FALSE
+detect_mrm_stone,nutrients,ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,2.18126506862791,0.139699589695853,0.0425065289492676,"",0.835994217648425,FALSE
+detect_mrm_stone,pre_flight_fitness,ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,1.20429068780231,0.272465791465157,0.0315036986633859,"",0.902503251563678,FALSE
+detect_mrm_stone,cumulative_mission_duration,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,2.75297757448334,0.0970734983850407,-0.0501529412000976,"",0.835994217648425,FALSE
+detect_mrm_stone,medications,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.000840255932416767,0.976874824420784,-0.000846841855198048,"",0.992362825292478,FALSE
+detect_mrm_stone,tamsulosin,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,1.31087795282474,0.252235758742339,0.0327202113391475,"",0.902503251563678,FALSE
+detect_mrm_stone,thiazides,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.148618096458449,0.699859468015907,-0.0113195503076073,"",0.989093354026907,FALSE
+detect_mrm_stone,water_intake,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,2.16530875499484,0.14115626844421,-0.0529827186659814,"",0.835994217648425,FALSE
+detect_mrm_stone,resistive_exercise,mission_era; pre_flight_fitness; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.384299577175625,0.535311110441868,0.0273024790172949,"",0.963099194989734,FALSE
+detect_mrm_stone,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,1.93081222183719,0.164669611136429,0.0419394931371681,"",0.835994217648425,FALSE
+detect_mrm_stone,percutaneous_nephrostomy,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.0052058285300518,0.942481399390748,-0.00206500212694793,"",0.989093354026907,FALSE
+detect_mrm_stone,hydration,mission_era; ultrasound; water_intake; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.0738605517381075,0.785796583633373,-0.00976925488405352,"",0.989093354026907,FALSE
+detect_mrm_stone,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; ultrasound; resistive_exercise; bisphosphonates; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,1.27193196926237,0.259404556463359,-0.0409760428719431,"",0.902503251563678,FALSE
+detect_mrm_stone,urine_concentration,ultrasound; hydration; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.306956165959491,0.579554037611106,0.0205568615885356,"",0.963099194989734,FALSE
+detect_mrm_stone,k_citrate,mission_era; individual_factors; ultrasound; urine_concentration; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,2.07509955249679,0.149720170719627,-0.0444418917173918,"",0.835994217648425,FALSE
+detect_mrm_stone,urine_chemistry,mission_era; microbiome; thiazides; ultrasound; bone_remodeling; urine_concentration; k_citrate; mineralized_renal_material; nephrolithiasis,TRUE,FALSE,0.167499018185481,0.682344141788113,-0.0231729283753798,"",0.989093354026907,FALSE
+flight_recertification,mission_era,nephrolithiasis,FALSE,FALSE,0.767559347238603,0.380973148365727,0.0288328497444911,"",0.92752661097855,FALSE
+flight_recertification,individual_factors,nephrolithiasis,FALSE,FALSE,0.00522809713766037,0.942358722811862,0.00246032161065657,"",0.989093354026907,FALSE
+flight_recertification,microbiome,nephrolithiasis,FALSE,FALSE,0.0218714890479532,0.882429481682134,-0.00494280146228384,"",0.989093354026907,FALSE
+flight_recertification,nutrients,nephrolithiasis,FALSE,FALSE,4.71084420119314,0.029972929449026,0.0726865885923617,"",0.622108671213261,FALSE
+flight_recertification,pre_flight_fitness,nephrolithiasis,FALSE,FALSE,3.3896735165481,0.0656059385230893,0.061661112250048,"",0.826634825390925,FALSE
+flight_recertification,cumulative_mission_duration,mission_era; nephrolithiasis,FALSE,FALSE,0.0293189042940867,0.864044775780508,-0.00627617023309455,"",0.989093354026907,FALSE
+flight_recertification,medications,mission_era; nephrolithiasis,FALSE,FALSE,4.99052213539835,0.0254865172975209,-0.0768885266133422,"",0.622108671213261,FALSE
+flight_recertification,tamsulosin,mission_era; nephrolithiasis,FALSE,FALSE,0.171891203933228,0.678436475373815,-0.0141835877495851,"",0.989093354026907,FALSE
+flight_recertification,thiazides,mission_era; nephrolithiasis,FALSE,FALSE,1.27940158842284,0.258010329444022,-0.0360935191960015,"",0.902503251563678,FALSE
+flight_recertification,ultrasound,mission_era; nephrolithiasis,FALSE,FALSE,0.00278595986310393,0.95790544991096,-0.00368922117672341,"",0.989093354026907,FALSE
+flight_recertification,water_intake,mission_era; nephrolithiasis,FALSE,FALSE,0.00178450721978152,0.966304642802685,-0.00177816137597814,"",0.989093354026907,FALSE
+flight_recertification,resistive_exercise,mission_era; pre_flight_fitness; nephrolithiasis,FALSE,FALSE,1.93738802918961,0.163952418669104,-0.0713488491510014,"",0.835994217648425,FALSE
+flight_recertification,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; nephrolithiasis,FALSE,FALSE,0.465476054589999,0.495075790398287,0.024526995058207,"",0.942284082369076,FALSE
+flight_recertification,percutaneous_nephrostomy,mission_era; ultrasound; nephrolithiasis,FALSE,FALSE,1.62711918213518,0.202101969593861,-0.0417931371631814,"",0.874746692822282,FALSE
+flight_recertification,hydration,mission_era; water_intake; nephrolithiasis,FALSE,FALSE,0.187703386975954,0.664834981918103,0.0180187154955814,"",0.989093354026907,FALSE
+flight_recertification,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; nephrolithiasis,FALSE,FALSE,2.3603076598265,0.124457641533552,0.0642652094442683,"",0.835994217648425,FALSE
+flight_recertification,urine_concentration,hydration; nephrolithiasis,FALSE,FALSE,0.0447584115499922,0.832448883762469,-0.00874534769556243,"",0.989093354026907,FALSE
+flight_recertification,k_citrate,mission_era; individual_factors; urine_concentration; nephrolithiasis,FALSE,FALSE,2.60905874347918,0.106254812361463,0.0587640770662219,"",0.835994217648425,FALSE
+flight_recertification,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; nephrolithiasis,FALSE,FALSE,0.296870986157046,0.585850713567036,-0.0332730934772604,"",0.963099194989734,FALSE
+flight_recertification,mineralized_renal_material,urine_chemistry; nephrolithiasis,FALSE,FALSE,0.180033289017047,0.671344634049837,0.0184177220825215,"",0.989093354026907,FALSE
+flight_recertification,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis,FALSE,FALSE,4.75121048172423,0.0292776922319947,-0.0785429461955124,"",0.622108671213261,FALSE
+ultrasound_manipulation,individual_factors,mission_era; detect_mrm_stone,FALSE,FALSE,0.0580108203130294,0.809668000212301,-0.00810021747030563,"",0.989093354026907,FALSE
+ultrasound_manipulation,microbiome,mission_era; detect_mrm_stone,FALSE,FALSE,1.55675167548816,0.212141471955706,0.0420258834481351,"",0.880047920906799,FALSE
+ultrasound_manipulation,nutrients,mission_era; detect_mrm_stone,FALSE,FALSE,0.631960518654523,0.426637093492246,-0.0269643961572168,"",0.92752661097855,FALSE
+ultrasound_manipulation,pre_flight_fitness,mission_era; detect_mrm_stone,FALSE,FALSE,0.345465851747576,0.556691092384549,0.0198596822208601,"",0.963099194989734,FALSE
+ultrasound_manipulation,cumulative_mission_duration,mission_era; detect_mrm_stone,FALSE,FALSE,0.0536000146830702,0.816913358905095,-0.00756782818871863,"",0.989093354026907,FALSE
+ultrasound_manipulation,medications,mission_era; detect_mrm_stone,FALSE,FALSE,0.751452209192394,0.386016841898115,0.0281586392716653,"",0.92752661097855,FALSE
+ultrasound_manipulation,tamsulosin,mission_era; detect_mrm_stone,FALSE,FALSE,1.03583124635406,0.308792999653181,-0.0327247107868144,"",0.902503251563678,FALSE
+ultrasound_manipulation,thiazides,mission_era; detect_mrm_stone,FALSE,FALSE,0.00679744029184803,0.934291588235895,-0.00252757930411493,"",0.989093354026907,FALSE
+ultrasound_manipulation,ultrasound,mission_era; detect_mrm_stone,FALSE,FALSE,2.05548028344674,0.151659426171973,0.111214055137681,"",0.835994217648425,FALSE
+ultrasound_manipulation,water_intake,mission_era; detect_mrm_stone,FALSE,FALSE,0.370925686303963,0.542500121702286,-0.0257840407917764,"",0.963099194989734,FALSE
+ultrasound_manipulation,resistive_exercise,mission_era; pre_flight_fitness; detect_mrm_stone,FALSE,FALSE,0.139739821709554,0.708539801795031,0.0191940990470176,"",0.989093354026907,FALSE
+ultrasound_manipulation,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; detect_mrm_stone,FALSE,FALSE,0.138208030762144,0.710069011016904,-0.0127653362544644,"",0.989093354026907,FALSE
+ultrasound_manipulation,percutaneous_nephrostomy,mission_era; ultrasound; detect_mrm_stone,FALSE,FALSE,3.72844300309953,0.0534932360864051,-0.0627463539309151,"",0.777709355410044,FALSE
+ultrasound_manipulation,hydration,mission_era; water_intake; detect_mrm_stone,FALSE,FALSE,0.673819186643414,0.411723225241684,-0.0344903210730979,"",0.92752661097855,FALSE
+ultrasound_manipulation,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; detect_mrm_stone,FALSE,FALSE,0.0103312336359522,0.919040304092673,-0.00429662676580361,"",0.989093354026907,FALSE
+ultrasound_manipulation,urine_concentration,mission_era; hydration; detect_mrm_stone,FALSE,FALSE,0.0532432126228741,0.817512983156978,0.00968002707519921,"",0.989093354026907,FALSE
+ultrasound_manipulation,k_citrate,mission_era; individual_factors; urine_concentration; detect_mrm_stone,FALSE,FALSE,0.00806704140541115,0.928432869154796,-0.00304452117810191,"",0.989093354026907,FALSE
+ultrasound_manipulation,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; detect_mrm_stone,FALSE,FALSE,10.1992038727922,0.00140501297427182,-0.19766223739166,"",0.258144414437837,FALSE
+ultrasound_manipulation,mineralized_renal_material,mission_era; urine_chemistry; detect_mrm_stone,FALSE,FALSE,1.49647336636281,0.221214790459358,0.0539894750252571,"",0.880047920906799,FALSE
+ultrasound_manipulation,nephrolithiasis,mission_era; individual_factors; mineralized_renal_material; detect_mrm_stone,FALSE,FALSE,4.74624828113792,0.0293622439353132,-0.077960615603681,"",0.622108671213261,FALSE
+ultrasound_manipulation,flight_recertification,mission_era; nephrolithiasis; detect_mrm_stone,FALSE,FALSE,0.202990718706133,0.652317577046288,-0.0151323625569881,"",0.989093354026907,FALSE
+ureterolithiasis,mission_era,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,2.12409234844654,0.144998653779991,-0.0553222206166075,"",0.835994217648425,FALSE
+ureterolithiasis,individual_factors,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,2.56308075006291,0.109385237352268,-0.0608205469345037,"",0.835994217648425,FALSE
+ureterolithiasis,microbiome,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.18215990489171,0.276916720143822,0.0405725727463248,"",0.902503251563678,FALSE
+ureterolithiasis,nutrients,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.00273813775038434,0.95826796614117,0.0019515960348369,"",0.989093354026907,FALSE
+ureterolithiasis,pre_flight_fitness,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.20323836991156,0.652119527313429,0.0168862762177592,"",0.989093354026907,FALSE
+ureterolithiasis,cumulative_mission_duration,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,3.83292534951124,0.050255149026723,-0.0809425014774362,"",0.777709355410044,FALSE
+ureterolithiasis,medications,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.07389476283424,0.300067365351231,0.0399567173193904,"",0.902503251563678,FALSE
+ureterolithiasis,tamsulosin,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.268143262989724,0.604580015234909,0.0197245530455901,"",0.963150799847929,FALSE
+ureterolithiasis,thiazides,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.728720115345823,0.393298363740517,0.0307626079349818,"",0.92752661097855,FALSE
+ureterolithiasis,ultrasound,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.0546342644474862,0.815187036794115,-0.0182253013280667,"",0.989093354026907,FALSE
+ureterolithiasis,water_intake,mission_era; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,5.32843226337991,0.020980248870989,-0.108684808298367,"",0.622108671213261,FALSE
+ureterolithiasis,resistive_exercise,mission_era; pre_flight_fitness; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.325700553356,0.249571536448255,-0.0658886648742252,"",0.902503251563678,FALSE
+ureterolithiasis,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.0241788951097988,0.876430588249598,-0.00637884111512431,"",0.989093354026907,FALSE
+ureterolithiasis,percutaneous_nephrostomy,mission_era; ultrasound; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.94336240315624,0.163303914246511,-0.0570486086906976,"",0.835994217648425,FALSE
+ureterolithiasis,hydration,mission_era; water_intake; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.816557656439727,0.366188552409114,0.0420186316199994,"",0.92752661097855,FALSE
+ureterolithiasis,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.04892177435158,0.305755542632438,-0.0478176166203946,"",0.902503251563678,FALSE
+ureterolithiasis,urine_concentration,hydration; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.19875339861028,0.273570976158408,-0.0505809130388516,"",0.902503251563678,FALSE
+ureterolithiasis,k_citrate,mission_era; individual_factors; urine_concentration; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.633909129208405,0.425925034836537,-0.0324929743434977,"",0.92752661097855,FALSE
+ureterolithiasis,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,2.46446933977222,0.116447024059857,0.107248957976672,"",0.835994217648425,FALSE
+ureterolithiasis,mineralized_renal_material,urine_chemistry; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,1.69514953930138,0.19292353522169,0.0632278302134655,"",0.860591469318669,FALSE
+ureterolithiasis,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.0879659858765081,0.766779085841449,-0.011937537199952,"",0.989093354026907,FALSE
+ureterolithiasis,flight_recertification,nephrolithiasis; ultrasound_manipulation,FALSE,FALSE,0.131141624194242,0.717251288189329,-0.0127875938155196,"",0.989093354026907,FALSE
+urine_flow,mission_era,tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.0325818013116077,0.856756681119007,0.0020323783754769,"",0.989093354026907,FALSE
+urine_flow,individual_factors,tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.480864950772229,0.488030790491069,0.00614471627276097,"",0.937520787024677,FALSE
+urine_flow,microbiome,tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.660344120486116,0.416438482099066,-0.0071981020656629,"",0.92752661097855,FALSE
+urine_flow,nutrients,tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.00106732649510377,0.973937776998068,-0.00028934854096158,"",0.992362825292478,FALSE
+urine_flow,pre_flight_fitness,tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,1.00123411661116,0.317012071924757,-0.00886259052717419,"",0.907362526396274,FALSE
+urine_flow,cumulative_mission_duration,mission_era; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.00163871874246979,0.967709581742499,0.000389337444690642,"",0.989093354026907,FALSE
+urine_flow,medications,mission_era; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.100706039345823,0.750983998782837,-0.00291578587738868,"",0.989093354026907,FALSE
+urine_flow,thiazides,mission_era; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,3.11745806294857,0.0774575268079785,-0.0156731392467037,"",0.835994217648425,FALSE
+urine_flow,ultrasound,mission_era; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,1.81695872889395,0.177675714448711,0.0252817152994218,"",0.835994217648425,FALSE
+urine_flow,resistive_exercise,mission_era; pre_flight_fitness; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,1.83982376871063,0.174971604035686,0.0183489179245694,"",0.835994217648425,FALSE
+urine_flow,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.139504905921058,0.708773699634457,-0.00353845760783753,"",0.989093354026907,FALSE
+urine_flow,percutaneous_nephrostomy,mission_era; tamsulosin; ultrasound; water_intake; ureterolithiasis,FALSE,FALSE,1.57874967683892,0.20894088440189,-0.0112225817109037,"",0.880047920906799,FALSE
+urine_flow,hydration,mission_era; tamsulosin; water_intake; ureterolithiasis,FALSE,FALSE,0.00343473054090282,0.953265474221755,-0.00064505363479034,"",0.989093354026907,FALSE
+urine_flow,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; tamsulosin; water_intake; resistive_exercise; bisphosphonates; ureterolithiasis,FALSE,FALSE,2.3245384413276,0.127347988919591,-0.0168640736064082,"",0.835994217648425,FALSE
+urine_flow,urine_concentration,tamsulosin; water_intake; hydration; ureterolithiasis,FALSE,FALSE,0.479546022146678,0.488628021911118,-0.00758534449269701,"",0.937520787024677,FALSE
+urine_flow,k_citrate,mission_era; individual_factors; tamsulosin; water_intake; urine_concentration; ureterolithiasis,FALSE,FALSE,0.0270949374935299,0.869254581130199,-0.0015485874042795,"",0.989093354026907,FALSE
+urine_flow,urine_chemistry,mission_era; microbiome; tamsulosin; thiazides; water_intake; bone_remodeling; urine_concentration; k_citrate; ureterolithiasis,FALSE,FALSE,1.89234725507413,0.168937411968492,0.0221083013815962,"",0.835994217648425,FALSE
+urine_flow,mineralized_renal_material,tamsulosin; water_intake; urine_chemistry; ureterolithiasis,FALSE,FALSE,0.401884090770182,0.526117834666039,-0.00707059245555415,"",0.962286491147239,FALSE
+urine_flow,nephrolithiasis,individual_factors; tamsulosin; water_intake; mineralized_renal_material; ureterolithiasis,FALSE,FALSE,0.484709718017257,0.486296717187177,-0.0066176138652843,"",0.937520787024677,FALSE
+urine_flow,detect_mrm_stone,tamsulosin; ultrasound; water_intake; mineralized_renal_material; nephrolithiasis; ureterolithiasis,FALSE,FALSE,0.372065033021499,0.541880794369203,-0.00612461366680644,"",0.963099194989734,FALSE
+urine_flow,flight_recertification,tamsulosin; water_intake; nephrolithiasis; ureterolithiasis,FALSE,FALSE,0.653778597108612,0.418764963241178,-0.00722388606232999,"",0.92752661097855,FALSE
+urine_flow,ultrasound_manipulation,mission_era; tamsulosin; water_intake; detect_mrm_stone; ureterolithiasis,FALSE,FALSE,0.989913171364606,0.319763597094094,0.00901056422233063,"",0.907362526396274,FALSE
+medical_illness,mission_era,medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,1.802575523423,0.179401438262258,0.0128745978851079,"",0.835994217648425,FALSE
+medical_illness,individual_factors,medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.0289646450473811,0.864860695166429,0.00150347152327157,"",0.989093354026907,FALSE
+medical_illness,microbiome,medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,1.32017234246814,0.250561122947234,-0.0101501878632401,"",0.902503251563678,FALSE
+medical_illness,nutrients,medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.992233409710025,0.319197121639054,0.00880059196577104,"",0.907362526396274,FALSE
+medical_illness,pre_flight_fitness,medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,4.23268103000737,0.0396527577236522,0.0181709972919157,"",0.68183709683502,FALSE
+medical_illness,cumulative_mission_duration,mission_era; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,1.10768409701632,0.292585929020255,0.0100941675957266,"",0.902503251563678,FALSE
+medical_illness,tamsulosin,mission_era; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,1.42471433179162,0.232629003091524,-0.0109265107831452,"",0.887525228135364,FALSE
+medical_illness,thiazides,mission_era; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,4.90574510983788,0.0267675010064309,-0.0196205139500939,"",0.622108671213261,FALSE
+medical_illness,ultrasound,mission_era; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.0127291501266882,0.910170458972031,0.00211054019419707,"",0.989093354026907,FALSE
+medical_illness,water_intake,mission_era; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.880053689266788,0.348186974780541,-0.0110482008521994,"",0.92752661097855,FALSE
+medical_illness,resistive_exercise,mission_era; pre_flight_fitness; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,1.79862490272353,0.179878826372324,-0.0180891002330206,"",0.835994217648425,FALSE
+medical_illness,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; medications; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.365196843627928,0.545634112086961,-0.00570748587667557,"",0.963099194989734,FALSE
+medical_illness,hydration,mission_era; medications; water_intake; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.985357418237982,0.320879715423328,0.0108949785696644,"",0.907362526396274,FALSE
+medical_illness,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; medications; resistive_exercise; bisphosphonates; percutaneous_nephrostomy; urine_flow,FALSE,FALSE,0.00511361021199264,0.942992254984898,-0.000788989625145919,"",0.989093354026907,FALSE
+medical_illness,urine_concentration,medications; percutaneous_nephrostomy; hydration; urine_flow,FALSE,FALSE,0.00457045226721675,0.946099979456103,0.000738536088383945,"",0.989093354026907,FALSE
+medical_illness,k_citrate,mission_era; individual_factors; medications; percutaneous_nephrostomy; urine_concentration; urine_flow,FALSE,FALSE,0.201436076815298,0.653564174708874,0.00421059565814031,"",0.989093354026907,FALSE
+medical_illness,urine_chemistry,mission_era; microbiome; medications; thiazides; percutaneous_nephrostomy; bone_remodeling; urine_concentration; k_citrate; urine_flow,FALSE,FALSE,1.05011392825691,0.305480849623152,-0.0164147993582498,"",0.902503251563678,FALSE
+medical_illness,mineralized_renal_material,medications; percutaneous_nephrostomy; urine_chemistry; urine_flow,FALSE,FALSE,0.546014748510061,0.459950653430603,0.00821029283693272,"",0.931364212848566,FALSE
+medical_illness,nephrolithiasis,individual_factors; medications; percutaneous_nephrostomy; mineralized_renal_material; urine_flow,FALSE,FALSE,0.033112891131168,0.855606678539152,0.00171102193918818,"",0.989093354026907,FALSE
+medical_illness,detect_mrm_stone,medications; ultrasound; percutaneous_nephrostomy; mineralized_renal_material; nephrolithiasis; urine_flow,FALSE,FALSE,0.881632305987296,0.347754993462706,-0.0094015029608287,"",0.92752661097855,FALSE
+medical_illness,flight_recertification,medications; percutaneous_nephrostomy; nephrolithiasis; urine_flow,FALSE,FALSE,1.68487343096058,0.194278144749188,-0.0115686513162831,"",0.860591469318669,FALSE
+medical_illness,ultrasound_manipulation,mission_era; medications; percutaneous_nephrostomy; detect_mrm_stone; urine_flow,FALSE,FALSE,0.655728601836017,0.418071969942051,-0.00729233728508724,"",0.92752661097855,FALSE
+medical_illness,ureterolithiasis,medications; percutaneous_nephrostomy; nephrolithiasis; ultrasound_manipulation; urine_flow,FALSE,FALSE,0.0826706456537067,0.773710335801701,-0.00258845387550911,"",0.989093354026907,FALSE
+evacuation,mission_era,medications; medical_illness,FALSE,FALSE,0.0184774434560495,0.891875227416024,0.0061650277980802,"",0.989093354026907,FALSE
+evacuation,individual_factors,medications; medical_illness,FALSE,FALSE,0.281000052036234,0.596046495212451,0.0258415120713417,"",0.963099194989734,FALSE
+evacuation,microbiome,medications; medical_illness,FALSE,FALSE,0.84855787454444,0.356960628407934,-0.0449384808294462,"",0.92752661097855,FALSE
+evacuation,nutrients,medications; medical_illness,FALSE,FALSE,3.95806542255241,0.0466472841028341,-0.0953615964280186,"",0.755686002465912,FALSE
+evacuation,pre_flight_fitness,medications; medical_illness,FALSE,FALSE,0.00207120957111329,0.963700371097039,-0.00219568453164773,"",0.989093354026907,FALSE
+evacuation,cumulative_mission_duration,mission_era; medications; medical_illness,FALSE,FALSE,1.39284262502679,0.237925634350221,0.0651075211640608,"",0.887525228135364,FALSE
+evacuation,tamsulosin,mission_era; medications; medical_illness,FALSE,FALSE,1.26318313170077,0.261049426123291,0.0585597861100185,"",0.902503251563678,FALSE
+evacuation,thiazides,mission_era; medications; medical_illness,FALSE,FALSE,0.0722027728893409,0.788156136918903,-0.015991903658162,"",0.989093354026907,FALSE
+evacuation,ultrasound,mission_era; medications; medical_illness,FALSE,FALSE,2.63894385677031,0.104272841856204,0.166892006137734,"",0.835994217648425,FALSE
+evacuation,water_intake,mission_era; medications; medical_illness,FALSE,FALSE,0.00787147586015635,0.929303373939961,-0.0054781376400795,"",0.989093354026907,FALSE
+evacuation,resistive_exercise,mission_era; pre_flight_fitness; medications; medical_illness,FALSE,FALSE,0.107943227981195,0.742498002420765,-0.0242005209006544,"",0.989093354026907,FALSE
+evacuation,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; medications; medical_illness,FALSE,FALSE,0.745966210625738,0.387756365225876,-0.0468417093640232,"",0.92752661097855,FALSE
+evacuation,percutaneous_nephrostomy,mission_era; medications; ultrasound; medical_illness,FALSE,FALSE,0.12173343201448,0.727161994507215,0.0200341837588042,"",0.989093354026907,FALSE
+evacuation,hydration,mission_era; medications; water_intake; medical_illness,FALSE,FALSE,1.17698513120695,0.277970618613471,0.0652230938340211,"",0.902503251563678,FALSE
+evacuation,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; medications; resistive_exercise; bisphosphonates; medical_illness,FALSE,FALSE,0.328484511469014,0.566552828184496,-0.0345733284478113,"",0.963099194989734,FALSE
+evacuation,urine_concentration,medications; hydration; medical_illness,FALSE,FALSE,0.0425724467181681,0.836532430923256,-0.0122087022880235,"",0.989093354026907,FALSE
+evacuation,k_citrate,mission_era; individual_factors; medications; urine_concentration; medical_illness,FALSE,FALSE,0.725227695338162,0.394434465584458,0.0439636027728749,"",0.92752661097855,FALSE
+evacuation,urine_chemistry,mission_era; microbiome; medications; thiazides; bone_remodeling; urine_concentration; k_citrate; medical_illness,FALSE,FALSE,0.0242043957182432,0.876365967086456,-0.01375024956117,"",0.989093354026907,FALSE
+evacuation,mineralized_renal_material,medications; urine_chemistry; medical_illness,FALSE,FALSE,0.142565921748883,0.705743347215404,-0.0227956697079855,"",0.989093354026907,FALSE
+evacuation,nephrolithiasis,individual_factors; medications; mineralized_renal_material; medical_illness,FALSE,FALSE,3.61491384765486,0.0572636875857758,0.0922287882126359,"",0.79191489905207,FALSE
+evacuation,detect_mrm_stone,medications; ultrasound; mineralized_renal_material; nephrolithiasis; medical_illness,FALSE,FALSE,1.88733226896738,0.16950312234977,-0.0774743939307363,"",0.835994217648425,FALSE
+evacuation,flight_recertification,medications; nephrolithiasis; medical_illness,FALSE,FALSE,1.15661216835861,0.282169256560111,-0.0502155499887706,"",0.902503251563678,FALSE
+evacuation,ultrasound_manipulation,mission_era; medications; detect_mrm_stone; medical_illness,FALSE,FALSE,1.33533868243467,0.24785767676352,0.0579388714989239,"",0.902503251563678,FALSE
+evacuation,ureterolithiasis,medications; nephrolithiasis; ultrasound_manipulation; medical_illness,FALSE,FALSE,0.514918881621725,0.473017227679623,-0.0342460868087689,"",0.937520787024677,FALSE
+evacuation,urine_flow,medications; tamsulosin; water_intake; ureterolithiasis; medical_illness,FALSE,FALSE,0.0513593395949101,0.820714580521909,-0.0132903479085369,"",0.989093354026907,FALSE
+individual_readiness,mission_era,medications; medical_illness,FALSE,FALSE,3.39573963504881,0.0653650416065052,0.0169631804650019,"",0.826634825390925,FALSE
+individual_readiness,individual_factors,medications; medical_illness,FALSE,FALSE,1.46617519455322,0.225950132741998,-0.0106771153508399,"",0.880047920906799,FALSE
+individual_readiness,microbiome,medications; medical_illness,FALSE,FALSE,4.92844103226162,0.0264181402951028,0.0195737525048826,"",0.622108671213261,FALSE
+individual_readiness,nutrients,medications; medical_illness,FALSE,FALSE,0.0065205733262701,0.935640719051714,0.000712091726222142,"",0.989093354026907,FALSE
+individual_readiness,pre_flight_fitness,medications; medical_illness,FALSE,FALSE,0.328153887621738,0.566748173279051,0.00505234359432949,"",0.963099194989734,FALSE
+individual_readiness,cumulative_mission_duration,mission_era; medications; medical_illness,FALSE,FALSE,0.000401312296162359,0.984017222718535,-0.00019180520658649,"",0.992362825292478,FALSE
+individual_readiness,tamsulosin,mission_era; medications; medical_illness,FALSE,FALSE,0.696494726707897,0.403964029465311,-0.00754670961234998,"",0.92752661097855,FALSE
+individual_readiness,thiazides,mission_era; medications; medical_illness,FALSE,FALSE,0.185532110510394,0.666661513878196,-0.00380896346092486,"",0.989093354026907,FALSE
+individual_readiness,ultrasound,mission_era; medications; medical_illness,FALSE,FALSE,1.40504171008797,0.235881244667068,-0.0221301558004765,"",0.887525228135364,FALSE
+individual_readiness,water_intake,mission_era; medications; medical_illness,FALSE,FALSE,5.62872325769058,0.0176684956809535,0.0265312258789451,"",0.622108671213261,FALSE
+individual_readiness,resistive_exercise,mission_era; pre_flight_fitness; medications; medical_illness,FALSE,FALSE,0.63298049768855,0.426264150887282,-0.0107153042201958,"",0.92752661097855,FALSE
+individual_readiness,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; medications; medical_illness,FALSE,FALSE,1.83777094461402,0.175212431022237,0.0127821262325119,"",0.835994217648425,FALSE
+individual_readiness,percutaneous_nephrostomy,mission_era; medications; ultrasound; medical_illness,FALSE,FALSE,1.41754022775785,0.233808694146742,-0.0106289196950426,"",0.887525228135364,FALSE
+individual_readiness,hydration,mission_era; medications; water_intake; medical_illness,FALSE,FALSE,3.68394747971252,0.0549386356306898,0.0210228272560569,"",0.778755160065028,FALSE
+individual_readiness,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; medications; resistive_exercise; bisphosphonates; medical_illness,FALSE,FALSE,0.0223863167630043,0.881063973621193,-0.00164783672848417,"",0.989093354026907,FALSE
+individual_readiness,urine_concentration,medications; hydration; medical_illness,FALSE,FALSE,2.6820231757265,0.101486719284504,-0.0178487934344529,"",0.835994217648425,FALSE
+individual_readiness,k_citrate,mission_era; individual_factors; medications; urine_concentration; medical_illness,FALSE,FALSE,0.0933520747094008,0.759958170954673,0.00286003061933753,"",0.989093354026907,FALSE
+individual_readiness,urine_chemistry,mission_era; microbiome; medications; thiazides; bone_remodeling; urine_concentration; k_citrate; medical_illness,FALSE,FALSE,0.289936722703715,0.590261082700898,0.00860795484097199,"",0.963099194989734,FALSE
+individual_readiness,mineralized_renal_material,medications; urine_chemistry; medical_illness,FALSE,FALSE,0.269061188690102,0.603962231101371,0.00575336352167928,"",0.963150799847929,FALSE
+individual_readiness,nephrolithiasis,individual_factors; medications; mineralized_renal_material; medical_illness,FALSE,FALSE,0.202263179202419,0.652900241280916,0.00422064070376008,"",0.989093354026907,FALSE
+individual_readiness,detect_mrm_stone,medications; ultrasound; mineralized_renal_material; nephrolithiasis; medical_illness,FALSE,FALSE,0.286816195999563,0.592268047950848,0.00535327875636042,"",0.963099194989734,FALSE
+individual_readiness,flight_recertification,medications; nephrolithiasis; medical_illness,FALSE,FALSE,1.1083625229694,0.292438176847171,0.00936696685295745,"",0.902503251563678,FALSE
+individual_readiness,ultrasound_manipulation,mission_era; medications; detect_mrm_stone; medical_illness,FALSE,FALSE,0.0911941648591892,0.76266447638026,-0.00271418913338836,"",0.989093354026907,FALSE
+individual_readiness,ureterolithiasis,medications; nephrolithiasis; ultrasound_manipulation; medical_illness,FALSE,FALSE,0.568452954026725,0.45087432692104,-0.00674277167497892,"",0.92752661097855,FALSE
+individual_readiness,urine_flow,medications; tamsulosin; water_intake; ureterolithiasis; medical_illness,FALSE,FALSE,0.158437451405916,0.690599210283419,0.00427704372624939,"",0.989093354026907,FALSE
+individual_readiness,evacuation,medications; medical_illness,FALSE,FALSE,0.290660881517397,0.589797332848931,0.00483852755457838,"",0.963099194989734,FALSE
+long_term_health_outcomes,mission_era,medications; medical_illness,FALSE,FALSE,0.0419331917437376,0.837747174046095,-0.0018939148726977,"",0.989093354026907,FALSE
+long_term_health_outcomes,individual_factors,medications; medical_illness,FALSE,FALSE,0.00740656522611971,0.931417605044584,-0.000762412935605893,"",0.989093354026907,FALSE
+long_term_health_outcomes,microbiome,medications; medical_illness,FALSE,FALSE,0.0699737146787811,0.791375055317276,0.00234338969029828,"",0.989093354026907,FALSE
+long_term_health_outcomes,nutrients,medications; medical_illness,FALSE,FALSE,1.46441749498263,0.226228556937507,0.0107204906409209,"",0.880047920906799,FALSE
+long_term_health_outcomes,pre_flight_fitness,medications; medical_illness,FALSE,FALSE,0.088162507108791,0.766526274300161,-0.00263089590047214,"",0.989093354026907,FALSE
+long_term_health_outcomes,cumulative_mission_duration,mission_era; medications; medical_illness,FALSE,FALSE,0.0279936591396108,0.867123730724113,-0.00160963169411567,"",0.989093354026907,FALSE
+long_term_health_outcomes,tamsulosin,mission_era; medications; medical_illness,FALSE,FALSE,3.44785710009091,0.0633338322604623,-0.0168702414729887,"",0.826634825390925,FALSE
+long_term_health_outcomes,thiazides,mission_era; medications; medical_illness,FALSE,FALSE,0.102918940214295,0.748354517620596,-0.00285051698112376,"",0.989093354026907,FALSE
+long_term_health_outcomes,ultrasound,mission_era; medications; medical_illness,FALSE,FALSE,0.0370052048201615,0.84745445045723,-0.0036088093651839,"",0.989093354026907,FALSE
+long_term_health_outcomes,water_intake,mission_era; medications; medical_illness,FALSE,FALSE,0.0237258574379666,0.877584503255859,0.0017310196514528,"",0.989093354026907,FALSE
+long_term_health_outcomes,resistive_exercise,mission_era; pre_flight_fitness; medications; medical_illness,FALSE,FALSE,0.18419548620659,0.667792224897587,0.0058081294303861,"",0.989093354026907,FALSE
+long_term_health_outcomes,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; medications; medical_illness,FALSE,FALSE,0.414541411100799,0.519673418082581,0.00610012596070445,"",0.959718457993204,FALSE
+long_term_health_outcomes,percutaneous_nephrostomy,mission_era; medications; ultrasound; medical_illness,FALSE,FALSE,0.701645392382488,0.402231370295601,-0.00751442174742164,"",0.92752661097855,FALSE
+long_term_health_outcomes,hydration,mission_era; medications; water_intake; medical_illness,FALSE,FALSE,0.001593280423549,0.968160161349089,-0.00043946068902676,"",0.989093354026907,FALSE
+long_term_health_outcomes,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; medications; resistive_exercise; bisphosphonates; medical_illness,FALSE,FALSE,1.07139044335054,0.300631588695186,-0.0114538290840604,"",0.902503251563678,FALSE
+long_term_health_outcomes,urine_concentration,medications; hydration; medical_illness,FALSE,FALSE,0.709354452472326,0.399658201350305,-0.00922700731766159,"",0.92752661097855,FALSE
+long_term_health_outcomes,k_citrate,mission_era; individual_factors; medications; urine_concentration; medical_illness,FALSE,FALSE,0.812129571717378,0.367491390293862,0.00847972157411896,"",0.92752661097855,FALSE
+long_term_health_outcomes,urine_chemistry,mission_era; microbiome; medications; thiazides; bone_remodeling; urine_concentration; k_citrate; medical_illness,FALSE,FALSE,2.06404725455286,0.150809154852016,0.0230890380816587,"",0.835994217648425,FALSE
+long_term_health_outcomes,mineralized_renal_material,medications; urine_chemistry; medical_illness,FALSE,FALSE,0.652944627541729,0.419061861619052,-0.00900515814213983,"",0.92752661097855,FALSE
+long_term_health_outcomes,nephrolithiasis,individual_factors; medications; mineralized_renal_material; medical_illness,FALSE,FALSE,0.0837499560548167,0.772278472988943,0.00272867159124091,"",0.989093354026907,FALSE
+long_term_health_outcomes,detect_mrm_stone,medications; ultrasound; mineralized_renal_material; nephrolithiasis; medical_illness,FALSE,FALSE,0.328533263582358,0.56652403463851,-0.0057560825546392,"",0.963099194989734,FALSE
+long_term_health_outcomes,flight_recertification,medications; nephrolithiasis; medical_illness,FALSE,FALSE,0.00693697016322403,0.933622163616159,-0.000744491503661127,"",0.989093354026907,FALSE
+long_term_health_outcomes,ultrasound_manipulation,mission_era; medications; detect_mrm_stone; medical_illness,FALSE,FALSE,2.06679590519343,0.150537495445171,-0.0129823855095988,"",0.835994217648425,FALSE
+long_term_health_outcomes,ureterolithiasis,medications; nephrolithiasis; ultrasound_manipulation; medical_illness,FALSE,FALSE,0.792950898237905,0.373209327582378,0.00799956130269392,"",0.92752661097855,FALSE
+long_term_health_outcomes,urine_flow,medications; tamsulosin; water_intake; ureterolithiasis; medical_illness,FALSE,FALSE,1.24140306994013,0.265200819287166,0.0120307944909368,"",0.902503251563678,FALSE
+long_term_health_outcomes,evacuation,medications; medical_illness,FALSE,FALSE,0.182992596735858,0.668813964481597,-0.00385693967284025,"",0.989093354026907,FALSE
+long_term_health_outcomes,individual_readiness,medications; medical_illness,FALSE,FALSE,0.0216463781289349,0.883031714481853,0.00147807808234707,"",0.989093354026907,FALSE
+loss_of_crew_life,mission_era,medications; medical_illness; evacuation,FALSE,FALSE,0.482394349170136,0.487339771901232,-0.0458337486652156,"",0.937520787024677,FALSE
+loss_of_crew_life,individual_factors,medications; medical_illness; evacuation,FALSE,FALSE,0.00728737817075853,0.931970309782298,-0.00607073436882866,"",0.989093354026907,FALSE
+loss_of_crew_life,microbiome,medications; medical_illness; evacuation,FALSE,FALSE,0.453160738375345,0.500837779359034,-0.0478542591011053,"",0.945746165882615,FALSE
+loss_of_crew_life,nutrients,medications; medical_illness; evacuation,FALSE,FALSE,0.024763216764768,0.874958513929918,0.0109974323663608,"",0.989093354026907,FALSE
+loss_of_crew_life,pre_flight_fitness,medications; medical_illness; evacuation,FALSE,FALSE,1.29481174700345,0.255163096952071,0.0800165586295193,"",0.902503251563678,FALSE
+loss_of_crew_life,cumulative_mission_duration,mission_era; medications; medical_illness; evacuation,FALSE,FALSE,0.123517682260626,0.725250158416924,-0.0290068439014328,"",0.989093354026907,FALSE
+loss_of_crew_life,tamsulosin,mission_era; medications; medical_illness; evacuation,FALSE,FALSE,0.00484200035543836,0.944524387309102,-0.00547130901615,"",0.989093354026907,FALSE
+loss_of_crew_life,thiazides,mission_era; medications; medical_illness; evacuation,FALSE,FALSE,0.665634161436174,0.414577890730258,-0.0852477037101032,"",0.92752661097855,FALSE
+loss_of_crew_life,ultrasound,mission_era; medications; medical_illness; evacuation,FALSE,FALSE,0.00940680126018378,0.922735395530981,-0.0140626372483717,"",0.989093354026907,FALSE
+loss_of_crew_life,water_intake,mission_era; medications; medical_illness; evacuation,FALSE,FALSE,2.20911869229826,0.137197029355058,0.133642538526728,"",0.835994217648425,FALSE
+loss_of_crew_life,resistive_exercise,mission_era; pre_flight_fitness; medications; medical_illness; evacuation,FALSE,FALSE,0.110843479410278,0.739185882476526,-0.0356782468334061,"",0.989093354026907,FALSE
+loss_of_crew_life,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; medications; medical_illness; evacuation,FALSE,FALSE,0.00250332891801008,0.960095869427883,-0.00404004758162026,"",0.989093354026907,FALSE
+loss_of_crew_life,percutaneous_nephrostomy,mission_era; medications; ultrasound; medical_illness; evacuation,FALSE,FALSE,0.615951677244539,0.432555658425733,-0.07537238146382,"",0.92752661097855,FALSE
+loss_of_crew_life,hydration,mission_era; medications; water_intake; medical_illness; evacuation,FALSE,FALSE,0.235386228506968,0.627558465603707,0.0425016358149095,"",0.989093354026907,FALSE
+loss_of_crew_life,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; medications; resistive_exercise; bisphosphonates; medical_illness; evacuation,FALSE,FALSE,0.614095997366576,0.43324974974105,0.068678467487621,"",0.92752661097855,FALSE
+loss_of_crew_life,urine_concentration,medications; hydration; medical_illness; evacuation,FALSE,FALSE,0.0173236374835142,0.895285427103234,0.0113222486351655,"",0.989093354026907,FALSE
+loss_of_crew_life,k_citrate,mission_era; individual_factors; medications; urine_concentration; medical_illness; evacuation,FALSE,FALSE,0.0404038214817319,0.840693086114325,0.015497399290025,"",0.989093354026907,FALSE
+loss_of_crew_life,urine_chemistry,mission_era; microbiome; medications; thiazides; bone_remodeling; urine_concentration; k_citrate; medical_illness; evacuation,FALSE,FALSE,0.133448682370499,0.714882786859079,-0.0469686286906844,"",0.989093354026907,FALSE
+loss_of_crew_life,mineralized_renal_material,medications; urine_chemistry; medical_illness; evacuation,FALSE,FALSE,0.0383117200558445,0.844818528325842,0.0171917143455214,"",0.989093354026907,FALSE
+loss_of_crew_life,nephrolithiasis,individual_factors; medications; mineralized_renal_material; medical_illness; evacuation,FALSE,FALSE,0.208297380195063,0.648105185392268,-0.0342900968645844,"",0.989093354026907,FALSE
+loss_of_crew_life,detect_mrm_stone,medications; ultrasound; mineralized_renal_material; nephrolithiasis; medical_illness; evacuation,FALSE,FALSE,0.625634040515706,0.428961313775389,-0.0649372464873856,"",0.92752661097855,FALSE
+loss_of_crew_life,flight_recertification,medications; nephrolithiasis; medical_illness; evacuation,FALSE,FALSE,0.68384752871475,0.408264981622143,-0.0562378675124045,"",0.92752661097855,FALSE
+loss_of_crew_life,ultrasound_manipulation,mission_era; medications; detect_mrm_stone; medical_illness; evacuation,FALSE,FALSE,1.59947429100862,0.20597772726724,0.0904397995779412,"",0.880047920906799,FALSE
+loss_of_crew_life,ureterolithiasis,medications; nephrolithiasis; ultrasound_manipulation; medical_illness; evacuation,FALSE,FALSE,3.27264931342256,0.0704437763858097,-0.139782927161299,"",0.835994217648425,FALSE
+loss_of_crew_life,urine_flow,medications; tamsulosin; water_intake; ureterolithiasis; medical_illness; evacuation,FALSE,FALSE,0.452314897780525,0.501237691418423,0.0574545925669134,"",0.945746165882615,FALSE
+loss_of_crew_life,individual_readiness,medications; medical_illness; evacuation,FALSE,FALSE,0.181020273182639,0.670497896151691,-0.0335827211132535,"",0.989093354026907,FALSE
+loss_of_crew_life,long_term_health_outcomes,medications; medical_illness; evacuation,FALSE,FALSE,2.7006412331757,0.100307895749057,0.130651718382027,"",0.835994217648425,FALSE
+crew_capability,mission_era,individual_readiness,FALSE,FALSE,0.387754083065374,0.533482319687451,0.005712101125597,"",0.963099194989734,FALSE
+crew_capability,individual_factors,individual_readiness,FALSE,FALSE,0.000644015119178221,0.979753895240029,-0.000230933158943595,"",0.992362825292478,FALSE
+crew_capability,microbiome,individual_readiness,FALSE,FALSE,2.2635748173816,0.132448007560238,-0.0136929032814869,"",0.835994217648425,FALSE
+crew_capability,nutrients,individual_readiness,FALSE,FALSE,2.03198023028381,0.154019814587018,0.0129704482258835,"",0.835994217648425,FALSE
+crew_capability,pre_flight_fitness,individual_readiness,FALSE,FALSE,0.271381701717473,0.602406417604358,-0.00474027468414209,"",0.963150799847929,FALSE
+crew_capability,cumulative_mission_duration,mission_era; individual_readiness,FALSE,FALSE,3.73008234165172,0.0534407591887699,-0.0190809516380905,"",0.777709355410044,FALSE
+crew_capability,medications,mission_era; individual_readiness,FALSE,FALSE,0.584036445550737,0.444734498225952,-0.0074117726341584,"",0.92752661097855,FALSE
+crew_capability,tamsulosin,mission_era; individual_readiness,FALSE,FALSE,0.854277431015362,0.35534508286003,-0.00860158204183373,"",0.92752661097855,FALSE
+crew_capability,thiazides,mission_era; individual_readiness,FALSE,FALSE,3.75734270639077,0.0525760710255778,-0.0176783759769489,"",0.777709355410044,FALSE
+crew_capability,ultrasound,mission_era; individual_readiness,FALSE,FALSE,9.3393278989497,0.00224287768324334,0.0588758489657873,"",0.258144414437837,FALSE
+crew_capability,water_intake,mission_era; individual_readiness,FALSE,FALSE,1.15275946608745,0.282972240934385,0.0122937634074217,"",0.902503251563678,FALSE
+crew_capability,resistive_exercise,mission_era; pre_flight_fitness; individual_readiness,FALSE,FALSE,0.665512583866075,0.41462051315324,0.0113367565574626,"",0.92752661097855,FALSE
+crew_capability,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; individual_readiness,FALSE,FALSE,2.33231359397178,0.126713422417822,-0.014859644478231,"",0.835994217648425,FALSE
+crew_capability,percutaneous_nephrostomy,mission_era; ultrasound; individual_readiness,FALSE,FALSE,4.80342323418881,0.0284032470830959,-0.0201031023405344,"",0.622108671213261,FALSE
+crew_capability,hydration,mission_era; water_intake; individual_readiness,FALSE,FALSE,0.723594519840844,0.394967366678654,-0.00961936888018291,"",0.92752661097855,FALSE
+crew_capability,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; individual_readiness,FALSE,FALSE,1.94818009301525,0.162783098085846,-0.0158559095423859,"",0.835994217648425,FALSE
+crew_capability,urine_concentration,hydration; individual_readiness,FALSE,FALSE,1.66687272557465,0.196677931180685,0.0145302516645512,"",0.861342869424971,FALSE
+crew_capability,k_citrate,mission_era; individual_factors; urine_concentration; individual_readiness,FALSE,FALSE,4.19990852464252,0.0404261599741287,0.0198042190077113,"",0.68183709683502,FALSE
+crew_capability,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; individual_readiness,FALSE,FALSE,2.04741530429965,0.152464837330927,0.0236053881445362,"",0.835994217648425,FALSE
+crew_capability,mineralized_renal_material,urine_chemistry; individual_readiness,FALSE,FALSE,0.0251075798551028,0.874099289757407,0.00181373613926329,"",0.989093354026907,FALSE
+crew_capability,nephrolithiasis,individual_factors; mineralized_renal_material; individual_readiness,FALSE,FALSE,0.573442814547889,0.44889406779202,-0.00733295602349776,"",0.92752661097855,FALSE
+crew_capability,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis; individual_readiness,FALSE,FALSE,0.542071338164533,0.461575562275921,-0.00759302941586134,"",0.931364212848566,FALSE
+crew_capability,flight_recertification,nephrolithiasis; individual_readiness,FALSE,FALSE,0.636787400839239,0.424876525673846,0.00732515187822439,"",0.92752661097855,FALSE
+crew_capability,ultrasound_manipulation,mission_era; detect_mrm_stone; individual_readiness,FALSE,FALSE,0.00423157590557821,0.948133741048115,0.000603392317846995,"",0.989093354026907,FALSE
+crew_capability,ureterolithiasis,nephrolithiasis; ultrasound_manipulation; individual_readiness,FALSE,FALSE,2.71224186848485,0.0995809575241597,0.0151864252661071,"",0.835994217648425,FALSE
+crew_capability,urine_flow,tamsulosin; water_intake; ureterolithiasis; individual_readiness,FALSE,FALSE,0.0628829465131275,0.801996016887995,-0.00260500642828493,"",0.989093354026907,FALSE
+crew_capability,medical_illness,medications; percutaneous_nephrostomy; urine_flow; individual_readiness,FALSE,FALSE,1.00549104816673,0.315985472879651,0.0111289871791558,"",0.907362526396274,FALSE
+crew_capability,evacuation,medications; medical_illness; individual_readiness,FALSE,FALSE,4.9856228353201,0.0255587829146334,-0.0206752334005269,"",0.622108671213261,FALSE
+crew_capability,long_term_health_outcomes,medications; medical_illness; individual_readiness,FALSE,FALSE,2.02957085491289,0.154264161206729,0.0146315723113072,"",0.835994217648425,FALSE
+crew_capability,loss_of_crew_life,medications; medical_illness; evacuation; individual_readiness,FALSE,FALSE,0.0624809773325978,0.80261677284908,-0.00229248705503896,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,individual_factors,mission_era; long_term_health_outcomes,TRUE,FALSE,0.0292749147820359,0.864145814211508,0.0048347360289643,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,microbiome,mission_era; long_term_health_outcomes,TRUE,FALSE,1.72797145177447,0.188670169350814,0.0371654000830583,"",0.860591469318669,FALSE
+detect_long_term_health_outcomes,nutrients,mission_era; long_term_health_outcomes,TRUE,FALSE,0.0127702696981942,0.910026101232661,-0.00318623979272171,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,pre_flight_fitness,mission_era; long_term_health_outcomes,TRUE,FALSE,1.04000621479645,0.307820026516163,0.0290529277031931,"",0.902503251563678,FALSE
+detect_long_term_health_outcomes,cumulative_mission_duration,mission_era; long_term_health_outcomes,TRUE,FALSE,1.28407965278439,0.257141868726127,-0.0340530362963568,"",0.902503251563678,FALSE
+detect_long_term_health_outcomes,medications,mission_era; long_term_health_outcomes,TRUE,FALSE,4.68170066169023,0.0304855536680971,-0.0674694768498469,"",0.622108671213261,FALSE
+detect_long_term_health_outcomes,tamsulosin,mission_era; long_term_health_outcomes,TRUE,FALSE,0.00395174371624307,0.949875680939171,-0.00182079035950759,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,thiazides,mission_era; long_term_health_outcomes,TRUE,FALSE,0.0251719360430798,0.873939385181176,-0.00464717030606409,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,ultrasound,mission_era; long_term_health_outcomes,TRUE,FALSE,0.223237165358114,0.636584353732741,0.0284660478290565,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,water_intake,mission_era; long_term_health_outcomes,TRUE,FALSE,4.18072631433915,0.0408861751188548,-0.0726030324604065,"",0.68183709683502,FALSE
+detect_long_term_health_outcomes,resistive_exercise,mission_era; pre_flight_fitness; long_term_health_outcomes,TRUE,FALSE,0.118479445065532,0.73068954106279,0.0147815767569517,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; long_term_health_outcomes,TRUE,FALSE,0.758787945695076,0.383708098280346,0.0259125334276476,"",0.92752661097855,FALSE
+detect_long_term_health_outcomes,percutaneous_nephrostomy,mission_era; ultrasound; long_term_health_outcomes,TRUE,FALSE,0.558745519612785,0.454766133777843,-0.0218873465060996,"",0.92752661097855,FALSE
+detect_long_term_health_outcomes,hydration,mission_era; water_intake; long_term_health_outcomes,TRUE,FALSE,0.901737041834167,0.34231637304114,-0.0334851721896553,"",0.92752661097855,FALSE
+detect_long_term_health_outcomes,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; long_term_health_outcomes,TRUE,FALSE,6.67460152890089,0.00977963734562408,-0.0913233954212835,"",0.622108671213261,FALSE
+detect_long_term_health_outcomes,urine_concentration,mission_era; hydration; long_term_health_outcomes,TRUE,FALSE,0.704391723217668,0.401311934680789,-0.0291433286458639,"",0.92752661097855,FALSE
+detect_long_term_health_outcomes,k_citrate,mission_era; individual_factors; urine_concentration; long_term_health_outcomes,TRUE,FALSE,0.0414709986844173,0.838631476371481,-0.00601553792984534,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; long_term_health_outcomes,TRUE,FALSE,2.74252294120743,0.097710389080342,0.0848174157264218,"",0.835994217648425,FALSE
+detect_long_term_health_outcomes,mineralized_renal_material,mission_era; urine_chemistry; long_term_health_outcomes,TRUE,FALSE,0.0998869201366688,0.751965376508007,-0.0111698587815424,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,nephrolithiasis,mission_era; individual_factors; mineralized_renal_material; long_term_health_outcomes,TRUE,FALSE,1.02923941085464e-05,0.997440250185117,-9.78451722467931e-05,"",0.999089749008409,FALSE
+detect_long_term_health_outcomes,detect_mrm_stone,mission_era; ultrasound; mineralized_renal_material; nephrolithiasis; long_term_health_outcomes,TRUE,FALSE,0.119104164968121,0.730008133010534,0.0111251870765593,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,flight_recertification,mission_era; nephrolithiasis; long_term_health_outcomes,TRUE,FALSE,0.370128307800769,0.542934337706785,-0.017267047978059,"",0.963099194989734,FALSE
+detect_long_term_health_outcomes,ultrasound_manipulation,mission_era; detect_mrm_stone; long_term_health_outcomes,TRUE,FALSE,0.00268347119617829,0.958686277400865,-0.00148446363006116,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,ureterolithiasis,mission_era; nephrolithiasis; ultrasound_manipulation; long_term_health_outcomes,TRUE,FALSE,1.52814311560542,0.216391344033573,-0.0353104245452391,"",0.880047920906799,FALSE
+detect_long_term_health_outcomes,urine_flow,mission_era; tamsulosin; water_intake; ureterolithiasis; long_term_health_outcomes,TRUE,FALSE,3.12906558949726,0.0769078099520815,0.0567472441140968,"",0.835994217648425,FALSE
+detect_long_term_health_outcomes,medical_illness,mission_era; medications; percutaneous_nephrostomy; urine_flow; long_term_health_outcomes,TRUE,FALSE,0.722583704668978,0.395297712748828,-0.0292486491652267,"",0.92752661097855,FALSE
+detect_long_term_health_outcomes,evacuation,mission_era; medications; medical_illness; long_term_health_outcomes,TRUE,FALSE,2.28457754138435,0.1306657160974,-0.0409617148227184,"",0.835994217648425,FALSE
+detect_long_term_health_outcomes,individual_readiness,mission_era; medications; medical_illness; long_term_health_outcomes,TRUE,FALSE,0.165412501384708,0.68422146702316,-0.013051295706174,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,loss_of_crew_life,mission_era; medications; medical_illness; evacuation; long_term_health_outcomes,TRUE,FALSE,0.00612943762916984,0.93759679515428,-0.00206034973364284,"",0.989093354026907,FALSE
+detect_long_term_health_outcomes,crew_capability,mission_era; individual_readiness; long_term_health_outcomes,TRUE,FALSE,0.288319789813613,0.591299265687293,0.0166351170751145,"",0.963099194989734,FALSE
+task_performance,mission_era,crew_capability,FALSE,FALSE,0.326130636112794,0.567946442003278,0.00526418625588969,"",0.963099194989734,FALSE
+task_performance,individual_factors,crew_capability,FALSE,FALSE,0.656706187473901,0.417725196954415,-0.0074573974591881,"",0.92752661097855,FALSE
+task_performance,microbiome,crew_capability,FALSE,FALSE,0.374828317715583,0.540384112678115,-0.00563405465955171,"",0.963099194989734,FALSE
+task_performance,nutrients,crew_capability,FALSE,FALSE,2.54122426200411,0.110908760683547,-0.0146699636077761,"",0.835994217648425,FALSE
+task_performance,pre_flight_fitness,crew_capability,FALSE,FALSE,0.440662251665344,0.506802987785165,-0.00610884109342157,"",0.945746165882615,FALSE
+task_performance,cumulative_mission_duration,mission_era; crew_capability,FALSE,FALSE,0.440115471639729,0.507066727386799,-0.0066300874989728,"",0.945746165882615,FALSE
+task_performance,medications,mission_era; crew_capability,FALSE,FALSE,1.80870886870616,0.178663190860926,0.0128862929832572,"",0.835994217648425,FALSE
+task_performance,tamsulosin,mission_era; crew_capability,FALSE,FALSE,0.0178355483803898,0.893758584329641,0.00125657021025678,"",0.989093354026907,FALSE
+task_performance,thiazides,mission_era; crew_capability,FALSE,FALSE,2.62386853629505,0.105267519443271,0.0149417127714895,"",0.835994217648425,FALSE
+task_performance,ultrasound,mission_era; crew_capability,FALSE,FALSE,0.152824199998577,0.69585093044169,-0.00762042470209788,"",0.989093354026907,FALSE
+task_performance,water_intake,mission_era; crew_capability,FALSE,FALSE,1.16886547717149,0.279634477063457,-0.0124945046693303,"",0.902503251563678,FALSE
+task_performance,resistive_exercise,mission_era; pre_flight_fitness; crew_capability,FALSE,FALSE,0.0136477065352665,0.907000001055161,0.00164185157876779,"",0.989093354026907,FALSE
+task_performance,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; crew_capability,FALSE,FALSE,0.29303850382712,0.588279932921776,-0.00532747592806296,"",0.963099194989734,FALSE
+task_performance,percutaneous_nephrostomy,mission_era; ultrasound; crew_capability,FALSE,FALSE,0.50004992738468,0.479478185350448,-0.00656166980736767,"",0.937520787024677,FALSE
+task_performance,hydration,mission_era; water_intake; crew_capability,FALSE,FALSE,0.145295979535149,0.703071842254369,-0.00435894853576119,"",0.989093354026907,FALSE
+task_performance,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; crew_capability,FALSE,FALSE,0.142462711173721,0.705844915574039,0.00433772841435957,"",0.989093354026907,FALSE
+task_performance,urine_concentration,hydration; crew_capability,FALSE,FALSE,0.0170072345717927,0.896240640390298,-0.00148413753727248,"",0.989093354026907,FALSE
+task_performance,k_citrate,mission_era; individual_factors; urine_concentration; crew_capability,FALSE,FALSE,2.35766534261711,0.124668642748749,0.0150102354498429,"",0.835994217648425,FALSE
+task_performance,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; crew_capability,FALSE,FALSE,0.710795366405364,0.399179895924576,0.0140743563763459,"",0.92752661097855,FALSE
+task_performance,mineralized_renal_material,urine_chemistry; crew_capability,FALSE,FALSE,1.54654846667836,0.213645704846887,0.0143954784291103,"",0.880047920906799,FALSE
+task_performance,nephrolithiasis,individual_factors; mineralized_renal_material; crew_capability,FALSE,FALSE,4.55015311908937,0.0329158027096963,-0.0208864003992881,"",0.622108671213261,FALSE
+task_performance,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis; crew_capability,FALSE,FALSE,4.55922667688719,0.0327418542793981,0.0222661919496212,"",0.622108671213261,FALSE
+task_performance,flight_recertification,nephrolithiasis; crew_capability,FALSE,FALSE,0.823800124133413,0.364071436528118,0.00842478918267535,"",0.92752661097855,FALSE
+task_performance,ultrasound_manipulation,mission_era; detect_mrm_stone; crew_capability,FALSE,FALSE,0.578786984031467,0.446788177609986,0.00713563858138668,"",0.92752661097855,FALSE
+task_performance,ureterolithiasis,nephrolithiasis; ultrasound_manipulation; crew_capability,FALSE,FALSE,0.382042870442092,0.536511949451124,0.00576191043943658,"",0.963099194989734,FALSE
+task_performance,urine_flow,tamsulosin; water_intake; ureterolithiasis; crew_capability,FALSE,FALSE,1.1754595342245,0.278282286311499,0.011284594082097,"",0.902503251563678,FALSE
+task_performance,medical_illness,medications; percutaneous_nephrostomy; urine_flow; crew_capability,FALSE,FALSE,0.105891649920522,0.744870809251169,-0.00342353609011071,"",0.989093354026907,FALSE
+task_performance,evacuation,medications; medical_illness; crew_capability,FALSE,FALSE,0.0180356586897688,0.893167800534195,-0.00125791668468647,"",0.989093354026907,FALSE
+task_performance,individual_readiness,medications; medical_illness; crew_capability,FALSE,FALSE,0.746849828505219,0.387475430126529,-0.00973889807008833,"",0.92752661097855,FALSE
+task_performance,long_term_health_outcomes,medications; medical_illness; crew_capability,FALSE,FALSE,0.69718699952864,0.403730520535765,-0.00867342595018792,"",0.92752661097855,FALSE
+task_performance,loss_of_crew_life,medications; medical_illness; evacuation; crew_capability,FALSE,FALSE,5.43927637437446,0.0196888246991416,-0.0216333785081555,"",0.622108671213261,FALSE
+task_performance,detect_long_term_health_outcomes,mission_era; long_term_health_outcomes; crew_capability,FALSE,FALSE,0.0614129721652716,0.80427645896166,0.00269561651738078,"",0.989093354026907,FALSE
+loss_of_mission_objectives,mission_era,evacuation; task_performance,TRUE,FALSE,0.00920187164638264,0.923579037736272,0.00437728202577024,"",0.989093354026907,FALSE
+loss_of_mission_objectives,individual_factors,evacuation; task_performance,TRUE,FALSE,2.64498747836342,0.103876975538698,0.0748279127826216,"",0.835994217648425,FALSE
+loss_of_mission_objectives,microbiome,evacuation; task_performance,TRUE,FALSE,3.22784748216282,0.0723957876972985,0.0824443376122695,"",0.835994217648425,FALSE
+loss_of_mission_objectives,nutrients,evacuation; task_performance,TRUE,FALSE,6.6124701860299,0.0101267093553754,0.117860696534544,"",0.622108671213261,FALSE
+loss_of_mission_objectives,pre_flight_fitness,evacuation; task_performance,TRUE,FALSE,6.06199927243642,0.0138121232531959,0.11343098200451,"",0.622108671213261,FALSE
+loss_of_mission_objectives,cumulative_mission_duration,mission_era; evacuation; task_performance,TRUE,FALSE,0.32014747981475,0.571519028472107,0.0282332141097888,"",0.963099194989734,FALSE
+loss_of_mission_objectives,medications,mission_era; evacuation; task_performance,TRUE,FALSE,0.611102605633732,0.434372961446748,-0.0385042683522502,"",0.92752661097855,FALSE
+loss_of_mission_objectives,tamsulosin,mission_era; evacuation; task_performance,TRUE,FALSE,1.12209246818566,0.289468337193978,-0.0508557605676744,"",0.902503251563678,FALSE
+loss_of_mission_objectives,thiazides,mission_era; evacuation; task_performance,TRUE,FALSE,0.723034882637876,0.395150213417474,0.0372905573010882,"",0.92752661097855,FALSE
+loss_of_mission_objectives,ultrasound,mission_era; evacuation; task_performance,TRUE,FALSE,0.191563142625455,0.661618799474017,0.0434974518695333,"",0.989093354026907,FALSE
+loss_of_mission_objectives,water_intake,mission_era; evacuation; task_performance,TRUE,FALSE,3.07947521012693,0.0792861049833927,-0.102274766968238,"",0.835994217648425,FALSE
+loss_of_mission_objectives,resistive_exercise,mission_era; pre_flight_fitness; evacuation; task_performance,TRUE,FALSE,1.27791015079538,0.258287969276245,0.0788480157087358,"",0.902503251563678,FALSE
+loss_of_mission_objectives,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; evacuation; task_performance,TRUE,FALSE,0.630563475415784,0.427148702748694,-0.0400943281356179,"",0.92752661097855,FALSE
+loss_of_mission_objectives,percutaneous_nephrostomy,mission_era; ultrasound; evacuation; task_performance,TRUE,FALSE,0.0356580824873163,0.850223332047992,0.00861627540080028,"",0.989093354026907,FALSE
+loss_of_mission_objectives,hydration,mission_era; water_intake; evacuation; task_performance,TRUE,FALSE,0.011005836487584,0.916448251108286,-0.00600532849154787,"",0.989093354026907,FALSE
+loss_of_mission_objectives,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; evacuation; task_performance,TRUE,FALSE,0.137051479246566,0.711230015803592,0.0213883544209499,"",0.989093354026907,FALSE
+loss_of_mission_objectives,urine_concentration,hydration; evacuation; task_performance,TRUE,FALSE,0.000750385754599847,0.978146145873753,0.00157155877883673,"",0.992362825292478,FALSE
+loss_of_mission_objectives,k_citrate,mission_era; individual_factors; urine_concentration; evacuation; task_performance,TRUE,FALSE,0.379345752528934,0.537953586627438,0.0297022422214417,"",0.963099194989734,FALSE
+loss_of_mission_objectives,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; evacuation; task_performance,TRUE,FALSE,0.267921299663612,0.60472960272639,0.0432289491412523,"",0.963150799847929,FALSE
+loss_of_mission_objectives,mineralized_renal_material,urine_chemistry; evacuation; task_performance,TRUE,FALSE,0.351336309777707,0.553357650582436,0.0344773547965706,"",0.963099194989734,FALSE
+loss_of_mission_objectives,nephrolithiasis,individual_factors; mineralized_renal_material; evacuation; task_performance,TRUE,FALSE,0.435567754221665,0.509269506279017,-0.0315428115841789,"",0.946740360853123,FALSE
+loss_of_mission_objectives,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis; evacuation; task_performance,TRUE,FALSE,0.305037700009052,0.580741336042012,-0.0289901537130154,"",0.963099194989734,FALSE
+loss_of_mission_objectives,flight_recertification,nephrolithiasis; evacuation; task_performance,TRUE,FALSE,5.23547523576372,0.0221307615499385,-0.098480604465317,"",0.622108671213261,FALSE
+loss_of_mission_objectives,ultrasound_manipulation,mission_era; detect_mrm_stone; evacuation; task_performance,TRUE,FALSE,2.40987884509923,0.120571697252378,0.07050459441244,"",0.835994217648425,FALSE
+loss_of_mission_objectives,ureterolithiasis,nephrolithiasis; ultrasound_manipulation; evacuation; task_performance,TRUE,FALSE,1.4492345445251,0.228650816024839,-0.0587343749706667,"",0.881938861810095,FALSE
+loss_of_mission_objectives,urine_flow,tamsulosin; water_intake; ureterolithiasis; evacuation; task_performance,TRUE,FALSE,0.417209982880195,0.518332501783593,-0.0334328418995149,"",0.959718457993204,FALSE
+loss_of_mission_objectives,medical_illness,medications; percutaneous_nephrostomy; urine_flow; evacuation; task_performance,TRUE,FALSE,2.01012093534428,0.156252862053544,-0.0751439382469452,"",0.835994217648425,FALSE
+loss_of_mission_objectives,individual_readiness,medications; medical_illness; evacuation; task_performance,TRUE,FALSE,0.00262899902418212,0.959107372731388,0.00271673869173284,"",0.989093354026907,FALSE
+loss_of_mission_objectives,long_term_health_outcomes,medications; medical_illness; evacuation; task_performance,TRUE,FALSE,1.8643041013429,0.17212886607185,0.0710468382479956,"",0.835994217648425,FALSE
+loss_of_mission_objectives,loss_of_crew_life,medications; medical_illness; evacuation; task_performance,TRUE,FALSE,1.56436372994358,0.211027428432751,-0.0595989365191667,"",0.880047920906799,FALSE
+loss_of_mission_objectives,crew_capability,evacuation; individual_readiness; task_performance,TRUE,FALSE,11.1743200098513,0.000829372868551856,-0.180533647361073,"",0.258144414437837,FALSE
+loss_of_mission_objectives,detect_long_term_health_outcomes,mission_era; evacuation; long_term_health_outcomes; task_performance,TRUE,FALSE,1.66086910838658,0.197486019444879,-0.0699292025079128,"",0.861342869424971,FALSE
+loss_of_mission,mission_era,loss_of_mission_objectives,FALSE,FALSE,0.0682742964700083,0.793866173848257,0.0122200598893307,"",0.989093354026907,FALSE
+loss_of_mission,individual_factors,loss_of_mission_objectives,FALSE,FALSE,0.44491548499127,0.504759451989519,-0.0310891731648748,"",0.945746165882615,FALSE
+loss_of_mission,microbiome,loss_of_mission_objectives,FALSE,FALSE,0.0255960581530417,0.87289077815528,0.0074551276512317,"",0.989093354026907,FALSE
+loss_of_mission,nutrients,loss_of_mission_objectives,FALSE,FALSE,1.21537898384804,0.270269438398057,-0.051405133134944,"",0.902503251563678,FALSE
+loss_of_mission,pre_flight_fitness,loss_of_mission_objectives,FALSE,FALSE,0.183977300590868,0.667977258884227,0.0199929146991464,"",0.989093354026907,FALSE
+loss_of_mission,cumulative_mission_duration,mission_era; loss_of_mission_objectives,FALSE,FALSE,0.226489171103822,0.634139363644952,0.0239493276703766,"",0.989093354026907,FALSE
+loss_of_mission,medications,mission_era; loss_of_mission_objectives,FALSE,FALSE,0.190712190069917,0.662324527822026,0.021077858302182,"",0.989093354026907,FALSE
+loss_of_mission,tamsulosin,mission_era; loss_of_mission_objectives,FALSE,FALSE,0.0318580965581532,0.85833945760973,-0.0085164552566546,"",0.989093354026907,FALSE
+loss_of_mission,thiazides,mission_era; loss_of_mission_objectives,FALSE,FALSE,0.356490984210723,0.550461541215308,0.0263509298035002,"",0.963099194989734,FALSE
+loss_of_mission,ultrasound,mission_era; loss_of_mission_objectives,FALSE,FALSE,4.23742572103765,0.0395420804201183,-0.190919150635437,"",0.68183709683502,FALSE
+loss_of_mission,water_intake,mission_era; loss_of_mission_objectives,FALSE,FALSE,1.043844167521,0.306929102603549,-0.0598153158639232,"",0.902503251563678,FALSE
+loss_of_mission,resistive_exercise,mission_era; pre_flight_fitness; loss_of_mission_objectives,FALSE,FALSE,0.589104277106344,0.442765698366808,-0.0546140194347434,"",0.92752661097855,FALSE
+loss_of_mission,bisphosphonates,mission_era; pre_flight_fitness; cumulative_mission_duration; loss_of_mission_objectives,FALSE,FALSE,3.09321709372944,0.078619230438631,-0.0910252350080899,"",0.835994217648425,FALSE
+loss_of_mission,percutaneous_nephrostomy,mission_era; ultrasound; loss_of_mission_objectives,FALSE,FALSE,0.176886600366288,0.674062613346846,0.0193939305534506,"",0.989093354026907,FALSE
+loss_of_mission,hydration,mission_era; water_intake; loss_of_mission_objectives,FALSE,FALSE,6.24585395286476,0.0124484348962086,-0.144643452257395,"",0.622108671213261,FALSE
+loss_of_mission,bone_remodeling,mission_era; nutrients; cumulative_mission_duration; resistive_exercise; bisphosphonates; loss_of_mission_objectives,FALSE,FALSE,1.07014256222874,0.300913246596584,0.060234725061917,"",0.902503251563678,FALSE
+loss_of_mission,urine_concentration,hydration; loss_of_mission_objectives,FALSE,FALSE,6.45938186578724,0.0110368031647594,-0.146738685209766,"",0.622108671213261,FALSE
+loss_of_mission,k_citrate,mission_era; individual_factors; urine_concentration; loss_of_mission_objectives,FALSE,FALSE,0.229447822921884,0.631933562031856,-0.0241696321415144,"",0.989093354026907,FALSE
+loss_of_mission,urine_chemistry,mission_era; microbiome; thiazides; bone_remodeling; urine_concentration; k_citrate; loss_of_mission_objectives,FALSE,FALSE,0.0024462176625093,0.960553309191121,-0.00418031246259707,"",0.989093354026907,FALSE
+loss_of_mission,mineralized_renal_material,urine_chemistry; loss_of_mission_objectives,FALSE,FALSE,0.0471892809096062,0.828028374395095,0.012733389465568,"",0.989093354026907,FALSE
+loss_of_mission,nephrolithiasis,individual_factors; mineralized_renal_material; loss_of_mission_objectives,FALSE,FALSE,0.00593407941960322,0.938597311699174,0.00382313769526699,"",0.989093354026907,FALSE
+loss_of_mission,detect_mrm_stone,ultrasound; mineralized_renal_material; nephrolithiasis; loss_of_mission_objectives,FALSE,FALSE,2.90860197630263,0.0881082202455447,0.0882542186156341,"",0.835994217648425,FALSE
+loss_of_mission,flight_recertification,nephrolithiasis; loss_of_mission_objectives,FALSE,FALSE,0.674252541158694,0.411572894821907,-0.0377270854060517,"",0.92752661097855,FALSE
+loss_of_mission,ultrasound_manipulation,mission_era; detect_mrm_stone; loss_of_mission_objectives,FALSE,FALSE,0.00997566837577324,0.920440969859484,-0.00471693986571261,"",0.989093354026907,FALSE
+loss_of_mission,ureterolithiasis,nephrolithiasis; ultrasound_manipulation; loss_of_mission_objectives,FALSE,FALSE,6.07293676738664,0.0137268542851653,-0.127321959839385,"",0.622108671213261,FALSE
+loss_of_mission,urine_flow,tamsulosin; water_intake; ureterolithiasis; loss_of_mission_objectives,FALSE,FALSE,1.09583604588533,0.295181737630218,0.0551427375121639,"",0.902503251563678,FALSE
+loss_of_mission,medical_illness,medications; percutaneous_nephrostomy; urine_flow; loss_of_mission_objectives,FALSE,FALSE,2.03955566328114,0.153254407109226,0.0755807244365326,"",0.835994217648425,FALSE
+loss_of_mission,evacuation,medications; medical_illness; loss_of_mission_objectives,FALSE,FALSE,0.0145091335571124,0.904123623990579,-0.00718758032585647,"",0.989093354026907,FALSE
+loss_of_mission,individual_readiness,medications; medical_illness; loss_of_mission_objectives,FALSE,FALSE,1.30149464894203e-06,0.999089749008409,-6.02940978701575e-05,"",0.999089749008409,FALSE
+loss_of_mission,long_term_health_outcomes,medications; medical_illness; loss_of_mission_objectives,FALSE,FALSE,0.114181790605471,0.735432547517703,-0.0177686676993308,"",0.989093354026907,FALSE
+loss_of_mission,loss_of_crew_life,medications; medical_illness; evacuation; loss_of_mission_objectives,FALSE,FALSE,1.68973346698931,0.193636107810913,-0.0654320534840308,"",0.860591469318669,FALSE
+loss_of_mission,crew_capability,individual_readiness; loss_of_mission_objectives,FALSE,FALSE,1.04768113243381,0.306041747946704,-0.052615500902878,"",0.902503251563678,FALSE
+loss_of_mission,detect_long_term_health_outcomes,mission_era; long_term_health_outcomes; loss_of_mission_objectives,FALSE,FALSE,0.597589417901872,0.439499253235266,0.0423471096586485,"",0.92752661097855,FALSE
+loss_of_mission,task_performance,crew_capability; loss_of_mission_objectives,FALSE,FALSE,0.588138562467066,0.443139829102207,0.0391562919035812,"",0.92752661097855,FALSE

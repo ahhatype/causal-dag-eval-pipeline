@@ -1,0 +1,46 @@
+ConfoundingSHAP provenance (written 2026-10-10 from the stored outputs; the run itself did not write a provenance file)
+
+What this covers: confounding_credits.csv, confounding_runs.csv, confounding_summary.csv, confounding_cells/,
+confounding_reference_credits.csv, confounding_reference_meta.json.
+
+Generated (file modification times, EDT, 2026-10-09)
+  reference credits (run_confounding_shap.py key): 08:14:51
+  ConfoundingSHAP cells (run_confounding_shap.py run): settings manifest 08:15:07, first cell 08:17:45, last cell 09:46:10
+  combined tables: 09:46:10
+  Not recorded at run time; reconstructed from file times.
+
+Settings actually used (confounding_cells/manifest.json, written by the run, and confounding_runs.csv)
+  TabPFN model version: v2.5  (every row of confounding_runs.csv states v2.5)
+  budget (coalitions per run): 64; exact computation: False (never; 2^10 and 2^11 coalitions exceed the budget)
+  approximator: shapiq RegressionMSR, proxy model: tree
+  TabPFN estimators per fit: 1; device: cpu; target power transform disabled
+  treatments: k_citrate, bisphosphonates
+  data sets: astronaut_set, reference_subsample; replicates 1 to 10 (40 runs)
+  covariates per run: 10, 11 (11 for k_citrate, 10 for bisphosphonates)
+  base seed: 20261200; cell seed = base + 1000 * replicate + 10 * index of data set in params.yaml datasets + index of treatment
+  reference credits: 50,000 simulated records, 100 permutations, seed 20261500 (params.yaml confounding_shap.reference; values at run time not
+    separately recorded, but params.yaml was last modified 2026-10-09 07:40, before the run)
+
+Data
+  data config hash: d2671ab6dc028eccc7a32b0cc8312afc (02_data/provenance.txt, generated 2026-10-08 07:19:47). The run checks the data against the calibration
+    hash before starting (check_data_current) and would have stopped on a mismatch, so the data used carried this hash.
+
+Code
+  git commit at run time: 2a57047 (HEAD when the run started; the ConfoundingSHAP code was untracked and uncommitted then). The code was first
+    committed in e47aa65 (2026-10-09 17:34). The source files below have modification times (07:35 to 07:56, 2026-10-09) earlier than the run
+    (08:15), so the committed versions should be those that ran, but that is an inference, not a record.
+  code hash at run time: NOT RECORDED. attribution_validation.pipeline.code_hash() hashes the whole package, which has changed since (table1.py
+    added, pipeline.py edited after the run), so the run-time value cannot be recomputed. SHA-256 (first 16 hex digits) of the files that
+    determine these results, as they are now:
+    37d5c6727c9c506e  04_attribution_validation/src/attribution_validation/confounding.py
+    93a23efae7a863cb  04_attribution_validation/src/attribution_validation/reference_key.py
+    66121c36ef74aa09  04_attribution_validation/src/attribution_validation/truesim.py
+    f44c59d34c151e6c  04_attribution_validation/src/attribution_validation/data.py
+    c3224874ddf04537  04_attribution_validation/run_confounding_shap.py
+
+Packages
+  Pinned exactly in 04_attribution_validation/pyproject.toml before the run (modified 2026-10-09 07:28): tabpfn==9.1.0, shapiq[proxy]==1.7.0.
+  Versions reported by the current environment: tabpfn 9.1.0, shapiq 1.7.0, torch 2.14.1. Versions at run time were not recorded.
+
+TabPFN-2.5 access: the licence (tabpfn-2.5-license-v1.1) was accepted on the Prior Labs account and the Hugging Face login was in place before the run
+  (the run started with the 2.5 weights; earlier TabPFN-2 attempts were discarded with --fresh).

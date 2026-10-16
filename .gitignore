@@ -1,0 +1,39 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Data & outputs: ignored, except the small files that are the paper's source data.
+# The full replicate data and per-record attributions are archived with a DOI, not committed.
+02_data/*
+!02_data/data_summary.csv
+!02_data/feature_sets.csv
+!02_data/truth_values.csv
+!02_data/truth_binary_checks.csv
+!02_data/provenance.txt
+outputs/*
+!outputs/03_shape_validation/
+!outputs/04_attribution_validation/
+outputs/04_attribution_validation/cells/
+outputs/04_attribution_validation/values.csv.gz
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+references/
+references/*
+
+outputs/03_shape_validation/units/

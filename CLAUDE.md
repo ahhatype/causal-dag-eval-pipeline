@@ -1,0 +1,32 @@
+# CLAUDE.md
+
+## Project
+causal-dag-eval-pipeline: evaluates an established causal DAG (NASA renal-stone DAG SA-07566, adapted) in synthetic data — structural validation (testable implications, causal discovery) and attribution validation (standard and causal SHAP against simulated total effects).
+
+## Layout
+- `01_data_generation/` (R): simulates replicate data sets and ground truth from `config/`.
+- `02_data/`: generated data (`DATA_DIR`); git-ignored except the small summary, feature-set, ground-truth and provenance files listed in `.gitignore`.
+- `03_shape_validation/` (R): implication tests, power control, MGM-PC discovery.
+- `04_attribution_validation/` (Python, uv): attribution methods and evaluation.
+- `05_figures/` (Python, system `python3`): manuscript figures and LaTeX tables from the stored results; display names from `04_attribution_validation/config/labels.yaml`.
+- `outputs/` (`OUTPUT_DIR`): analysis outputs; the `03_shape_validation` and `04_attribution_validation` result tables are committed as source data, the per-cell and per-record files and `05_figures` are git-ignored.
+- `references/`: drafts and notes; git-ignored, never cite it from README or code.
+
+## Conventions
+- R: config-driven (`config/params.yaml`), testthat tests in each module's `tests/`, packages pinned in `renv.lock`.
+- Shape validation: code in `03_shape_validation/R/` and `params.yaml` are hashed into the saved units, so editing them invalidates `--resume`; post-hoc analyses of stored results live beside `run_all.R`.
+- Python: uv-managed project with pinned lockfile, pytest tests (`05_figures` uses system `python3` and its own `tests/`).
+- Seeds live in each module's `config/params.yaml`; never use unseeded randomness.
+- Directories come from `.env` (`DATA_DIR`, `OUTPUT_DIR`); never hard-code keys.
+- Comments are sparse; the README carries intent. Never describe the editing process in code, comments or README.
+
+## Rules
+- Never read, print, or commit `.env`.
+- Ask before adding heavy dependencies.
+- Add tests for any new metric.
+
+## Commands
+- Generate data: `make data` (`make recalibrate` after changing `01_data_generation/config`)
+- Shape validation: `make shape`
+- Contrasts from stored results: `make conditions`; figures and tables: `make figures`
+- Tests: `make test`

@@ -1,0 +1,13 @@
+dataset,dataset_label,method,method_label,n_ancestors,n_displaced,n_replicates,tau_b_mean,tau_b_mcse
+full_set,Full set,standard_shap,Standard SHAP,16,7,50,0.5536666666666668,0.019870841455158723
+full_set,Full set,ordering_only_shap,Ordering-only SHAP,16,7,50,0.5573333333333335,0.016715303184334337
+full_set,Full set,ng_style_shap,Causal predictive SHAP,16,2,50,0.8969999999999999,0.0053386453138271036
+full_set,Full set,interventional_shap,Causal interventional SHAP,16,2,50,0.9143333333333333,0.0057540284616445
+reference_subsample,Reference subsample,standard_shap,Standard SHAP,16,6,50,0.6946666666666667,0.01803523887476518
+reference_subsample,Reference subsample,ordering_only_shap,Ordering-only SHAP,16,6,50,0.6996666666666667,0.0178014369212877
+reference_subsample,Reference subsample,ng_style_shap,Causal predictive SHAP,16,0,50,0.8933333333333331,0.006546536707079772
+reference_subsample,Reference subsample,interventional_shap,Causal interventional SHAP,16,0,50,0.858,0.009644943924702602
+astronaut_set,Astronaut set,standard_shap,Standard SHAP,16,4,50,0.7236666666666666,0.01469331222142513
+astronaut_set,Astronaut set,ordering_only_shap,Ordering-only SHAP,16,2,50,0.722,0.014447025759234384
+astronaut_set,Astronaut set,ng_style_shap,Causal predictive SHAP,16,2,50,0.9103333333333332,0.00661356401835979
+astronaut_set,Astronaut set,interventional_shap,Causal interventional SHAP,16,0,50,0.8606666666666665,0.008790326573560351
