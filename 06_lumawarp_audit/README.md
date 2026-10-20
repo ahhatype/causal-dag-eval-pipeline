@@ -11,7 +11,7 @@ fit, the scripts, and a RESULTS.md; result tables are in `outputs/06_lumawarp_au
 | `estimation/` | does adjustment by the DAG's parents (or by the ordering alone) recover the per-unit contrast for K+ citrate and bisphosphonates, with a calibrated interval, with LumaWarp, a Super Learner, or a logistic model as the nuisance learner | 600 units x 6 fits | full-set K+ citrate: naive +0.032 (sign wrong 50 of 50) becomes -0.020 against a true -0.020, coverage 0.92, identical across learners and routes; at 900 rows bias removed, SE 0.03 exceeds the effect |
 | `estimation_bounds/` | is the astronaut-set under-coverage (0.82) the propensity bounds or the sample | 0 (re-targeting only) | no bound from 0.001 to 0.05 changes coverage or bias by more than 0.002: the sample |
 | `attribution_lumawarp_base/` | do the attribution findings hold when LumaWarp replaces the Super Learner as the explained model, with the same split, records and feature orders | 30 | causal interventional tau 0.814 vs 0.811 on the full set; interventional minus standard +0.41 (draft +0.43); ordering-only minus standard 0.00 |
-| `nonlinear_sensitivity/` | what curvature does to shape validation inside this generator (branch `nonmonotone-variant`: three edges made U-shaped, one saturating) | 0 here (PC-stable and the hybrid are CPU) | symmetric U-shapes: MGM-PC-Stable recovers none of the three curved edges in 150 data sets and the linear implication test certifies their absence; the flexible two-way audit and a basis-expanded conditional-independence test recover all three |
+| `nonlinear_sensitivity/` | what curvature does to shape validation inside this generator (branch `nonlinear-variant`: three edges made U-shaped, one saturating) | 0 here (PC-stable and the hybrid are CPU) | symmetric U-shapes: MGM-PC-Stable recovers none of the three curved edges in 150 data sets and the linear implication test certifies their absence; the flexible two-way audit and a basis-expanded conditional-independence test recover all three |
 | `shape_flag_checks/` | the monotonicity flag's dependence on the test's functional form and on the engine build | 144 | the flag is a kernel-slice degree-centroid reading (format-1 model files); the newer build's importance file does not carry it |
 
 ## Method in one paragraph (the ordering-informed audit)
@@ -46,7 +46,7 @@ per-unit contrast for the population each data set represents.
     cd 06_lumawarp_audit/estimation && PLAN=full ./run_all.sh          # engine driver plus three R workers; then python summarize.py
     cd 06_lumawarp_audit/estimation_bounds && ./run_all.sh && python summarize.py
     cd 06_lumawarp_audit/attribution_lumawarp_base && BACKGROUND=32 ./run_all.sh && python compare.py
-    nonlinear_sensitivity: generate data on branch nonmonotone-variant (make recalibrate), then ./run_after_data.sh
+    nonlinear_sensitivity: generate data on branch nonlinear-variant (make recalibrate), then ./run_after_data.sh
 Each run script is resumable. Engine time on one RTX 5090 laptop: edge audit about 12 h (two streams), estimation
 about 6 h, attribution about 4 h at 32 background records (about 24 h at the paper's 128).
 
