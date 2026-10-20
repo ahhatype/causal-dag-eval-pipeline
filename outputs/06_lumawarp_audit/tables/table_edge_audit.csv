@@ -1,0 +1,16 @@
+dataset,learner,ordering,recall,recall_mcse,precision,noise_kept,edges_called
+full_set,LumaWarp,given,0.852,0.009,0.932,0.001,57.7
+full_set,spline additive,given,0.846,0.008,0.928,0.002,57.5
+full_set,logistic/linear,given,0.803,0.007,0.992,0.0,51.0
+full_set,XGBoost,given,0.733,0.01,0.908,0.002,51.0
+full_set,"MGM-PC-Stable (draft, 50 reps)",none,0.78,,1.0,,
+reference_subsample,LumaWarp,given,0.476,0.02,0.909,0.004,33.7
+reference_subsample,spline additive,given,0.459,0.012,0.823,0.007,35.5
+reference_subsample,logistic/linear,given,0.478,0.006,0.912,0.0,33.1
+reference_subsample,XGBoost,given,0.414,0.015,0.965,0.005,27.2
+reference_subsample,"MGM-PC-Stable (draft, 50 reps)",none,0.56,,0.99,,
+astronaut_set,LumaWarp,given,0.459,0.015,0.843,0.003,35.0
+astronaut_set,spline additive,given,0.454,0.016,0.749,0.007,38.2
+astronaut_set,logistic/linear,given,0.471,0.014,0.926,0.001,32.2
+astronaut_set,XGBoost,given,0.408,0.009,0.912,0.002,28.2
+astronaut_set,"MGM-PC-Stable (draft, 50 reps)",none,0.55,,0.97,,
