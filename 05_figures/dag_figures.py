@@ -1,9 +1,10 @@
-"""Figures drawn on the hand-tuned DAG layout (fig2_layout.json, saved from the layout editor).
+"""Figures drawn on the portrait DAG layout (fig2_portrait.json, in points).
 
+Figure 2: the true analysis graph, 4 in wide.
 Figure 3: where structure recovery failed, one panel per data set, plus a key.
-Figure 5: where each attribution method put its credit, full-set, one panel per truth or method.
+Figure 6 (and Supplementary Figs 1-2): where each attribution method put its credit, one panel per truth or method.
 
-Both write SVG with live text; PDFs are made from the SVG by a browser so the label font is embedded.
+All write SVG with live text; PDFs are made from the SVG by a browser so the label font is embedded.
 """
 import argparse
 import json
@@ -14,6 +15,8 @@ from xml.sax.saxutils import escape
 
 import pandas as pd
 
+import dag_labels as dl
+
 HERE = Path(__file__).resolve().parent
 ROOT = Path(os.environ.get("PIPELINE_ROOT", HERE.parent))
 OUT = ROOT / "outputs" / "05_figures"
@@ -21,92 +24,33 @@ STRUCTURE = ROOT / "outputs" / "03_structure_validation"
 ATTR = ROOT / "outputs" / "04_attribution_validation"
 DATA = ROOT / "02_data"
 
-W, H = 1830, 1000
-PAD, INNER = 70, 0.92  # panel inset so labels at the left edge stay inside
-FONT = "Barlow Semi Condensed, TeX Gyre Heros Cn, Arial Narrow, Arial, sans-serif"
-INK, NODE, FAINT = "#0b0d12", "#00a6d6", "#c4ccd6"
+FONT = "Inter, Helvetica Neue, Arial, sans-serif"  # OFL, Google Fonts
+INK, GREY, BLUE, FAINT = "#0b0d12", "#4a5260", "#4cc0e8", "#c4ccd6"
 DATASETS = ["full_set", "reference_subsample", "astronaut_set"]
 DS_LABEL = {"full_set": "Full-set", "reference_subsample": "Reference-set", "astronaut_set": "Astronaut-set"}
+DS_N = {"full_set": "n = 10,000", "reference_subsample": "n = 900", "astronaut_set": "n = 900, selected"}
 OUTCOME = "nephrolithiasis"
 
-# recovery categories: colour, dash pattern, arrow, legend label
+TEXT_W = 468.0  # printed width of Figures 3 and 6, pt (6.5 in)
+PANEL_GAP, TITLE_H = 12.0, 16.0
+PANEL_PAD = 14.0  # layout units added left and right of each panel for labels on the outer lanes
+LABEL_PT = 5.0  # printed size of node labels in the panels
+
+# recovery categories: colour, dash pattern (panel units), arrow, legend label
 CATS = {
-    "absent": ("#1b1e24", "14 9", False, "Missed"),
+    "absent": ("#1b1e24", "4 2.6", False, "Missed"),
     "reversed": ("#d55e00", None, True, "Recovered, direction reversed"),
-    "overoriented": ("#e69f00", "18 6 4 6", True, "Direction imposed on an undirected edge"),
+    "overoriented": ("#e69f00", "5 1.8 1.2 1.8", True, "Direction imposed on an undirected edge"),
     "unoriented": ("#8a5cc2", None, False, "Left undirected"),
-    "added": ("#cc79a7", "3 7", False, "Added (not in the true graph)"),
+    "added": ("#cc79a7", "1 2.2", False, "Added (not in the true graph)"),
+}
+
+PANEL_FIXED = {  # small-panel placements where the search leaves a label ambiguous
+    "flight_recertification": (("BR", 0), ["FLIGHT RECERTIFICATION"]),
 }
 
 METHODS = [("truth", "True effect"), ("standard_shap", "Standard SHAP"), ("ordering_only_shap", "Ordering-only SHAP"),
            ("ng_style_shap", "Causal predictive SHAP"), ("interventional_shap", "Causal interventional SHAP")]
-
-
-def load_layout(path):
-    d = json.loads(Path(path).read_text())
-    d = d.get("data", d)
-    return d["nodes"], d.get("edges", {}), d["style"]
-
-
-def label_lines(label):
-    return [t.strip() for t in label.split("|")]
-
-
-class Canvas:
-    """One SVG panel in layout units, placed inside a larger figure by a transform."""
-
-    def __init__(self, nodes, bends, style, fs=None):
-        self.nodes, self.bends, self.s = nodes, bends, dict(style)
-        if fs:
-            self.s["fs"] = fs
-        self.parts = []
-
-    def edge(self, a, b, color, width, dash=None, arrow=True, reverse=False, opacity=1.0, r=None):
-        if reverse:
-            a, b = b, a
-        A, B = self.nodes[a], self.nodes[b]
-        r = r or self.s["nr"]
-        bend = self.bends.get(f"{a}__{b}") or self.bends.get(f"{b}__{a}")
-        mx, my = (A["x"] + B["x"]) / 2, (A["y"] + B["y"]) / 2
-        cx, cy = (mx + bend["dx"], my + bend["dy"]) if bend else (mx, my)
-        ux, uy = unit(cx - A["x"], cy - A["y"])
-        vx, vy = unit(B["x"] - cx, B["y"] - cy)
-        sx, sy = A["x"] + ux * (r + 2), A["y"] + uy * (r + 2)
-        ex, ey = B["x"] - vx * (r + (4 if arrow else 2)), B["y"] - vy * (r + (4 if arrow else 2))
-        d = f"M{sx:.1f},{sy:.1f} Q{cx:.1f},{cy:.1f} {ex:.1f},{ey:.1f}" if bend else f"M{sx:.1f},{sy:.1f} L{ex:.1f},{ey:.1f}"
-        attrs = f'd="{d}" fill="none" stroke="{color}" stroke-width="{width}" stroke-linecap="round"'
-        if dash:
-            attrs += f' stroke-dasharray="{dash}"'
-        if opacity < 1:
-            attrs += f' stroke-opacity="{opacity}"'
-        if arrow:
-            attrs += f' marker-end="url(#arr{color.strip("#")})"'
-        self.parts.append(f"<path {attrs}/>")
-        return color if arrow else None
-
-    def node(self, nid, fill, stroke, r, ring=False, width=1.4):
-        n = self.nodes[nid]
-        self.parts.append(f'<circle cx="{n["x"]}" cy="{n["y"]}" r="{r:.1f}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
-        if ring:
-            self.parts.append(f'<circle cx="{n["x"]}" cy="{n["y"]}" r="{r + 3.5:.1f}" fill="none" stroke="{stroke}" stroke-width="{width * 0.7}"/>')
-
-    def label(self, nid, r, color=INK, weight=700):
-        n, s = self.nodes[nid], self.s
-        lines = label_lines(n["label"])
-        lh = s["fs"] * s["ld"]
-        # the editor's offsets were set at the editor's type size; scale them with the type
-        k = s["fs"] / s.get("fs0", s["fs"])
-        # offset of the first baseline as the editor set it, at the editor's dot size
-        base = -s["nr"] - s["gap"] * k + n.get("ly", 0) * k
-        grow = max(r - s["nr"], 0)
-        y0 = n["y"] + base + (grow if base > 0 else -grow) - (len(lines) - 1) * lh
-        x = n["x"] + n.get("lx", 0) * k
-        spans = "".join(f'<tspan x="{x:.1f}" dy="{0 if i == 0 else lh:.1f}">{escape(t)}</tspan>' for i, t in enumerate(lines))
-        self.parts.append(f'<text x="{x:.1f}" y="{y0:.1f}" text-anchor="middle" font-family="{FONT}" font-size="{s["fs"]}" '
-                          f'font-weight="{weight}" fill="{color}">{spans}</text>')
-
-    def svg(self):
-        return "\n".join(self.parts)
 
 
 def unit(x, y):
@@ -114,24 +58,127 @@ def unit(x, y):
     return x / l, y / l
 
 
-def markers(colors):
-    m = []
-    for c in sorted(set(colors)):
-        m.append(f'<marker id="arr{c.strip("#")}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" '
-                 f'markerUnits="strokeWidth" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="{c}"/></marker>')
-    return "<defs>" + "".join(m) + "</defs>"
+def marker(c, size=7):
+    return (f'<marker id="arr{c.strip("#")}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="{size}" '
+            f'markerHeight="{size}" markerUnits="strokeWidth" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="{c}"/></marker>')
 
 
 def text(x, y, s, size, weight=700, anchor="start", color=INK):
-    return (f'<text x="{x}" y="{y}" font-family="{FONT}" font-size="{size}" font-weight="{weight}" '
+    return (f'<text x="{x:.1f}" y="{y:.1f}" font-family="{FONT}" font-size="{size}" font-weight="{weight}" '
             f'text-anchor="{anchor}" fill="{color}">{escape(s)}</text>')
 
 
-def document(width_mm, vb_w, vb_h, body, colors):
-    h_mm = width_mm * vb_h / vb_w
-    return (f'<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vb_w} {vb_h}" '
-            f'width="{width_mm}mm" height="{h_mm:.1f}mm">{markers(colors)}<rect width="{vb_w}" height="{vb_h}" fill="#ffffff"/>'
-            f"{body}</svg>")
+def label_svg(nid, x, y, lines, anchor, fs, color=INK):
+    lh = fs * dl.LEAD
+    spans = "".join(f'<tspan x="{x:.2f}" dy="{0 if i == 0 else lh:.2f}">{escape(t)}</tspan>' for i, t in enumerate(lines))
+    return (f'<text id="label_{nid}" x="{x:.2f}" y="{y:.2f}" text-anchor="{anchor}" font-family="{FONT}" '
+            f'font-size="{fs:.2f}" font-weight="{dl.WEIGHT}" letter-spacing="{dl.TRACK}em" fill="{color}">{spans}</text>')
+
+
+def svg_doc(w, h, body, colors, marker_size=7):
+    defs = "<defs>" + "".join(marker(c, marker_size) for c in sorted(colors)) + "</defs>"
+    return (f'<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.1f} {h:.1f}" '
+            f'width="{w / 72:.3f}in" height="{h / 72:.3f}in">{defs}<rect width="{w:.1f}" height="{h:.1f}" fill="#ffffff"/>'
+            + "\n".join(body) + "</svg>")
+
+
+def load_portrait(path):
+    return json.loads(Path(path).read_text())
+
+
+def read_edges():
+    return list(pd.read_csv(STRUCTURE / "analysis_graph_edges.csv")[["parent", "child"]].itertuples(index=False, name=None))
+
+
+def ancestors_of(target, edges):
+    par = {}
+    for a, b in edges:
+        par.setdefault(b, set()).add(a)
+    seen, stack = set(), [target]
+    while stack:
+        for p in par.get(stack.pop(), ()):
+            if p not in seen:
+                seen.add(p)
+                stack.append(p)
+    return seen
+
+
+class Panel:
+    """One DAG panel in the portrait layout's units, placed in a figure by translate and scale."""
+
+    def __init__(self, lay, scale, label_pt=LABEL_PT):
+        self.lay, self.nodes, self.s, self.label_pt = lay, lay["nodes"], scale, label_pt
+        self.P = {k: (n["x"] + PANEL_PAD, n["y"]) for k, n in self.nodes.items()}
+        self.w = lay["width"] + 2 * PANEL_PAD
+        self.rad, self.segs, self.parts, self.labels = {}, [], [], {}
+
+    def edge(self, a, b, color, width, dash=None, arrow=True, reverse=False):
+        if reverse:
+            a, b = b, a
+        (ax, ay), (bx, by) = self.P[a], self.P[b]
+        ux, uy = unit(bx - ax, by - ay)
+        ra, rb = self.rad.get(a, 2.6), self.rad.get(b, 2.6)
+        sx, sy = ax + ux * (ra + 0.8), ay + uy * (ra + 0.8)
+        ex, ey = bx - ux * (rb + (1.4 if arrow else 0.8)), by - uy * (rb + (1.4 if arrow else 0.8))
+        attrs = f'd="M{sx:.2f},{sy:.2f} L{ex:.2f},{ey:.2f}" fill="none" stroke="{color}" stroke-width="{width}" stroke-linecap="round"'
+        if dash:
+            attrs += f' stroke-dasharray="{dash}"'
+        if arrow:
+            attrs += f' marker-end="url(#arr{color.strip("#")})"'
+        self.parts.append(f"<path {attrs}/>")
+        self.segs.append(((ax, ay), (bx, by)))
+        return color if arrow else None
+
+    def node(self, nid, fill, stroke, r, ring=False, width=0.9):
+        x, y = self.P[nid]
+        self.parts.append(f'<circle cx="{x}" cy="{y}" r="{r:.2f}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
+        if ring:
+            self.parts.append(f'<circle cx="{x}" cy="{y}" r="{r + 1.8:.2f}" fill="none" stroke="{stroke}" stroke-width="{width * 0.6:.2f}"/>')
+
+    def place_labels(self, labelled):
+        fs = self.label_pt / self.s
+        opts = {k: dl.variants(self.nodes[k]["label"], self.nodes[k]["label"].split("|")) for k in labelled}
+        pref = {k: self.nodes[k].get("place") for k in labelled}
+        fixed = {k: v for k, v in PANEL_FIXED.items() if k in labelled}
+        lab = dl.place(self.P, self.rad, labelled, opts, self.segs, self.w, self.lay["height"], fs, fixed,
+                       iters=10, preferred=pref, clear=0.45)
+        for k, a in lab.items():
+            x, y = self.P[k]
+            self.parts.append(label_svg(k, x + a["lx"], y + a["ly"], a["lines"], a["anchor"], fs))
+
+    def svg(self, x0, y0):
+        return f'<g transform="translate({x0:.2f},{y0:.2f}) scale({self.s:.4f})">' + "".join(self.parts) + "</g>"
+
+
+def panel_title(x0, y0, letter, title, sub=None):
+    tail = f'<tspan font-size="6" font-weight="500" fill="{GREY}">  {escape(sub)}</tspan>' if sub else ""
+    return (text(x0, y0 + 9, letter, 8.5) + f'<text x="{x0 + 10:.1f}" y="{y0 + 9:.1f}" font-family="{FONT}" font-size="7" '
+            f'font-weight="700" fill="{INK}" xml:space="preserve">{escape(title)}{tail}</text>')
+
+
+# ---------- Figure 2: the true analysis graph ----------
+
+def fig2(lay, edges):
+    nodes, f = lay["nodes"], lay["font"]
+    anc = ancestors_of(OUTCOME, edges)
+    body = []
+    for a, b in edges:
+        A, B = nodes[a], nodes[b]
+        ux, uy = unit(B["x"] - A["x"], B["y"] - A["y"])
+        ra, rb = (lay["outcome_r"] if n == OUTCOME else lay["node_r"] for n in (a, b))
+        sx, sy = A["x"] + ux * (ra + 0.8), A["y"] + uy * (ra + 0.8)
+        ex, ey = B["x"] - ux * (rb + 1.2), B["y"] - uy * (rb + 1.2)
+        body.append(f'<path id="edge_{a}__{b}" d="M{sx:.2f},{sy:.2f} L{ex:.2f},{ey:.2f}" stroke="{BLUE}" '
+                    f'stroke-width="0.55" fill="none" marker-end="url(#arr{BLUE.strip("#")})"/>')
+    for nid, n in nodes.items():
+        r = lay["outcome_r"] if nid == OUTCOME else lay["node_r"]
+        filled = nid == OUTCOME or nid in anc
+        g = [f'<circle cx="{n["x"]}" cy="{n["y"]}" r="{r}" fill="{BLUE if filled else "#ffffff"}" stroke="{BLUE}" stroke-width="0.8"/>']
+        if nid == OUTCOME:
+            g.append(f'<circle cx="{n["x"]}" cy="{n["y"]}" r="{r + 1.6}" fill="none" stroke="{BLUE}" stroke-width="0.5"/>')
+        g.append(label_svg(nid, n["x"] + n["lx"], n["y"] + n["ly"], n["label"].split("|"), n["anchor"], f["size"]))
+        body.append(f'<g id="node_{nid}">{"".join(g)}</g>')
+    return svg_doc(lay["width"], lay["height"], body, {BLUE})
 
 
 # ---------- Figure 3: recovery failures per data set ----------
@@ -146,85 +193,86 @@ def recovery(added_threshold):
     return true, added
 
 
-def fig3(layout, added_threshold, fs):
-    nodes, bends, style = layout
+FIG3_PANEL_W = 175.0  # two panels per row, so the 2 x 2 grid fits a page
+
+
+def fig3(lay, added_threshold):
     true, added = recovery(added_threshold)
-    pw, ph, gap_x, gap_y, title_h = W, H, 90, 60, 70
-    vb_w, vb_h = 2 * pw + gap_x, 2 * (ph + title_h) + gap_y
-    body, colors = [], set()
-    counts = {}
-    slots = [(0, 0), (1, 0), (0, 1)]
-    for (cx, cy), ds in zip(slots, DATASETS):
-        c = Canvas(nodes, bends, {**style, "fs0": style["fs"]}, fs=fs)
+    pw = FIG3_PANEL_W
+    s = pw / (lay["width"] + 2 * PANEL_PAD)
+    ph = lay["height"] * s
+    row_h = TITLE_H + ph + PANEL_GAP
+    body, colors, counts = [], set(), {}
+    nr = 3.2
+    for i, ds in enumerate(DATASETS):
+        p = Panel(lay, s)
+        for nid in p.nodes:
+            p.rad[nid] = nr * 1.4 if nid == OUTCOME else nr
         t = true[true["dataset"] == ds]
-        hit = set()
+        hit, cnt = set(), {}
         for e in t.itertuples():
             if e.modal_category == "correct":
-                c.edge(e.parent, e.child, FAINT, 2.2, dash="2 7", arrow=False)
-        cnt = {}
+                p.edge(e.parent, e.child, FAINT, 1.0, dash="0.1 2.6", arrow=False)
         for e in t.itertuples():
             cat = e.modal_category
             if cat == "correct":
                 continue
             col, dash, arrow, _ = CATS[cat]
             arrow = arrow and e.true_mark != "undir" or cat == "overoriented"
-            m = c.edge(e.parent, e.child, col, 3.4, dash=dash, arrow=arrow, reverse=(cat == "reversed"))
+            m = p.edge(e.parent, e.child, col, 1.4, dash=dash, arrow=arrow, reverse=(cat == "reversed"))
             if m:
                 colors.add(m)
             hit |= {e.parent, e.child}
             cnt[cat] = cnt.get(cat, 0) + 1
         for e in added[added["dataset"] == ds].itertuples():
             col, dash, _, _ = CATS["added"]
-            c.edge(e.a, e.b, col, 4.5, dash=dash, arrow=False)
+            p.edge(e.a, e.b, col, 1.8, dash=dash, arrow=False)
             hit |= {e.a, e.b}
             cnt["added"] = cnt.get("added", 0) + 1
         counts[ds] = cnt
-        r = style["nr"] * 1.15
-        for nid in nodes:
+        for nid in p.nodes:
             on = nid in hit
             if nid == OUTCOME:
-                c.node(nid, NODE, NODE, r * 1.45, ring=True)
+                p.node(nid, BLUE, BLUE, p.rad[nid], ring=True)
             else:
-                c.node(nid, NODE if on else "#ffffff", NODE if on else FAINT, r, width=2)
-        for nid in hit | {OUTCOME}:
-            c.label(nid, r * (1.45 if nid == OUTCOME else 1))
-        x0, y0 = cx * (pw + gap_x), cy * (ph + title_h + gap_y)
-        letter = "abc"[DATASETS.index(ds)]
-        body.append(text(x0 + 6, y0 + 46, f"{letter}", 48))
-        body.append(text(x0 + 56, y0 + 46, DS_LABEL[ds], 40, weight=600))
-        body.append(f'<g transform="translate({x0 + PAD},{y0 + title_h}) scale({INNER})">{c.svg()}</g>')
-    # key panel
-    x0, y0 = pw + gap_x, ph + title_h + gap_y
-    body.append(text(x0 + 6, y0 + 46, "Key", 40, weight=600))
-    yy = y0 + 150
-    for cat in ["absent", "reversed", "overoriented", "unoriented", "added"]:
+                p.node(nid, BLUE if on else "#ffffff", BLUE if on else FAINT, nr, width=1.0)
+        p.place_labels(sorted(hit | {OUTCOME}))
+        x0, y0 = (i % 2) * (pw + PANEL_GAP), (i // 2) * row_h
+        body.append(panel_title(x0, y0, "abc"[i], DS_LABEL[ds], DS_N[ds]))
+        body.append(p.svg(x0, y0 + TITLE_H))
+    # key in the fourth slot
+    x0, y0 = pw + PANEL_GAP + 4, row_h
+    body.append(text(x0, y0 + 9, "Key", 7))
+    yy = y0 + 26
+    rows = [("absent", "Missed"), ("reversed", "Reversed"), ("overoriented", "Direction imposed"),
+            ("unoriented", "Left undirected"), ("added", "Added")]
+    for cat, _ in rows:
         col, dash, arrow, lab = CATS[cat]
-        da = f' stroke-dasharray="{dash}"' if dash else ""
+        da = f' stroke-dasharray="{" ".join(str(round(float(v) * 0.6, 2)) for v in dash.split())}"' if dash else ""
         mk = f' marker-end="url(#arr{col.strip("#")})"' if arrow else ""
         if arrow:
             colors.add(col)
-        body.append(f'<path d="M{x0 + 20},{yy} L{x0 + 200},{yy}" stroke="{col}" stroke-width="5" fill="none"{da}{mk}/>')
-        body.append(text(x0 + 230, yy + 13, lab, 38, weight=500))
-        yy += 78
-    body.append(f'<path d="M{x0 + 20},{yy} L{x0 + 200},{yy}" stroke="{FAINT}" stroke-width="3" stroke-dasharray="2 7" fill="none"/>')
-    body.append(text(x0 + 230, yy + 13, "Recovered correctly", 38, weight=500))
-    yy += 110
-    head = ["", "Full", "Ref.", "Astro."]
-    cols = [x0 + 20, x0 + 640, x0 + 780, x0 + 920]
-    for x, h in zip(cols, head):
-        body.append(text(x, yy, h, 34, weight=700, anchor="start" if x == cols[0] else "end"))
-    yy += 52
-    for cat in ["absent", "reversed", "overoriented", "unoriented", "added"]:
-        body.append(text(cols[0], yy, CATS[cat][3], 34, weight=500))
-        for x, ds in zip(cols[1:], DATASETS):
-            body.append(text(x, yy, str(counts[ds].get(cat, 0)), 34, weight=500, anchor="end"))
-        yy += 48
-    body.append(text(cols[0], yy + 20, "Edges by most frequent outcome over 50 replicates (of 63).", 30, weight=500, color="#4a5260"))
-    svg = document(183, vb_w, vb_h, "\n".join(body), colors | {NODE})
-    return svg, counts
+        body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{col}" stroke-width="0.9" fill="none"{da}{mk}/>')
+        body.append(text(x0 + 28, yy, lab, 6, weight=500))
+        yy += 11
+    body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{FAINT}" stroke-width="0.6" stroke-dasharray="0.1 1.6" '
+                f'stroke-linecap="round" fill="none"/>')
+    body.append(text(x0 + 28, yy, "Recovered correctly", 6, weight=500))
+    yy += 26
+    cx = [x0, x0 + 98, x0 + 130, x0 + 166]
+    for x, h in zip(cx, ["Edges", "Full", "Ref.", "Astro."]):
+        body.append(text(x, yy, h, 6, anchor="start" if x == cx[0] else "end"))
+    for cat, short in rows:
+        yy += 10
+        body.append(text(cx[0], yy, short, 6, weight=500))
+        for x, ds in zip(cx[1:], DATASETS):
+            body.append(text(x, yy, str(counts[ds].get(cat, 0)), 6, weight=500, anchor="end"))
+    body.append(text(cx[0], yy + 14, "By most frequent outcome over", 5.5, weight=500, color=GREY))
+    body.append(text(cx[0], yy + 21.5, "50 replicates, of 63 true edges.", 5.5, weight=500, color=GREY))
+    return svg_doc(2 * pw + PANEL_GAP, 2 * row_h - PANEL_GAP, body, colors | {FAINT}, marker_size=5), counts
 
 
-# ---------- Figure 5: where credit went ----------
+# ---------- Figure 6: where credit went ----------
 
 def credit_shares(dataset):
     imp = pd.read_csv(ATTR / "importance.csv")
@@ -240,70 +288,74 @@ def credit_shares(dataset):
 
 
 def colour(v, vmax):
-    # white to deep cyan-blue, by square root so small shares stay visible
+    # white to deep blue through the Figure 2 blue, by square root so small shares stay visible
     f = min(1.0, math.sqrt(max(v, 0) / vmax)) if vmax else 0
-    lo, hi = (255, 255, 255), (6, 54, 122)
-    mid = (0, 166, 214)
-    if f < 0.5:
-        a, b, g = lo, mid, f / 0.5
-    else:
-        a, b, g = mid, hi, (f - 0.5) / 0.5
+    lo, mid, hi = (255, 255, 255), (76, 192, 232), (6, 54, 122)
+    a, b, g = (lo, mid, f / 0.5) if f < 0.5 else (mid, hi, (f - 0.5) / 0.5)
     return "#%02x%02x%02x" % tuple(round(a[i] + (b[i] - a[i]) * g) for i in range(3))
 
 
-def fig5(layout, dataset, fs, label_min):
-    nodes, bends, style = layout
+def credit_r(v, vmax):
+    return min(2.4 + 9.0 * math.sqrt(v / vmax), 11.5) if v > 0 else 2.0
+
+
+def fig6(lay, dataset, label_min, edges):
     sh = credit_shares(dataset)
     vmax = 0.30
-    pw, ph, gap_x, gap_y, title_h = W, H, 90, 60, 70
-    vb_w, vb_h = 2 * pw + gap_x, 3 * (ph + title_h) + 2 * gap_y
+    pw = (TEXT_W - 2 * PANEL_GAP) / 3
+    s = pw / (lay["width"] + 2 * PANEL_PAD)
+    ph = lay["height"] * s
+    row_h = TITLE_H + ph + PANEL_GAP
     body = []
-    edges = list(pd.read_csv(STRUCTURE / "analysis_graph_edges.csv")[["parent", "child"]].itertuples(index=False))
     for i, (m, title) in enumerate(METHODS):
-        cx, cy = i % 2, i // 2
-        c = Canvas(nodes, bends, {**style, "fs0": style["fs"]}, fs=fs)
+        p = Panel(lay, s)
+        vals = {nid: (float(sh.loc[nid, m]) if nid in sh.index else 0.0) for nid in p.nodes}
+        for nid, v in vals.items():
+            p.rad[nid] = credit_r(v, vmax)
         for a, b in edges:
-            c.edge(a, b, FAINT, 1.6, arrow=False)
-        for nid in nodes:
-            v = float(sh.loc[nid, m]) if nid in sh.index else 0.0
-            r = 7 + 34 * math.sqrt(v / vmax) if v > 0 else 5
-            r = min(r, 44)
+            p.edge(a, b, FAINT, 0.9, arrow=False)
+        for nid, v in vals.items():
             stroke = INK if nid == OUTCOME else "#6b7686"
-            c.node(nid, colour(v, vmax) if nid != OUTCOME else "#ffffff", stroke, r, ring=(nid == OUTCOME), width=1.6)
-            if v >= label_min or nid == OUTCOME:
-                c.label(nid, r)
-        x0, y0 = cx * (pw + gap_x), cy * (ph + title_h + gap_y)
-        body.append(text(x0 + 6, y0 + 46, "abcde"[i], 48))
-        body.append(text(x0 + 56, y0 + 46, title, 40, weight=600))
-        body.append(f'<g transform="translate({x0 + PAD},{y0 + title_h}) scale({INNER})">{c.svg()}</g>')
-    # colour key
-    x0, y0 = pw + gap_x, 2 * (ph + title_h + gap_y)
-    body.append(text(x0 + 6, y0 + 46, "Share of credit", 40, weight=600))
+            p.node(nid, colour(v, vmax) if nid != OUTCOME else "#ffffff", stroke, p.rad[nid], ring=(nid == OUTCOME), width=0.8)
+        p.place_labels(sorted(k for k, v in vals.items() if v >= label_min or k == OUTCOME))
+        x0, y0 = (i % 3) * (pw + PANEL_GAP), (i // 3) * row_h
+        body.append(panel_title(x0, y0, "abcde"[i], title))
+        body.append(p.svg(x0, y0 + TITLE_H))
+    # key in the sixth slot
+    x0, y0 = 2 * (pw + PANEL_GAP), row_h
+    body.append(text(x0, y0 + 9, "Share of credit", 7))
     for j, v in enumerate([0.01, 0.05, 0.10, 0.20, 0.30]):
-        r = 7 + 34 * math.sqrt(v / vmax)
-        x = x0 + 80 + j * 190
-        body.append(f'<circle cx="{x}" cy="{y0 + 220}" r="{r:.1f}" fill="{colour(v, vmax)}" stroke="#6b7686" stroke-width="1.6"/>')
-        body.append(text(x, y0 + 310, f"{v:.0%}", 34, weight=500, anchor="middle"))
-    body.append(text(x0 + 20, y0 + 400, f"{DS_LABEL[dataset]}, all-features runs, mean over 50 replicates.", 30, weight=500, color="#4a5260"))
-    body.append(text(x0 + 20, y0 + 445, f"Labels shown for nodes with at least {label_min:.0%} of credit.", 30, weight=500, color="#4a5260"))
-    body.append(text(x0 + 20, y0 + 490, "Ringed node: the outcome.", 30, weight=500, color="#4a5260"))
-    return document(183, vb_w, vb_h, "\n".join(body), {FAINT})
+        r = credit_r(v, vmax) * s
+        x = x0 + 10 + j * 30
+        body.append(f'<circle cx="{x:.1f}" cy="{y0 + 40:.1f}" r="{r:.2f}" fill="{colour(v, vmax)}" stroke="#6b7686" stroke-width="{0.8 * s:.2f}"/>')
+        body.append(text(x, y0 + 58, f"{v:.0%}", 6, weight=500, anchor="middle"))
+    notes = [f"{DS_LABEL[dataset]} ({DS_N[dataset]}), all-features runs,", "mean over 50 replicates.",
+             f"Labels: nodes with at least {label_min:.0%} of credit.", "Ringed node: the outcome."]
+    for j, t in enumerate(notes):
+        body.append(text(x0, y0 + 80 + j * 9, t, 5.5, weight=500, color=GREY))
+    return svg_doc(TEXT_W, 2 * row_h - PANEL_GAP, body, {FAINT})
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--layout", default=str(HERE / "fig2_layout.json"))
+    ap.add_argument("--portrait", default=str(HERE / "fig2_portrait.json"))
     ap.add_argument("--added-threshold", type=float, default=0.10)
-    ap.add_argument("--fs", type=float, default=36, help="label size in layout units for the small panels")
-    ap.add_argument("--dataset", default="full_set", help="data set for Figure 5")
+    ap.add_argument("--dataset", default="all", help="data set for Figure 6, or all (the other two are supplementary)")
     ap.add_argument("--label-min", type=float, default=0.03)
+    ap.add_argument("--figs", default="2,3,6", help="which figures to draw")
     a = ap.parse_args()
-    layout = load_layout(a.layout)
+    figs = set(a.figs.split(","))
     OUT.mkdir(parents=True, exist_ok=True)
-    svg3, counts = fig3(layout, a.added_threshold, a.fs)
-    (OUT / "fig3_recovery_grid.svg").write_text(svg3)
-    (OUT / f"fig5_credit_dag_{a.dataset}.svg").write_text(fig5(layout, a.dataset, a.fs, a.label_min))
-    print(json.dumps(counts, indent=1))
+    lay, edges = load_portrait(a.portrait), read_edges()
+    if "2" in figs:
+        (OUT / "fig2_true_graph.svg").write_text(fig2(lay, edges))
+    if "3" in figs:
+        svg3, counts = fig3(lay, a.added_threshold)
+        (OUT / "fig3_recovery_grid.svg").write_text(svg3)
+        print(json.dumps(counts, indent=1))
+    if "6" in figs:
+        for ds in (DATASETS if a.dataset == "all" else [a.dataset]):
+            (OUT / f"fig5_credit_dag_{ds}.svg").write_text(fig6(lay, ds, a.label_min, edges))
 
 
 if __name__ == "__main__":

@@ -146,19 +146,24 @@ def build_t2():
     cal = pd.read_csv(STRUCTURE / "implication_calibration_summary.csv").set_index("dataset")
     summ = pd.read_csv(STRUCTURE / "summary.csv").query("variant == 'MGM-PC-Stable'").set_index("dataset")
     power = pd.read_csv(STRUCTURE / "power_by_edge.csv")
+    per_rep = pd.read_csv(STRUCTURE / "per_replicate.csv").query("variant == 'MGM-PC-Stable'")
+    nonadd = (per_rep["rejected_nonadditive"] > 0).groupby(per_rep["dataset"]).mean()
     t = Table("tab:supp-implications", "Calibration and power of the testable-implication tests.",
-              r"@{}l rr r@{}", [r"Data set & KS rejection rate & Raw rejection rate & Replicates with any unexpected rejection \\"], [
+              r"@{}l rr rr@{}", [r"Data set & KS rejection rate & Raw rejection rate & \shortstack{Unexpected rejection\\{}(additive response)} & \shortstack{Unexpected rejection\\{}(non-additive response)} \\"], [
         "Rejection rates are over 50 replicates (binomial MCSE for the KS rate and the unexpected-rejection rate; "
-        "Monte Carlo SE of the mean for the raw rate). Unexpected rejections are for MGM-PC-Stable.",
+        "Monte Carlo SE of the mean for the raw rate). Unexpected rejection: share of replicates with any implication "
+        "rejected after false discovery rate adjustment, other than the one expected to fail under selection, split by "
+        "whether the dependent variable has an additive or a non-additive generating mechanism.",
         rf"Power: detection rate of each deleted edge by data set; {DAGGER}detected in fewer than "
         f"{POWER_FLOOR:.0%} of replicates. Binary child nodes are flagged."])
     for ds in style.DATASETS:
         c, s = cal.loc[ds], summ.loc[ds]
         t.row(ds_label(ds), ms(c.ks_rejection_rate, binom_se(c.ks_rejection_rate, c.replicates), 3),
               ms(c.raw_rejection_rate_mean, c.raw_rejection_rate_se, 3),
-              ms(s.any_unexpected_rejection_rate, binom_se(s.any_unexpected_rejection_rate, s.replicates), 3))
+              ms(s.any_unexpected_rejection_rate, binom_se(s.any_unexpected_rejection_rate, s.replicates), 3),
+              ms(nonadd[ds], binom_se(nonadd[ds], s.replicates), 3))
     t.raw(r"\midrule")
-    t.raw(r"Deleted edge & " + " & ".join(ds_label(d) for d in style.DATASETS) + r" \\")
+    t.raw(r"Deleted edge & " + " & ".join(ds_label(d) for d in style.DATASETS) + r" & \\")
     t.raw(r"\midrule")
     wide = power.pivot(index="edge", columns="dataset", values="detection_rate")
     n = int(cal["replicates"].iloc[0])
@@ -169,7 +174,7 @@ def build_t2():
         binary = kind.get((p, c), scale.get(c)) == "binary"
         cells = [f"{fnum(r[d])} ({fnum(binom_se(r[d], n))})" + (DAGGER if r[d] < POWER_FLOOR else "")
                  for d in style.DATASETS]
-        t.row(rf"{esc(nm[p])} $\to$ {esc(nm[c])}" + (" (binary child)" if binary else ""), *cells)
+        t.row(rf"{esc(nm[p])} $\to$ {esc(nm[c])}" + (" (binary child)" if binary else ""), *cells, "")
     return t.render("supp_table2_implications.tex"), t.n
 
 
