@@ -38,10 +38,10 @@ def toy_data(n=4000, seed=0):
     return pd.DataFrame({"a": a, "c": c, "d": d, "b": b, "nephrolithiasis": y})
 
 
-def test_analysis_graph_matches_design_and_shape_validation():
+def test_analysis_graph_matches_design_and_structure_validation():
     assert (len(AG.nodes), len(AG.edges)) == (36, 63)
     assert ("individual_factors", "k_citrate") in AG.edges and ("pre_flight_fitness", "bisphosphonates") in AG.edges
-    r = D.REPO / "outputs" / "03_shape_validation" / "analysis_graph_edges.csv"
+    r = D.REPO / "outputs" / "03_structure_validation" / "analysis_graph_edges.csv"
     if r.exists():
         e = pd.read_csv(r)
         assert set(zip(e.parent, e.child)) == set(AG.edges)

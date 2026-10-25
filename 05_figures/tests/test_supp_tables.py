@@ -22,25 +22,25 @@ def attribution_rows(scope):
 
 
 def reported_contrasts():
-    paired, cond, shape = S.contrast_files()
+    paired, cond, structure = S.contrast_files()
     p = paired[paired.truth_type.isin(S.CO_PRIMARY) & (paired.population == paired.dataset.map(S.OWN))
                & (paired.feature_set == "ancestor")]
     c = cond[cond.truth_type.isin(S.CO_PRIMARY) & cond.metric.isin(S.COND_METRICS)
              & cond.contrast.isin(["sample_size_effect", "selection_effect"])]
-    return len(p) + len(c) + len(shape)
+    return len(p) + len(c) + len(structure)
 
 
 def test_supplementary_data_keep_every_row():
     n_edges, n_contrasts = S.write_supplementary_data()
-    assert n_edges == len(pd.read_csv(S.SHAPE / "edge_recovery.csv"))
+    assert n_edges == len(pd.read_csv(S.STRUCTURE / "edge_recovery.csv"))
     assert n_contrasts == sum(len(f) for f in S.contrast_files())
 
 
 def expected_counts():
     nodes = len(pd.read_csv(S.DATA / "feature_sets.csv"))
     edges = len(pd.read_csv(S.CFG / "edges.csv")) + len(pd.read_csv(S.CFG / "simulation_edges.csv"))
-    power = pd.read_csv(S.SHAPE / "power_by_edge.csv")["edge"].nunique()
-    true_edges = len(pd.read_csv(S.SHAPE / "difference_dag_edges.csv").query("true_edge"))
+    power = pd.read_csv(S.STRUCTURE / "power_by_edge.csv")["edge"].nunique()
+    true_edges = len(pd.read_csv(S.STRUCTURE / "difference_dag_edges.csv").query("true_edge"))
     conf = len(pd.read_csv(S.ATTR / "confounding_summary.csv")) * 2
     contrasts = sum(len(f) for f in S.contrast_files())
     return {

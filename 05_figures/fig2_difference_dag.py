@@ -1,6 +1,6 @@
 """Figure 2: true analysis graph (a) and edge-level recovery by MGM-PC-Stable in each data set (b-d).
 
-Reads node_layout.csv and outputs/03_shape_validation/difference_dag_edges.csv when it exists. Until the
+Reads node_layout.csv and outputs/03_structure_validation/difference_dag_edges.csv when it exists. Until the
 rerun adds that file, it falls back to edge_recovery.csv, where reversed and unoriented edges cannot be
 separated and are drawn together as "orientation unresolved".
 """
@@ -13,23 +13,23 @@ from matplotlib.patches import FancyArrowPatch
 
 import style
 
-SHAPE = style.ROOT / "outputs" / "03_shape_validation"
+STRUCTURE = style.ROOT / "outputs" / "03_structure_validation"
 VARIANT = "MGM-PC-Stable"
 
 
 
 def load_recovery(added_threshold):
-    new = SHAPE / "difference_dag_edges.csv"
+    new = STRUCTURE / "difference_dag_edges.csv"
     if new.exists():
         d = pd.read_csv(new)
         rates = {"correct": "correct_rate", "reversed": "reversed_rate", "unoriented": "unoriented_rate",
                  "overoriented": "overoriented_rate", "absent": "absent_rate"}
-        recovery = pd.read_csv(SHAPE / "edge_recovery.csv").query("variant == @VARIANT")
+        recovery = pd.read_csv(STRUCTURE / "edge_recovery.csv").query("variant == @VARIANT")
         spurious = recovery[~recovery["true_edge"]].assign(added_rate=lambda x: x["adjacency_rate"])
         d = pd.concat([d[d["true_edge"]], spurious[["dataset", "edge", "true_edge", "adjacency_rate", "added_rate"]]])
         source = "difference_dag_edges.csv"
     else:
-        d = pd.read_csv(SHAPE / "edge_recovery.csv").query("variant == @VARIANT").copy()
+        d = pd.read_csv(STRUCTURE / "edge_recovery.csv").query("variant == @VARIANT").copy()
         d["correct_rate"] = d["cpdag_mark_rate"]
         d["orientation_rate"] = d["adjacency_rate"] - d["cpdag_mark_rate"]
         d["absent_rate"] = 1 - d["adjacency_rate"]
@@ -71,7 +71,7 @@ def main():
 
     nodes = pd.read_csv("node_layout.csv")
     xy = {r.id: (r.x, r.y) for r in nodes.itertuples()}
-    graph = pd.read_csv(SHAPE / "analysis_graph_edges.csv")
+    graph = pd.read_csv(STRUCTURE / "analysis_graph_edges.csv")
     true, added, source = load_recovery(args.added_threshold)
 
     fig = plt.figure(figsize=(style.DOUBLE, style.DOUBLE * 0.72))

@@ -9,7 +9,7 @@ from collections import defaultdict
 
 from style import ROOT
 
-edges = list(csv.DictReader(open(ROOT / "outputs" / "03_shape_validation" / "analysis_graph_edges.csv")))
+edges = list(csv.DictReader(open(ROOT / "outputs" / "03_structure_validation" / "analysis_graph_edges.csv")))
 roles = {r["id"]: r for r in csv.DictReader(open(ROOT / "02_data" / "feature_sets.csv"))}
 ERA = "mission_era"
 parents, children = defaultdict(set), defaultdict(set)

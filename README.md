@@ -10,14 +10,14 @@ _(Overview to be written.)_
 
 ## Setup
 
-R is needed for data generation and shape validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python (3.12), managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`; the lockfile also pins `tabpfn` and `shapiq`, used by ConfoundingSHAP. TabPFN-2.5 weights (the model the paper used) are gated and licensed non-commercially; see [TabPFN-2.5 access](#tabpfn-25-access) below before running ConfoundingSHAP with that model.
+R is needed for data generation and structure validation. Package versions (`simcausal`, `rCausalMGM`, `data.table`, `yaml`, `dagitty`, `testthat`) are pinned in `renv.lock`. Attribution validation is Python (3.12), managed with [uv](https://docs.astral.sh/uv/) and pinned in `04_attribution_validation/uv.lock`; the lockfile also pins `tabpfn` and `shapiq`, used by ConfoundingSHAP. TabPFN-2.5 weights (the model the paper used) are gated and licensed non-commercially; see [TabPFN-2.5 access](#tabpfn-25-access) below before running ConfoundingSHAP with that model.
 
 ```bash
 Rscript -e 'renv::restore()'   # install the pinned R packages
 (cd 04_attribution_validation && uv sync)   # install the pinned Python packages
 cp .env.example .env           # then fill in the settings below; .env is git-ignored and never committed
 make data                      # generate the data sets
-make shape                     # structural validation on the generated data
+make structure                 # structural validation on the generated data
 make attribution               # attribution validation on the generated data
 make convergence               # causal predictive SHAP convergence study (after make attribution)
 make confounding               # ConfoundingSHAP reference credits, then the TabPFN runs
@@ -119,9 +119,9 @@ Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (ab
 
 `make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, duration truncation, confounded drug uptake, astronaut selection from the full-set, direct formula evaluation against simcausal, the population-scaled spread (2p(1 − p)|Δ| for binary features), ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
 
-## Shape validation
+## Structure validation
 
-Code in [03_shape_validation/](03_shape_validation/) asks whether the structure of the DAG is consistent with the data. It tests the DAG's conditional independencies directly, and learns a structure with causal discovery and compares the two. Every analysis is repeated on each of the 50 replicates of each data set, and results are reported as rates or means with Monte Carlo standard errors.
+Code in [03_structure_validation/](03_structure_validation/) asks whether the structure of the DAG is consistent with the data. It tests the DAG's conditional independencies directly, and learns a structure with causal discovery and compares the two. Every analysis is repeated on each of the 50 replicates of each data set, and results are reported as rates or means with Monte Carlo standard errors.
 
 ### How it works
 
@@ -157,15 +157,15 @@ Settings (FDR level, power α, PC-Stable α, variants, StEPS subsamples, stabili
 ### Run
 
 ```bash
-make shape                                  # or: Rscript 03_shape_validation/run_all.R
-Rscript 03_shape_validation/run_all.R --resume                       # continue an interrupted run
-Rscript 03_shape_validation/run_all.R --fresh                        # discard saved units and start again
-Rscript 03_shape_validation/run_all.R --replicates=2 --subsamples=0   # quick check
-Rscript 03_shape_validation/run_calibration.R                         # implication tests and calibration only
-Rscript 03_shape_validation/run_conditions.R                          # sample-size and selection contrasts, from the stored per_replicate.csv
+make structure                             # or: Rscript 03_structure_validation/run_all.R
+Rscript 03_structure_validation/run_all.R --resume                       # continue an interrupted run
+Rscript 03_structure_validation/run_all.R --fresh                        # discard saved units and start again
+Rscript 03_structure_validation/run_all.R --replicates=2 --subsamples=0   # quick check
+Rscript 03_structure_validation/run_calibration.R                         # implication tests and calibration only
+Rscript 03_structure_validation/run_conditions.R                          # sample-size and selection contrasts, from the stored per_replicate.csv
 ```
 
-The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes about 2–3 hours when run alone, plus about 30 minutes for the stability analysis on replicate 1; the implication tests alone take a few minutes. Each replicate × data set is saved in `units/` when complete. A later run refuses to touch them unless given `--resume` (continue, only if settings, config and code are unchanged) or `--fresh` (discard). **Reproducibility:** rCausalMGM's `pcStable` has no seed, so MGM-PC-Stable (sepset rule) keeps its skeleton on repeat runs but can orient colliders differently; the other three variants repeat exactly. It reads `DATA_DIR` and writes to `OUTPUT_DIR/03_shape_validation/` (default `./outputs`, git-ignored):
+The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes about 2–3 hours when run alone, plus about 30 minutes for the stability analysis on replicate 1; the implication tests alone take a few minutes. Each replicate × data set is saved in `units/` when complete. A later run refuses to touch them unless given `--resume` (continue, only if settings, config and code are unchanged) or `--fresh` (discard). **Reproducibility:** rCausalMGM's `pcStable` has no seed, so MGM-PC-Stable (sepset rule) keeps its skeleton on repeat runs but can orient colliders differently; the other three variants repeat exactly. It reads `DATA_DIR` and writes to `OUTPUT_DIR/03_structure_validation/` (default `./outputs`, git-ignored):
 
 | File | Contents |
 |---|---|
@@ -184,7 +184,7 @@ The full run (50 replicates × 3 data sets × 4 variants, with StEPS) takes abou
 
 ### Tests
 
-`make test` also runs `03_shape_validation/tests/`:
+`make test` also runs `03_structure_validation/tests/`:
 - **Settings:** they parse to the expected types.
 - **Analysis graph:** size and collapsing.
 - **Basis set:** 567 implications, all implied by the graph.
@@ -211,7 +211,7 @@ Code in [04_attribution_validation/](04_attribution_validation/) asks whether at
 
 ### How it works
 
-1. **Inputs** (`data.py`): the replicate data sets and ground truth from `DATA_DIR`. The analysis graph is built from `01_data_generation/config` with the same rules as shape validation; a test checks the two are identical. The run stops if the data were generated from a different config.
+1. **Inputs** (`data.py`): the replicate data sets and ground truth from `DATA_DIR`. The analysis graph is built from `01_data_generation/config` with the same rules as structure validation; a test checks the two are identical. The run stops if the data were generated from a different config.
 2. **Feature sets:** all 35 observed features, and the 16 ancestors of nephrolithiasis. The all-features set adds 15 outcome descendants and 4 variables that are neither ancestors nor descendants, all with a true effect of zero.
 3. **Predictive model** (`superlearner.py`): one super learner per data set and feature set.
    - Library: main-terms logistic regression, L2-penalized logistic regression, random forest, gradient boosting.
@@ -299,7 +299,7 @@ Each replicate × data set × feature set is one cell, seeded on its own and run
 ### Tests
 
 `make test` also runs `04_attribution_validation/tests/`:
-- **Analysis graph:** matches the design and shape validation.
+- **Analysis graph:** matches the design and structure validation.
 - **Order sampler:** uniform over consistent orders.
 - **Ancestry constraints:** pass through non-feature nodes.
 - **Structural model:** abduction and simulation round-trip, coefficients recovered.
@@ -345,7 +345,7 @@ make figures                                # or, from 05_figures/: python3 fig2
 
 **Committed.** Code, configuration, seeds and the frozen calibration (`01_data_generation/config`), plus the small files that are the source data for the paper's tables and figures:
 - `02_data/`: `data_summary.csv` (realized prevalence, era share and selection-induced correlation per replicate), `feature_sets.csv`, `truth_values.csv`, `truth_binary_checks.csv` and `provenance.txt`.
-- `outputs/03_shape_validation/` and `outputs/04_attribution_validation/`: the summary, per-replicate and per-run tables, and per-edge and per-implication results. Each folder's `provenance.txt` records the code commit and data config hash. For attribution validation this includes `summary.csv`, `per_run.csv`, `contrasts.csv`, `data_condition_contrasts.csv`, `oracle_decomposition.csv`, `tie_groups.csv`, `importance.csv` and `ng_convergence.csv`; `units/` (shape) and `cells/` and `values.csv.gz` (attribution) are not committed.
+- `outputs/03_structure_validation/` and `outputs/04_attribution_validation/`: the summary, per-replicate and per-run tables, and per-edge and per-implication results. Each folder's `provenance.txt` records the code commit and data config hash. For attribution validation this includes `summary.csv`, `per_run.csv`, `contrasts.csv`, `data_condition_contrasts.csv`, `oracle_decomposition.csv`, `tie_groups.csv`, `importance.csv` and `ng_convergence.csv`; `units/` (structure) and `cells/` and `values.csv.gz` (attribution) are not committed.
 
 **Archived, not committed.** The 50 replicate data sets per data set (about 390 MB as CSV), the per-cell results and the per-record attributions (`values.csv.gz`) are deposited in a DOI-minting repository with the tagged release: <!-- TO BE WRITTEN BY THE AUTHOR: DOI and repository at submission -->.
 

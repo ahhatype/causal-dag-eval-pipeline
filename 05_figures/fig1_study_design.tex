@@ -57,19 +57,19 @@
     {\textbf{Analysis graph}: 36 observed variables, 63 edges; 16 ancestors and 19 non-ancestors of the outcome};
   \draw [arrow] (reps.south -| ag.north) -- (ag.north);
 
-  % --- Shape arm ---
+  % --- Structure arm ---
   \node (disc) [process] at (-6.6,-10.25) {Causal discovery\\MGM-PC-Stable; 3 alternative collider rules};
   \node (impl) [process] at (-2.6,-10.25) {Implication testing\\567 implications; 63 edge deletions for power};
-  \node (shapescore) [review, text width=7.2cm] at (-4.6,-11.95)
+  \node (structurescore) [review, text width=7.2cm] at (-4.6,-11.95)
     {Adjacency precision and recall; orientation; implications compared in both directions; calibration; selection signature; edges detected};
   \draw [arrow] (ag.south -| disc.north) -- (disc.north);
   \draw [arrow] (ag.south -| impl.north) -- (impl.north);
-  \draw [arrow] (disc.south) -- (disc.south |- shapescore.north);
-  \draw [arrow] (impl.south) -- (impl.south |- shapescore.north);
+  \draw [arrow] (disc.south) -- (disc.south |- structurescore.north);
+  \draw [arrow] (impl.south) -- (impl.south |- structurescore.north);
   \begin{scope}[on background layer]
-    \node (shapebox) [group, fit=(disc) (impl) (shapescore), inner ysep=0.35cm] {};
+    \node (structurebox) [group, fit=(disc) (impl) (structurescore), inner ysep=0.35cm] {};
   \end{scope}
-  \node [grouplabel] at (shapebox.north west) {\textbf{Shape}};
+  \node [grouplabel] at (structurebox.north west) {\textbf{Structure}};
 
   % --- Attribution arm ---
   \node (sl) [process] at (2.6,-10.25) {Super learner on all features ($n\,{=}\,35$) and ancestors only ($n\,{=}\,16$)};
@@ -87,7 +87,7 @@
   % --- Ground truth feeds both scored boxes ---
   \coordinate (bus) at (0,-13.25);
   \draw [draw=black!55] (truth.west) -- ++(-1.25,0) |- (2.4,0 |- bus);
-  \draw [thinarrow] (-6.6,0 |- bus) -- (-6.6,0 |- shapescore.south);
+  \draw [thinarrow] (-6.6,0 |- bus) -- (-6.6,0 |- structurescore.south);
   \draw [thinarrow] (2.4,0 |- bus) -- (2.4,0 |- attrscore.south);
   \node [font=\tiny\itshape, anchor=north, inner sep=1.5pt] at (-3.55,0 |- bus) {scored against ground truth};
 
@@ -95,7 +95,7 @@
   \node (luma) [explore, text width=3.8cm] at (-5.3,-14.35) {Exploratory: learned-kernel classifier (LumaWarp)};
   \node (cshap) [explore, text width=4.0cm] at (4.75,-14.35)
     {Exploratory: ConfoundingSHAP on ``K+~citrate'' and ``bisphosphonates''; reference-set and astronaut-set, replicates 1--10};
-  \draw [thinarrow, dashed] (shapebox.south -| luma.north) -- (luma.north);
+  \draw [thinarrow, dashed] (structurebox.south -| luma.north) -- (luma.north);
   \draw [thinarrow, dashed] (attrbox.south -| cshap.north) -- (cshap.north);
   % OPTIONAL: oracle reference (delete this node and its arrow to drop it)
   \node (oracle) [explore, text width=2.3cm] at (8.75,-14.35) {Oracle reference: true generating model in place of fitted components (replicates 1--10)};
@@ -103,7 +103,7 @@
 
   % --- Output ---
   \node (out) [startstop, text width=6.0cm] at (0,-16.1) {Means $\pm$ Monte Carlo SE over 50 replicates};
-  \draw [arrow] (-1.8,0 |- shapescore.south) -- (-1.8,0 |- out.north);
+  \draw [arrow] (-1.8,0 |- structurescore.south) -- (-1.8,0 |- out.north);
   \draw [arrow] (1.8,0 |- attrscore.south) -- (1.8,0 |- out.north);
 
 \end{tikzpicture}

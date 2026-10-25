@@ -22,7 +22,7 @@ check_analysis_graph <- function(ag, imp) {
 
 mc_se <- function(x) if (sum(!is.na(x)) > 1) sd(x, na.rm = TRUE) / sqrt(sum(!is.na(x))) else NA_real_
 
-shape_manifest <- function(params, cal, ag, sv_dir) {
+structure_manifest <- function(params, cal, ag, sv_dir) {
   f <- tempfile()
   on.exit(unlink(f))
   code <- list.files(file.path(sv_dir, "R"), pattern = "\\.R$", full.names = TRUE)
@@ -96,8 +96,8 @@ run_unit <- function(r, ds, n_rep, first, data_dir, out_dir, params, ag, imp, de
        pow = cbind(dataset = ds, pw))
 }
 
-run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, repo_dir = NULL,
-                      resume = FALSE, fresh = FALSE, sv_dir = file.path(repo_dir, "03_shape_validation")) {
+run_structure <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, repo_dir = NULL,
+                      resume = FALSE, fresh = FALSE, sv_dir = file.path(repo_dir, "03_structure_validation")) {
   available <- check_data_current(data_dir, cal)
   reps <- seq_len(min(available, if (is.null(replicates)) available else replicates))
   dir.create(file.path(out_dir, "detail"), showWarnings = FALSE, recursive = TRUE)
@@ -111,7 +111,7 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
   data.table::fwrite(cpdag, file.path(out_dir, "analysis_graph_cpdag.csv"))
 
   unit_dir <- file.path(out_dir, "units")
-  prepare_units(unit_dir, shape_manifest(params, cal, ag, sv_dir), resume, fresh)
+  prepare_units(unit_dir, structure_manifest(params, cal, ag, sv_dir), resume, fresh)
 
   rows <- list(); rej <- list(); pow <- list(); edges <- list(); calib <- list()
   for (r in reps) {
@@ -153,7 +153,7 @@ run_shape <- function(cfg, cal, params, data_dir, out_dir, replicates = NULL, re
   data.table::fwrite(recovery, file.path(out_dir, "edge_recovery.csv"))
   data.table::fwrite(difference_dag_table(recovery, cpdag, params$variants[[1]], params$difference_dag$spurious_threshold),
                      file.path(out_dir, "difference_dag_edges.csv"))
-  write_shape_provenance(out_dir, data_dir, cal, length(reps), repo_dir,
+  write_structure_provenance(out_dir, data_dir, cal, length(reps), repo_dir,
                          extra = sprintf("difference DAG spurious-edge display threshold: %s (primary variant %s)",
                                          params$difference_dag$spurious_threshold, params$variants[[1]]))
   list(per_replicate = per_rep, summary = summ, power = power)
@@ -231,7 +231,7 @@ difference_dag_table <- function(recovery, cpdag, variant, threshold) {
   out[out$true_edge | out$added_rate >= threshold, ]
 }
 
-write_shape_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir, file = "provenance.txt", extra = NULL) {
+write_structure_provenance <- function(out_dir, data_dir, cal, n_rep, repo_dir, file = "provenance.txt", extra = NULL) {
   commit <- if (!is.null(repo_dir)) tryCatch(system2("git", c("-C", repo_dir, "rev-parse", "HEAD"), stdout = TRUE,
                                                      stderr = FALSE)[1], error = function(e) NA_character_) else NA
   pkgs <- c("rCausalMGM", "dagitty")
@@ -269,6 +269,6 @@ run_calibration <- function(cfg, cal, params, data_dir, out_dir, replicates = NU
     data.table::fwrite(tests, file.path(out_dir, "detail", sprintf("implications_r%03d_%s.csv", r, ds)))
     calib[[length(calib) + 1]] <- cbind(replicate = r, dataset = ds, implication_calibration(tests, params$calibration$alpha))
   }
-  write_shape_provenance(out_dir, data_dir, cal, length(reps), repo_dir, "implication_calibration_provenance.txt")
+  write_structure_provenance(out_dir, data_dir, cal, length(reps), repo_dir, "implication_calibration_provenance.txt")
   write_calibration(do.call(rbind, calib), out_dir)
 }

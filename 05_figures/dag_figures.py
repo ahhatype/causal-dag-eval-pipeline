@@ -17,7 +17,7 @@ import pandas as pd
 HERE = Path(__file__).resolve().parent
 ROOT = Path(os.environ.get("PIPELINE_ROOT", HERE.parent))
 OUT = ROOT / "outputs" / "05_figures"
-SHAPE = ROOT / "outputs" / "03_shape_validation"
+STRUCTURE = ROOT / "outputs" / "03_structure_validation"
 ATTR = ROOT / "outputs" / "04_attribution_validation"
 DATA = ROOT / "02_data"
 
@@ -137,9 +137,9 @@ def document(width_mm, vb_w, vb_h, body, colors):
 # ---------- Figure 3: recovery failures per data set ----------
 
 def recovery(added_threshold):
-    d = pd.read_csv(SHAPE / "difference_dag_edges.csv")
+    d = pd.read_csv(STRUCTURE / "difference_dag_edges.csv")
     true = d[d["true_edge"].astype(str).str.upper() == "TRUE"].copy()
-    rec = pd.read_csv(SHAPE / "edge_recovery.csv")
+    rec = pd.read_csv(STRUCTURE / "edge_recovery.csv")
     rec = rec[(rec["variant"] == "MGM-PC-Stable") & (rec["true_edge"].astype(str).str.upper() != "TRUE")]
     added = rec[rec["adjacency_rate"] >= added_threshold].copy()
     added[["a", "b"]] = added["edge"].str.split(" ", expand=True)
@@ -258,7 +258,7 @@ def fig5(layout, dataset, fs, label_min):
     pw, ph, gap_x, gap_y, title_h = W, H, 90, 60, 70
     vb_w, vb_h = 2 * pw + gap_x, 3 * (ph + title_h) + 2 * gap_y
     body = []
-    edges = list(pd.read_csv(SHAPE / "analysis_graph_edges.csv")[["parent", "child"]].itertuples(index=False))
+    edges = list(pd.read_csv(STRUCTURE / "analysis_graph_edges.csv")[["parent", "child"]].itertuples(index=False))
     for i, (m, title) in enumerate(METHODS):
         cx, cy = i % 2, i // 2
         c = Canvas(nodes, bends, {**style, "fs0": style["fs"]}, fs=fs)

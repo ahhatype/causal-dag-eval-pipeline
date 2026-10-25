@@ -8,7 +8,7 @@ from matplotlib.patches import Patch, Rectangle
 
 import style
 
-SHAPE = style.ROOT / "outputs" / "03_shape_validation"
+STRUCTURE = style.ROOT / "outputs" / "03_structure_validation"
 CATS = ["correct", "reversed", "overoriented", "unoriented", "absent"]
 RATE = {c: f"{c}_rate" for c in CATS}
 GROUPS = ["Recovered correctly in all data sets", "Lost at n = 900", "Missed in all data sets",
@@ -31,7 +31,7 @@ def group(row):
 def main():
     style.apply()
     labels = pd.read_csv("node_layout.csv").set_index("id")["label"].str.replace("\\n", " ", regex=False)
-    d = pd.read_csv(SHAPE / "difference_dag_edges.csv")
+    d = pd.read_csv(STRUCTURE / "difference_dag_edges.csv")
     cols = list(RATE.values()) + ["added_rate"]
     d[cols] = d[cols].fillna(0)
     rows = []

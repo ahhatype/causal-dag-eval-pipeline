@@ -9,7 +9,7 @@ from matplotlib.patches import FancyArrowPatch
 
 import style
 
-SHAPE = style.ROOT / "outputs" / "03_shape_validation"
+STRUCTURE = style.ROOT / "outputs" / "03_structure_validation"
 FACE = {"ancestor": "#3B3B3B", "non_ancestor": "white", "outcome": "#0072B2"}
 
 
@@ -17,7 +17,7 @@ def main():
     style.apply()
     nodes = pd.read_csv("node_layout.csv")
     xy = {r.id: (r.x, r.y) for r in nodes.itertuples()}
-    edges = pd.read_csv(SHAPE / "analysis_graph_edges.csv")
+    edges = pd.read_csv(STRUCTURE / "analysis_graph_edges.csv")
 
     fig, ax = plt.subplots(figsize=(style.DOUBLE, style.DOUBLE * 0.5))
     for e in edges.itertuples():

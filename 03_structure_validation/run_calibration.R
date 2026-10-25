@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-# Usage: Rscript 03_shape_validation/run_all.R [--replicates=N] [--subsamples=N] [--resume | --fresh]
+# Usage: Rscript 03_structure_validation/run_calibration.R [--replicates=N]
+# Re-runs only the implication tests on every replicate (no discovery) to check their calibration.
 
 file_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
 sv_dir <- if (length(file_arg)) dirname(normalizePath(sub("^--file=", "", file_arg))) else normalizePath(".")
@@ -13,18 +14,12 @@ arg <- function(name) {
   a <- grep(sprintf("^--%s=", name), commandArgs(trailingOnly = TRUE), value = TRUE)
   if (length(a)) as.integer(sub("^[^=]*=", "", a[1])) else NULL
 }
-if (!is.null(arg("subsamples"))) params$stability$subsamples <- arg("subsamples")
-flags <- commandArgs(trailingOnly = TRUE)
-
 data_dir <- env_dir(repo_dir, "DATA_DIR", "./02_data")
-out_dir <- file.path(env_dir(repo_dir, "OUTPUT_DIR", "./outputs"), "03_shape_validation")
+out_dir <- file.path(env_dir(repo_dir, "OUTPUT_DIR", "./outputs"), "03_structure_validation")
 cfg_dir <- file.path(repo_dir, "01_data_generation", "config")
 cfg <- read_config(cfg_dir)
 cal <- read_calibration(file.path(cfg_dir, "calibration.yaml"))
 
-out <- run_shape(cfg, cal, params, data_dir, out_dir, arg("replicates"), repo_dir,
-                 resume = "--resume" %in% flags, fresh = "--fresh" %in% flags, sv_dir = sv_dir)
-print(t(out$summary[, c("dataset", "variant", "replicates", "selection_violation_detection_rate",
-                        "any_unexpected_rejection_rate", "edges_detectable_mean", "adjacency_precision_mean",
-                        "adjacency_recall_mean", "orientation_agreement_mean")]))
-message("Wrote shape validation outputs to ", out_dir)
+summ <- run_calibration(cfg, cal, params, data_dir, out_dir, arg("replicates"), repo_dir)
+print(summ)
+message("Wrote implication calibration to ", out_dir)

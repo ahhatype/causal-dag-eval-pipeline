@@ -1,0 +1,55 @@
+"""Shared figure style: Nature-family sizes, live text, colour-blind-safe palettes."""
+from pathlib import Path
+
+import matplotlib as mpl
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "outputs" / "05_figures"
+MM = 1 / 25.4
+SINGLE, DOUBLE = 89 * MM, 183 * MM
+
+DATASETS = ["full_set", "reference_subsample", "astronaut_set"]
+DATASET_LABELS = {"full_set": "Full set\n(n = 10,000)",
+                  "reference_subsample": "Reference\nsubsample (n = 900)",
+                  "astronaut_set": "Astronaut set\n(n = 900, selected)"}
+DATASET_SHORT = {"full_set": "Full", "reference_subsample": "Reference", "astronaut_set": "Astronaut"}
+
+METHODS = ["standard_shap", "ordering_only_shap", "ng_style_shap", "interventional_shap"]
+METHOD_LABELS = {"standard_shap": "Standard SHAP", "ordering_only_shap": "Ordering-only SHAP",
+                 "ng_style_shap": "Causal predictive SHAP", "interventional_shap": "Causal interventional SHAP"}
+METHOD_COLORS = {"standard_shap": "#D55E00", "ordering_only_shap": "#E69F00",
+                 "ng_style_shap": "#009E73", "interventional_shap": "#0072B2"}
+METHOD_LINES = {"standard_shap": "-", "ordering_only_shap": (0, (3, 1.5)),
+                "ng_style_shap": "-", "interventional_shap": "-"}
+
+EDGE_STYLE = {  # category: (colour, linestyle, label)
+    "correct": ("#3B3B3B", "-", "Recovered, orientation correct"),
+    "reversed": ("#D55E00", "-", "Recovered, orientation reversed"),
+    "overoriented": ("#E69F00", "-", "Recovered, direction imposed (true edge undirected)"),
+    "unoriented": ("#999999", "-", "Recovered, left undirected (true edge directed)"),
+    "orientation": ("#E69F00", "-", "Recovered, orientation not recovered"),
+    "absent": ("#56B4E9", (0, (2.5, 1.5)), "Missed"),
+    "added": ("#CC79A7", (0, (0.8, 1.2)), "Added (not in true graph)"),
+}
+
+TRUTH_LABELS = {"per_unit": "Per-unit truth", "pop": "Population-scaled truth"}
+
+
+def apply():
+    mpl.rcParams.update({
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+        "font.size": 6, "axes.titlesize": 7, "axes.labelsize": 6,
+        "xtick.labelsize": 5.5, "ytick.labelsize": 5.5, "legend.fontsize": 5.5,
+        "axes.linewidth": 0.5, "xtick.major.width": 0.5, "ytick.major.width": 0.5,
+        "xtick.major.size": 2, "ytick.major.size": 2,
+        "axes.spines.top": False, "axes.spines.right": False,
+        "svg.fonttype": "none", "pdf.fonttype": 42,
+        "savefig.dpi": 600, "savefig.bbox": "tight", "savefig.pad_inches": 0.02,
+    })
+
+
+def save(fig, name):
+    OUT.mkdir(parents=True, exist_ok=True)
+    for ext in ("svg", "pdf", "png"):
+        fig.savefig(OUT / f"{name}.{ext}")

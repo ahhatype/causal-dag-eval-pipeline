@@ -154,7 +154,7 @@ test_that("stale data are refused", {
   expect_equal(check_data_current(tmp, cal), 2L)
 })
 
-test_that("shape pipeline runs end to end on generated replicates", {
+test_that("structure pipeline runs end to end on generated replicates", {
   dg <- new.env()
   for (f in c("dag", "select", "ground_truth", "finalize", "checks", "pipeline"))
     sys.source(file.path(repo_dir, "01_data_generation", "R", paste0(f, ".R")), envir = dg)
@@ -166,7 +166,7 @@ test_that("shape pipeline runs end to end on generated replicates", {
   suppressMessages(dg$run_pipeline(c2, cal, data_dir))
   p2 <- modifyList(params, list(mgm = list(lambda_selection = "fixed"), stability = list(subsamples = 2),
                                 orientations = list(max = 8)))
-  out <- suppressMessages(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir))
+  out <- suppressMessages(run_structure(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir))
   nv <- length(params$variants)
   expect_equal(nrow(out$per_replicate), 6 * nv)
   expect_equal(nrow(out$summary), 3 * nv)
@@ -188,22 +188,22 @@ test_that("shape pipeline runs end to end on generated replicates", {
     adj <- c("learned_edges", "adjacency_precision", "adjacency_recall", "shared_edges", "true_edges")
     identical(a[det, ], b[det, ]) && identical(a[!det, adj], b[!det, adj])
   }
-  expect_error(suppressMessages(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir)), "--resume")
+  expect_error(suppressMessages(run_structure(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir)), "--resume")
   msgs <- character(0)
-  again <- withCallingHandlers(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
+  again <- withCallingHandlers(run_structure(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
                                message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
   expect_equal(sum(grepl("kept from an earlier run", msgs)), 6)
   expect_true(same_results(again$per_replicate, out$per_replicate))
   unlink(file.path(out_dir, "units", "r002_astronaut_set.rds"))
   msgs <- character(0)
-  partial <- withCallingHandlers(run_shape(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
+  partial <- withCallingHandlers(run_structure(cfg, cal, p2, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE),
                                  message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
   expect_equal(sum(grepl("kept from an earlier run", msgs)), 5)
   expect_true(same_results(partial$per_replicate, out$per_replicate))
   p3 <- modifyList(p2, list(fdr = 0.01))
-  expect_error(suppressMessages(run_shape(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE)),
+  expect_error(suppressMessages(run_structure(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, resume = TRUE)),
                "different settings")
-  fresh <- suppressMessages(run_shape(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, fresh = TRUE))
+  fresh <- suppressMessages(run_structure(cfg, cal, p3, data_dir, out_dir, sv_dir = sv_dir, fresh = TRUE))
   expect_equal(nrow(fresh$per_replicate), 6 * nv)
 })
 

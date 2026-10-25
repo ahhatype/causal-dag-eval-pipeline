@@ -15,7 +15,7 @@ import style
 
 DATA = style.ROOT / "02_data"
 CFG = style.ROOT / "01_data_generation" / "config"
-SHAPE = style.ROOT / "outputs" / "03_shape_validation"
+STRUCTURE = style.ROOT / "outputs" / "03_structure_validation"
 ATTR = style.ROOT / "outputs" / "04_attribution_validation"
 LABELS = yaml.safe_load((style.ROOT / "04_attribution_validation" / "config" / "labels.yaml").read_text())
 METHODS = list(LABELS["methods"])
@@ -143,9 +143,9 @@ def build_t1():
 # Table 2: implication-test calibration and power
 def build_t2():
     nm, _, scale = names()
-    cal = pd.read_csv(SHAPE / "implication_calibration_summary.csv").set_index("dataset")
-    summ = pd.read_csv(SHAPE / "summary.csv").query("variant == 'MGM-PC-Stable'").set_index("dataset")
-    power = pd.read_csv(SHAPE / "power_by_edge.csv")
+    cal = pd.read_csv(STRUCTURE / "implication_calibration_summary.csv").set_index("dataset")
+    summ = pd.read_csv(STRUCTURE / "summary.csv").query("variant == 'MGM-PC-Stable'").set_index("dataset")
+    power = pd.read_csv(STRUCTURE / "power_by_edge.csv")
     t = Table("tab:supp-implications", "Calibration and power of the testable-implication tests.",
               r"@{}l rr r@{}", [r"Data set & KS rejection rate & Raw rejection rate & Replicates with any unexpected rejection \\"], [
         "Rejection rates are over 50 replicates (binomial MCSE for the KS rate and the unexpected-rejection rate; "
@@ -176,8 +176,8 @@ def build_t2():
 # Table 4: causal discovery by variant and per-edge recovery
 def build_t4():
     nm, _, _ = names()
-    summ = pd.read_csv(SHAPE / "summary.csv")
-    rep = pd.read_csv(SHAPE / "per_replicate.csv")
+    summ = pd.read_csv(STRUCTURE / "summary.csv")
+    rep = pd.read_csv(STRUCTURE / "per_replicate.csv")
     t = Table("tab:supp-discovery", "Causal discovery against the true analysis graph.",
               r"@{}l l rrr rr rr r@{}", [
         r" & & & & & \multicolumn{2}{c}{Compelled edges} & \multicolumn{2}{c}{Implications held (share)} & \\",
@@ -291,7 +291,7 @@ METRIC_LABELS = {"kendall_tau_b": r"$\tau_b$", "top_k_recovery": "Top-5", "proxi
 
 def contrast_files():
     return (pd.read_csv(ATTR / "contrasts.csv"), pd.read_csv(ATTR / "data_condition_contrasts.csv"),
-            pd.read_csv(SHAPE / "data_condition_contrasts.csv"))
+            pd.read_csv(STRUCTURE / "data_condition_contrasts.csv"))
 
 
 CO_PRIMARY = ["per_unit", "pop"]
@@ -300,7 +300,7 @@ COND_METRICS = ["kendall_tau_b", "proximity_bias_index", "non_ancestor_share"]
 
 def build_t7():
     """The contrasts the text reports; the full grid (every truth, population and metric) is Supplementary Data 2."""
-    paired, cond, shape = contrast_files()
+    paired, cond, structure = contrast_files()
     paired = paired[paired.truth_type.isin(CO_PRIMARY) & (paired.population == paired.dataset.map(OWN))
                     & (paired.feature_set == "ancestor")]
     cond = cond[cond.truth_type.isin(CO_PRIMARY) & cond.metric.isin(COND_METRICS)
@@ -315,7 +315,7 @@ def build_t7():
         "classified. Panel A: differences in Kendall's $\\tau_b$ between methods. Panel B: sample-size and "
         "selection effects on each metric, each data set scored against its own population (source, or selected "
         "for the astronaut-set); classification applies to $\\tau_b$ only and other metrics are descriptive. "
-        "Panel C: the same effects on the shape-validation metrics for MGM-PC-Stable, which are not scored "
+        "Panel C: the same effects on the structure-validation metrics for MGM-PC-Stable, which are not scored "
         "against a population. Contrasts: ordering, ordering-only minus standard SHAP; value function, causal "
         "interventional minus ordering-only SHAP; prediction value function, causal predictive minus ordering-only "
         "SHAP; sample size, reference-set minus full-set; selection, astronaut-set minus reference-set; selection, "
@@ -343,8 +343,8 @@ def build_t7():
     t.raw(r"\midrule")
     t.raw("Variant & Metric & & & Contrast & " + hdr("Mean (MCSE)", r"[95\% CI]") + r" & & \\")
     t.raw(r"\midrule")
-    t.span("C  Data-condition contrasts, shape validation")
-    for r in shape.itertuples():
+    t.span("C  Data-condition contrasts, structure validation")
+    for r in structure.itertuples():
         t.row(r.variant, METRIC_LABELS[r.metric], "", "", CONDITION_CONTRASTS[r.contrast], ci(r), "", "")
     return t.render("supp_table7_contrasts.tex"), t.n
 
@@ -408,14 +408,14 @@ def write_supplementary_data():
     nm, _, _ = names()
     out = style.OUT / "supplementary_data"
     out.mkdir(parents=True, exist_ok=True)
-    rec = pd.read_csv(SHAPE / "edge_recovery.csv")
+    rec = pd.read_csv(STRUCTURE / "edge_recovery.csv")
     pc = rec["edge"].str.split(" ", expand=True)
     rec.insert(3, "node_1", pc[0].map(nm).fillna(pc[0]))
     rec.insert(4, "node_2", pc[1].map(nm).fillna(pc[1]))
     rec.to_csv(out / "Supplementary_Data_1_edge_recovery.csv", index=False)
-    paired, cond, shape = contrast_files()
+    paired, cond, structure = contrast_files()
     allc = pd.concat([paired.assign(family="method_contrast"), cond.assign(family="data_condition_attribution"),
-                      shape.assign(family="data_condition_shape")], ignore_index=True)
+                      structure.assign(family="data_condition_structure")], ignore_index=True)
     allc = allc[["family"] + [c for c in allc.columns if c != "family"]]
     allc.to_csv(out / "Supplementary_Data_2_contrasts.csv", index=False)
     return len(rec), len(allc)

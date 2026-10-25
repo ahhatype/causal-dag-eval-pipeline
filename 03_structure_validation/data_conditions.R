@@ -1,4 +1,4 @@
-# Sample-size and selection contrasts of the shape-validation metrics. Kept outside R/ so that the code hash of the
+# Sample-size and selection contrasts of the structure-validation metrics. Kept outside R/ so that the code hash of the
 # stored replicate units is unchanged.
 DATA_CONDITION_METRICS <- c("edges_detectable", "adjacency_recall", "adjacency_precision", "orientation_agreement",
                             "raw_rejection_rate")
