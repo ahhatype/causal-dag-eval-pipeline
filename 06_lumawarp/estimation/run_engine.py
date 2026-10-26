@@ -1,9 +1,13 @@
 """Engine side on the paper's data: for each (dataset, treatment, route, replicate) draw nothing, read the replicate, assign 3
 stratified folds, fit g and Q with LumaWarp under the playbook profile, write tmle_inputs.csv. Resumable.
-Usage: PLAN=subset|full python run_engine.py"""
+Usage: PLAN=subset|full python run_engine.py
+ENGINE=none writes the folds and covariates without LumaWarp fits (the Super Learner, logistic and naive rows then run
+from the R side); NUISANCE=<lumawarp_nuisance.csv.gz> merges archived LumaWarp predictions so the LW-TMLE row runs
+without the engine."""
 import os, sys, json, subprocess, numpy as np, pandas as pd
 from graph54 import NODES, PA, TOPO, P, DATA_DIR
 TRAIN = os.environ.get("LUMAWARP_TRAIN", "lumawarp_training"); INFER = os.environ.get("LUMAWARP_INFER", "lumawarp_inference"); H = os.path.dirname(os.path.abspath(__file__)); K = 3; Y = "nephrolithiasis"
+ENGINE = os.environ.get("ENGINE", "lumawarp"); NUIS = pd.read_csv(os.environ["NUISANCE"]) if os.environ.get("NUISANCE") else None
 CFG = open(os.path.join(H, "lumawarp_playbook.cfg")).read(); POS = {v: i for i, v in enumerate(TOPO)}
 ROUTES = {"parents": lambda t: sorted(PA[t]), "ordering": lambda t: [v for v in TOPO if POS[v] < POS[t] and v != Y]}
 PLANS = {"subset": [("reference_subsample", "k_citrate", r, rt) for rt in ("parents", "ordering") for r in range(1, 11)] + [("astronaut_set", "k_citrate", r, rt) for rt in ("parents", "ordering") for r in range(1, 11)],
@@ -34,14 +38,20 @@ def lw_fit_predict(Xtr, ytr, work, seed, Xtests):
 def replicate(ds, A, rep, route):
     out = os.path.join(H, "reps", ds, A, route, f"rep{rep:03d}"); fin = os.path.join(out, "tmle_inputs.csv")
     if os.path.exists(fin): return
+    os.makedirs(out, exist_ok=True)
     df = pd.read_csv(os.path.join(DATA_DIR, "replicates", f"r{rep:03d}", f"{ds}.csv")); Wc = ROUTES[route](A); N = len(df)
     a = df[A].to_numpy(int); y = df[Y].to_numpy(int); seed = 5000 + rep; f = folds(a, y, seed); g = np.full(N, np.nan); q0 = np.full(N, np.nan); q1 = np.full(N, np.nan)
-    for k in range(1, K + 1):
+    for k in (range(1, K + 1) if ENGINE != "none" else ()):
         tr, te = f != k, f == k; Wtr, Wte = df.loc[tr, Wc].reset_index(drop=True), df.loc[te, Wc].reset_index(drop=True); fd = os.path.join(out, f"fold_{k:02d}")
         g[te] = lw_fit_predict(Wtr, a[tr], os.path.join(fd, "g"), seed * 10 + 100 * k, {"heldout": Wte})[0]
         x0 = pd.concat([pd.DataFrame({A: np.zeros(te.sum(), int)}), Wte], axis=1); x1 = x0.copy(); x1[A] = 1; xtr = pd.concat([pd.DataFrame({A: a[tr]}), Wtr], axis=1)
         q0[te], q1[te] = lw_fit_predict(xtr, y[tr], os.path.join(fd, "Q"), seed * 10 + 100 * k + 1, {"counterfactual_A0": x0, "counterfactual_A1": x1})
-    inputs = pd.concat([pd.DataFrame({"id": np.arange(N), "fold": f}), df[Wc].reset_index(drop=True)], axis=1); inputs[A] = a; inputs[Y] = y; inputs["g_lw"] = g; inputs["Q0_lw"] = q0; inputs["Q1_lw"] = q1
+    inputs = pd.concat([pd.DataFrame({"id": np.arange(N), "fold": f}), df[Wc].reset_index(drop=True)], axis=1); inputs[A] = a; inputs[Y] = y
+    if NUIS is not None:
+        m = NUIS[(NUIS.dataset == ds) & (NUIS.treatment == A) & (NUIS.route == route) & (NUIS.replicate == rep)].set_index("id")
+        assert (m.loc[inputs.id, "fold"].to_numpy() == f).all(), "archived folds differ from the recomputed folds"
+        g, q0, q1 = (m.loc[inputs.id, c].to_numpy() for c in ("g_lw", "Q0_lw", "Q1_lw"))
+    if ENGINE != "none" or NUIS is not None: inputs["g_lw"] = g; inputs["Q0_lw"] = q0; inputs["Q1_lw"] = q1
     tmp = fin + ".tmp"; inputs.to_csv(tmp, index=False, float_format="%.10g"); os.replace(tmp, fin)
 if __name__ == "__main__":
     plan = PLANS[os.environ.get("PLAN", "subset")]

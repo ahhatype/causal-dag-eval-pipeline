@@ -22,7 +22,8 @@ one <- function(suffix) {
               family = "binomial", fluctuation = "logistic", gbound = gbound, prescreenW.g = FALSE, target.gwt = FALSE, evalATT = FALSE)
   e <- fit$estimates$ATE; c(est = unname(e$psi), se = sqrt(unname(e$var.psi)), lower = unname(e$CI[1]), upper = unname(e$CI[2]))
 }
-lw <- one("lw"); sl <- one("sl")
+has_lw <- all(c("g_lw", "Q0_lw", "Q1_lw") %in% names(d))
+lw <- if (has_lw) one("lw") else c(est = NA_real_, se = NA_real_, lower = NA_real_, upper = NA_real_); sl <- one("sl")
 naive <- mean(Y[A == 1]) - mean(Y[A == 0])
 gl <- glm(Y ~ ., data = cbind(Y = Y, XA), family = binomial()); x0 <- XA; x0[[treatment]] <- 0; x1 <- XA; x1[[treatment]] <- 1
 gcomp <- mean(predict(gl, x1, type = "response")) - mean(predict(gl, x0, type = "response"))
@@ -30,5 +31,5 @@ nuis <- function(suffix) c(g_auc_proxy = cor(d[[paste0("g_", suffix)]], A), g_cl
 row <- data.frame(treatment = treatment, seed = seed, truth = truth, n = nrow(d), events = sum(Y), treated = sum(A),
                   lw_est = lw["est"], lw_se = lw["se"], lw_lower = lw["lower"], lw_upper = lw["upper"], lw_covered = (lw["lower"] <= truth & truth <= lw["upper"]),
                   sl_est = sl["est"], sl_se = sl["se"], sl_lower = sl["lower"], sl_upper = sl["upper"], sl_covered = (sl["lower"] <= truth & truth <= sl["upper"]),
-                  naive_est = naive, gcomp_logistic_est = gcomp, g_lw_clipped = nuis("lw")["g_clipped"], g_sl_clipped = nuis("sl")["g_clipped"], sl_seconds = sl_seconds)
+                  naive_est = naive, gcomp_logistic_est = gcomp, g_lw_clipped = if (has_lw) nuis("lw")["g_clipped"] else NA_real_, g_sl_clipped = nuis("sl")["g_clipped"], sl_seconds = sl_seconds)
 dir.create(dirname(outp), recursive = TRUE, showWarnings = FALSE); tmp <- paste0(outp, ".tmp"); write.csv(row, tmp, row.names = FALSE); file.rename(tmp, outp)

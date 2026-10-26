@@ -63,3 +63,18 @@ are not committed (available on request).
   Causal predictive SHAP was not ported.
 - The edge audit's full-set stage ran as two engine streams with a claim file; it was paused and resumed once.
 - Replicates: edge audit and attribution 1 to 10; estimation 1 to 50.
+
+## Reproducing without the engine
+Every row that does not come from LumaWarp reruns from scratch, and the LumaWarp rows reproduce from archived
+predictions:
+
+    cd 06_lumawarp/edge_audit && python make_jobs.py && python restore_predictions.py && python references.py && python score.py
+    cd 06_lumawarp/estimation && ENGINE=none PLAN=full python run_engine.py && ./run_r_worker.sh 0 1 ENGINE_DONE_full && python summarize.py
+
+`restore_predictions.py` writes the archived sweep predictions (`outputs/06_lumawarp/edge_audit/lumawarp_predictions.csv.gz`,
+all 1,050 fits) back into the job directories, so `score.py` reproduces the LumaWarp recall and precision exactly;
+the shape flags need the fitted model files and are reported from `outputs/06_lumawarp/edge_audit/shape_flags.csv`.
+`ENGINE=none` writes the folds and covariates without LumaWarp fits, so the Super Learner TMLE, logistic
+g-computation and crude rows rerun; with `NUISANCE=<path>/lumawarp_nuisance.csv.gz` (the archived LumaWarp
+outcome and propensity predictions, 35 MB, in the data deposit rather than the repository) the LW-TMLE row runs as
+well. `attribution_lumawarp_base/` needs the engine; its per-cell outputs are committed under `outputs/`.
