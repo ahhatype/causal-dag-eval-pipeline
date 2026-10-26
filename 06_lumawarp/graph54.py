@@ -4,7 +4,7 @@ import os, pandas as pd
 P = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 DATA_DIR = os.environ.get("DATA_DIR", os.path.join(P, "02_data"))
 if not os.path.isabs(DATA_DIR): DATA_DIR = os.path.join(P, DATA_DIR.removeprefix("./"))
-E = pd.read_csv(os.path.join(P, "outputs", "03_shape_validation", "analysis_graph_edges.csv"))
+E = pd.read_csv(os.path.join(P, "outputs", "03_structure_validation", "analysis_graph_edges.csv"))
 TRUE = {(a, b) for a, b in zip(E.parent, E.child)}; NODES = sorted(set(E.parent) | set(E.child))
 PA = {v: {a for a, b in TRUE if b == v} for v in NODES}
 SC = dict(zip(*[pd.read_csv(os.path.join(P, "01_data_generation", "config", "nodes.csv"))[c] for c in ("id", "scale")]))

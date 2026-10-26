@@ -2,7 +2,7 @@
 
 ## Question
 The paper's audit step tests a graph's d-separation implications (Shipley basis set) with linear and logistic
-likelihood-ratio tests, as in Andy's pipeline (`03_shape_validation/R/implications.R`). If a graph is missing a
+likelihood-ratio tests, as in Andy's pipeline (`03_structure_validation/R/implications.R`). If a graph is missing a
 non-monotone edge, does that audit notice? Does a nonlinear test?
 
 ## Data (fixed)

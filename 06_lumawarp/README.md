@@ -1,9 +1,9 @@
-# 06_lumawarp_audit: ordering-informed edge audit, DAG-adjusted estimation and sensitivity checks with a learned-kernel ensemble
+# 06_lumawarp: ordering-informed edge audit, DAG-adjusted estimation and sensitivity checks with a learned-kernel ensemble
 
 Secondary analyses on the pipeline's own replicate data (`02_data`, commit 79a1b56 generator), run 14 to 20 October
 2026 by Lauren Morgenthaler (Lucidity Sciences). Each directory holds the pre-registration written before its first
-fit, the scripts, and a RESULTS.md; result tables are in `outputs/06_lumawarp_audit/`, with manuscript-ready tables in
-`outputs/06_lumawarp_audit/tables/TABLES.md`.
+fit, the scripts, and a RESULTS.md; result tables are in `outputs/06_lumawarp/`, with manuscript-ready tables in
+`outputs/06_lumawarp/tables/TABLES.md`.
 
 | directory | question | engine fits | headline |
 |---|---|---|---|
@@ -39,18 +39,18 @@ per-unit contrast for the population each data set represents.
   (`PYTHON` selects the interpreter; default `python3`). `attribution_lumawarp_base/` imports the pipeline's own
   `04_attribution_validation` package for the split, records, orders, SCM and scoring.
 - R with tmle, SuperLearner, glmnet, earth.
-- `DATA_DIR` as in `.env` (default `02_data`); the analysis graph is read from `outputs/03_shape_validation/`.
+- `DATA_DIR` as in `.env` (default `02_data`); the analysis graph is read from `outputs/03_structure_validation/`.
 
 ## Running
-    cd 06_lumawarp_audit/edge_audit && python make_jobs.py && ./run_jobs.sh && python references.py && python score.py
-    cd 06_lumawarp_audit/estimation && PLAN=full ./run_all.sh          # engine driver plus three R workers; then python summarize.py
-    cd 06_lumawarp_audit/estimation_bounds && ./run_all.sh && python summarize.py
-    cd 06_lumawarp_audit/attribution_lumawarp_base && BACKGROUND=32 ./run_all.sh && python compare.py
+    cd 06_lumawarp/edge_audit && python make_jobs.py && ./run_jobs.sh && python references.py && python score.py
+    cd 06_lumawarp/estimation && PLAN=full ./run_all.sh          # engine driver plus three R workers; then python summarize.py
+    cd 06_lumawarp/estimation_bounds && ./run_all.sh && python summarize.py
+    cd 06_lumawarp/attribution_lumawarp_base && BACKGROUND=32 ./run_all.sh && python compare.py
     nonlinear_sensitivity: generate data on branch nonlinear-variant (make recalibrate), then ./run_after_data.sh
 Each run script is resumable. Engine time on one RTX 5090 laptop: edge audit about 12 h (two streams), estimation
 about 6 h, attribution about 4 h at 32 background records (about 24 h at the paper's 128).
 
-## Outputs committed (`outputs/06_lumawarp_audit/`)
+## Outputs committed (`outputs/06_lumawarp/`)
 `edge_audit/` summary.csv, scores_by_rep.csv, shape_flags.csv, edges_all.csv.gz (every candidate score and decision);
 `estimation/` summary.csv, results_all_reps.csv; `estimation_bounds/` summary.csv, results_all.csv;
 `attribution_lumawarp_base/` summary.csv, per_run.csv, importance.csv; `nonlinear_sensitivity/armA|armB/`

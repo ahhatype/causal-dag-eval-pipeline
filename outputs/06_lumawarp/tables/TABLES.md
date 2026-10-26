@@ -1,4 +1,4 @@
-# Result tables for the manuscript (generated from outputs/06_lumawarp_audit)
+# Result tables for the manuscript (generated from outputs/06_lumawarp)
 
 ## Edge audit given the ordering (10 replicates; MGM-PC-Stable from the draft for reference)
 
