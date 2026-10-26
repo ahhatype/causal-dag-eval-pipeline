@@ -49,6 +49,11 @@ Check without running anything heavy: `uv run python -c "from attribution_valida
 
 ## Data generation
 
+### Nonlinear variant (supplement)
+`make data-nonlinear` generates the same three data sets from `01_data_generation/config/variants/nonlinear_symmetric_u/`, in which three edges carry symmetric U-shaped mechanisms (nutrients to bone remodeling, inverted; microbiome to urine chemistry; hydration to urine concentration) and one carries a saturating mechanism (urine chemistry to mineralized renal material), everything else unchanged. The `mechanism` column of `edges.csv` selects the form (`linear` when absent); the default configuration has no such column, so `make data` is unaffected. Output goes to `<DATA_DIR>_nonlinear_symmetric_u`; point `DATA_DIR` there in `.env` to run `make structure` on it. The frozen calibration for the variant is in the same directory.
+
+
+
 All code lives in [01_data_generation/](01_data_generation/). Three synthetic data sets are drawn from one prespecified DAG with [simcausal](https://cran.r-project.org/package=simcausal), so the true causal structure and total effects are known. The DAG is the NASA Human System Risk Board renal-stone DAG (SA-07566; 51 nodes, 75 edges) with three added nodes (**cumulative mission duration** as the exposure, **mission era** as a root, **pre-flight fitness** as a root), giving 54 nodes and 90 edges. The outcome is **nephrolithiasis** (binary). NASA's DAG specifies structure only: all equations, coefficients, era values and detection parameters here are study design parameters, not estimates of real-world effects.
 
 The data are generated with four further edges that are not in SA-07566, so that two drugs are confounded and confounding attribution can be evaluated: **individual factors** and **urine concentration** → **K+ citrate** (prescription by indication), and **cumulative mission duration** and **pre-flight fitness** → **bisphosphonates** (bone-loss countermeasure). Both drugs are also taken in the 1960s (5%; 15% in the 2000s), which is not historical, so that every record has treated and untreated counterparts. These edges are part of the true model and of the analysis graph.

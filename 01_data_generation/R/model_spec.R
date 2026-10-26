@@ -44,7 +44,23 @@ lin_expr <- function(id, cfg) {
   e <- parents_of(id, cfg)
   e <- e[!is.na(e$coef), ]
   if (!nrow(e)) stop("no numeric coefficients into ", id)
-  paste(sprintf("(%s) * %s", num(e$coef), e$parent), collapse = " + ")
+  # Non-monotone variant: an optional `mechanism` column in edges.csv selects the functional form of a
+  # continuous parent's term. Parents are standardized, so each form is centred to mean zero under N(0, 1):
+  #   linear (default)  coef * x
+  #   u_shape           coef * ((x - m)^2 - (1 + m^2)),  m = 0.2  (deficiency and excess both raise the child)
+  #   inverted_u        -coef * ((x - m)^2 - (1 + m^2))
+  #   saturating        coef * 1.2 * tanh(x)            (monotone, nonlinear control)
+  mech <- if ("mechanism" %in% names(e)) ifelse(is.na(e$mechanism) | e$mechanism == "", "linear", e$mechanism) else rep("linear", nrow(e))
+  m <- 0.2
+  term <- function(coef, parent, kind) switch(kind,
+    linear = sprintf("(%s) * %s", num(coef), parent),
+    u_shape = sprintf("(%s) * ((%s - %s)^2 - %s)", num(coef), parent, num(m), num(1 + m^2)),
+    inverted_u = sprintf("(%s) * ((%s - %s)^2 - %s)", num(-coef), parent, num(m), num(1 + m^2)),
+    u_shape_sym = sprintf("(%s) * (%s^2 - 1)", num(coef), parent),          # arm B: centred at the parent's mean, zero linear projection
+    inverted_u_sym = sprintf("(%s) * (%s^2 - 1)", num(-coef), parent),
+    saturating = sprintf("(%s) * 1.2 * tanh(%s)", num(coef), parent),
+    stop("unknown mechanism: ", kind))
+  paste(mapply(term, e$coef, e$parent, mech), collapse = " + ")
 }
 
 coef_of <- function(parent, child, cfg) {

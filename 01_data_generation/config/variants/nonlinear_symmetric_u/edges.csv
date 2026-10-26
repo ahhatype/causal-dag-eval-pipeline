@@ -1,0 +1,91 @@
+parent,child,edge_type,child_scale,coef,coef_status,mechanism
+altered_gravity,bone_remodeling,biological,continuous,0.4,given,linear
+astronaut_selection,individual_factors,definitional,continuous,,blank,linear
+bisphosphonates,bone_remodeling,biological,continuous,-0.4,given,linear
+bone_fracture_risk,bone_remodeling,biological,continuous,0.2,given,linear
+bone_remodeling,urine_chemistry,biological,continuous,0.4,given,linear
+co2_risk,urine_chemistry,biological,continuous,0.2,given,linear
+crew_health_and_performance_system,medical_prevention_capability,engineered,continuous,,era_fixed,linear
+crew_health_and_performance_system,medical_treatment_capability,engineered,continuous,,era_fixed,linear
+crew_health_and_performance_system,resistive_exercise,engineered (availability),continuous,0.4,given,linear
+distance_from_earth,vehicle_design,engineered,continuous,,era_fixed,linear
+cumulative_mission_duration,bone_remodeling,biological,continuous,0.6,given,linear
+food_and_nutrition_risk,nutrients,biological,continuous,0.4,given,linear
+hsia_risk,crew_health_and_performance_system,engineered,continuous,,era_fixed,linear
+hsia_risk,vehicle_design,engineered,continuous,,era_fixed,linear
+hostile_closed_environment,hydration,biological,continuous,-0.25,given,linear
+humidity,hydration,biological,continuous,0.15,given,linear
+hydration,urine_concentration,biological,continuous,0.45,given,u_shape_sym
+individual_factors,nephrolithiasis,biological,binary,0.8,given,linear
+k_citrate,urine_chemistry,biological,continuous,-0.4,given,linear
+medical_prevention_capability,bisphosphonates,decision,binary,,era_table,linear
+medical_prevention_capability,bone_remodeling,decision,continuous,-0.2,given,linear
+medical_prevention_capability,k_citrate,decision,binary,,era_table,linear
+medical_prevention_capability,thiazides,decision,binary,,era_table,linear
+medical_prevention_capability,urine_chemistry,decision,continuous,-0.2,given,linear
+medical_prevention_capability,water_intake,decision,continuous,0.4,given,linear
+medical_treatment_capability,water_intake,decision,continuous,0.2,given,linear
+microbiome,urine_chemistry,biological,continuous,0.35,given,u_shape_sym
+microhost_risk,microbiome,biological,continuous,0.4,given,linear
+mineralized_renal_material,nephrolithiasis,biological,binary,1.2,given,linear
+mission_era,altered_gravity,engineered (era assignment),continuous,,era_table,linear
+mission_era,crew_health_and_performance_system,engineered (era assignment),continuous,,era_table,linear
+mission_era,distance_from_earth,engineered (era assignment),continuous,,era_table,linear
+mission_era,cumulative_mission_duration,engineered (era assignment),continuous,,era_table,linear
+mission_era,hsia_risk,engineered (era assignment),continuous,,era_table,linear
+mission_era,hostile_closed_environment,engineered (era assignment),continuous,,era_table,linear
+mission_era,humidity,engineered (era assignment),continuous,,era_table,linear
+mission_era,medical_prevention_capability,engineered (era assignment),continuous,,era_table,linear
+mission_era,medical_treatment_capability,engineered (era assignment),continuous,,era_table,linear
+mission_era,pharm_risk,engineered (era assignment),continuous,,era_table,linear
+mission_era,vehicle_design,engineered (era assignment),continuous,,era_table,linear
+nutrients,bone_remodeling,biological,continuous,0.35,given,inverted_u_sym
+pharm_risk,medical_prevention_capability,engineered,continuous,,era_fixed,linear
+pharm_risk,medical_treatment_capability,engineered,continuous,,era_fixed,linear
+pre_flight_fitness,resistive_exercise,biological,continuous,0.4,given,linear
+resistive_exercise,bone_remodeling,biological,continuous,-0.15,given,linear
+thiazides,urine_chemistry,biological,continuous,-0.2,given,linear
+urine_chemistry,mineralized_renal_material,biological,continuous,0.6,given,saturating
+urine_concentration,urine_chemistry,biological,continuous,0.6,given,linear
+vehicle_design,crew_health_and_performance_system,engineered,continuous,,era_fixed,linear
+vehicle_design,humidity,engineered,continuous,,era_fixed,linear
+water_intake,hydration,biological,continuous,0.4,given,linear
+crew_capability,task_performance,biological,continuous,0.4,given,linear
+crew_health_and_performance_system,medical_monitoring_capability,engineered,continuous,,era_fixed,linear
+detect_mrm_stone,ultrasound_manipulation,decision,binary,0.8,given,linear
+evacuation,loss_of_crew_life,decision,binary,0.8,provisional_sign,linear
+evacuation,loss_of_mission_objectives,definitional,binary,,flip,linear
+individual_readiness,crew_capability,biological,continuous,0.4,given,linear
+long_term_health_outcomes,detect_long_term_health_outcomes,measurement,binary,,blank,linear
+loss_of_mission_objectives,loss_of_mission,definitional,binary,,flip,linear
+medical_illness,evacuation,decision,binary,0.8,given,linear
+medical_illness,individual_readiness,biological,continuous,-0.4,given,linear
+medical_illness,long_term_health_outcomes,biological,continuous,0.4,given,linear
+medical_illness,loss_of_crew_life,biological,binary,0.8,given,linear
+medical_monitoring_capability,ultrasound,engineered,binary,,flip,linear
+medical_treatment_capability,medications,decision,binary,0.8,given,linear
+medical_treatment_capability,percutaneous_nephrostomy,decision,binary,0.8,given,linear
+medical_treatment_capability,tamsulosin,decision,binary,0.8,given,linear
+medical_treatment_capability,ultrasound_manipulation,decision,binary,0.8,given,linear
+medications,evacuation,decision,binary,-0.8,given,linear
+medications,individual_readiness,decision,continuous,0.4,given,linear
+medications,long_term_health_outcomes,decision,continuous,-0.4,given,linear
+medications,loss_of_crew_life,decision,binary,-0.8,given,linear
+medications,medical_illness,decision,continuous,-0.4,given,linear
+mineralized_renal_material,detect_mrm_stone,measurement,binary,,blank,linear
+mission_era,medical_monitoring_capability,engineered (era assignment),continuous,,era_table,linear
+mission_era,surveillance,engineered (era assignment),continuous,,era_table,linear
+nephrolithiasis,detect_mrm_stone,measurement,binary,,blank,linear
+nephrolithiasis,flight_recertification,decision,binary,-1.2,given,linear
+nephrolithiasis,ureterolithiasis,biological,binary,1.2,given,linear
+percutaneous_nephrostomy,medical_illness,decision,continuous,-0.4,provisional_sign,linear
+surveillance,detect_long_term_health_outcomes,measurement,binary,,blank,linear
+tamsulosin,urine_flow,decision,continuous,0.4,given,linear
+task_performance,loss_of_mission_objectives,biological,binary,-0.8,given,linear
+ultrasound,detect_mrm_stone,measurement,binary,,blank,linear
+ultrasound,percutaneous_nephrostomy,decision,binary,0.8,given,linear
+ultrasound_manipulation,ureterolithiasis,decision,binary,0.8,given,linear
+ureterolithiasis,urine_flow,biological,continuous,-0.4,given,linear
+urinary_retention_risk,urine_flow,biological,continuous,-0.4,given,linear
+urine_flow,medical_illness,biological,continuous,-0.4,given,linear
+water_intake,urine_flow,biological,continuous,0.4,given,linear
