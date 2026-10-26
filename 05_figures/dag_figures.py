@@ -1,7 +1,8 @@
 """Figures drawn on the portrait DAG layout (fig2_portrait.json, in points).
 
 Figure 2: the true analysis graph, 4 in wide.
-Figure 3: where structure recovery failed, one panel per data set, plus a key.
+Figure 3: where structure recovery failed in the full-set, with a key; the reference-set and astronaut-set
+          go in a supplementary figure.
 Figure 6 (and Supplementary Figs 1-2): where each attribution method put its credit, one panel per truth or method.
 
 All write SVG with live text; PDFs are made from the SVG by a browser so the label font is embedded.
@@ -26,6 +27,7 @@ DATA = ROOT / "02_data"
 
 FONT = "Inter, Helvetica Neue, Arial, sans-serif"  # OFL, Google Fonts
 INK, GREY, BLUE, FAINT = "#0b0d12", "#4a5260", "#4cc0e8", "#c4ccd6"
+BLUE_EDGE = "#a6e0f4"  # node blue 50% lighter, for edges recovered correctly
 DATASETS = ["full_set", "reference_subsample", "astronaut_set"]
 DS_LABEL = {"full_set": "Full-set", "reference_subsample": "Reference-set", "astronaut_set": "Astronaut-set"}
 DS_N = {"full_set": "n = 10,000", "reference_subsample": "n = 900", "astronaut_set": "n = 900, selected"}
@@ -38,15 +40,11 @@ LABEL_PT = 5.0  # printed size of node labels in the panels
 
 # recovery categories: colour, dash pattern (panel units), arrow, legend label
 CATS = {
-    "absent": ("#1b1e24", "4 2.6", False, "Missed"),
-    "reversed": ("#d55e00", None, True, "Recovered, direction reversed"),
-    "overoriented": ("#e69f00", "5 1.8 1.2 1.8", True, "Direction imposed on an undirected edge"),
-    "unoriented": ("#8a5cc2", None, False, "Left undirected"),
+    "absent": ("#f29a92", "0.1 2.6", False, "Missed"),
+    "reversed": ("#6fc2a7", None, True, "Recovered, direction reversed"),
+    "overoriented": ("#ecb740", "5 1.8 1.2 1.8", True, "Direction imposed on an undirected edge"),
+    "unoriented": ("#b9a3e3", None, False, "Left undirected"),
     "added": ("#cc79a7", "1 2.2", False, "Added (not in the true graph)"),
-}
-
-PANEL_FIXED = {  # small-panel placements where the search leaves a label ambiguous
-    "flight_recertification": (("BR", 0), ["FLIGHT RECERTIFICATION"]),
 }
 
 METHODS = [("truth", "True effect"), ("standard_shap", "Standard SHAP"), ("ordering_only_shap", "Ordering-only SHAP"),
@@ -139,8 +137,7 @@ class Panel:
         fs = self.label_pt / self.s
         opts = {k: dl.variants(self.nodes[k]["label"], self.nodes[k]["label"].split("|")) for k in labelled}
         pref = {k: self.nodes[k].get("place") for k in labelled}
-        fixed = {k: v for k, v in PANEL_FIXED.items() if k in labelled}
-        lab = dl.place(self.P, self.rad, labelled, opts, self.segs, self.w, self.lay["height"], fs, fixed,
+        lab = dl.place(self.P, self.rad, labelled, opts, self.segs, self.w, self.lay["height"], fs,
                        iters=10, preferred=pref, clear=0.45)
         for k, a in lab.items():
             x, y = self.P[k]
@@ -193,83 +190,113 @@ def recovery(added_threshold):
     return true, added
 
 
-FIG3_PANEL_W = 175.0  # two panels per row, so the 2 x 2 grid fits a page
-
-
-def fig3(lay, added_threshold):
-    true, added = recovery(added_threshold)
-    pw = FIG3_PANEL_W
-    s = pw / (lay["width"] + 2 * PANEL_PAD)
-    ph = lay["height"] * s
-    row_h = TITLE_H + ph + PANEL_GAP
-    body, colors, counts = [], set(), {}
-    nr = 3.2
-    for i, ds in enumerate(DATASETS):
-        p = Panel(lay, s)
-        for nid in p.nodes:
-            p.rad[nid] = nr * 1.4 if nid == OUTCOME else nr
-        t = true[true["dataset"] == ds]
-        hit, cnt = set(), {}
-        for e in t.itertuples():
-            if e.modal_category == "correct":
-                p.edge(e.parent, e.child, FAINT, 1.0, dash="0.1 2.6", arrow=False)
-        for e in t.itertuples():
-            cat = e.modal_category
-            if cat == "correct":
-                continue
-            col, dash, arrow, _ = CATS[cat]
-            arrow = arrow and e.true_mark != "undir" or cat == "overoriented"
-            m = p.edge(e.parent, e.child, col, 1.4, dash=dash, arrow=arrow, reverse=(cat == "reversed"))
-            if m:
-                colors.add(m)
-            hit |= {e.parent, e.child}
-            cnt[cat] = cnt.get(cat, 0) + 1
-        for e in added[added["dataset"] == ds].itertuples():
-            col, dash, _, _ = CATS["added"]
-            p.edge(e.a, e.b, col, 1.8, dash=dash, arrow=False)
-            hit |= {e.a, e.b}
-            cnt["added"] = cnt.get("added", 0) + 1
-        counts[ds] = cnt
-        for nid in p.nodes:
-            on = nid in hit
-            if nid == OUTCOME:
-                p.node(nid, BLUE, BLUE, p.rad[nid], ring=True)
-            else:
-                p.node(nid, BLUE if on else "#ffffff", BLUE if on else FAINT, nr, width=1.0)
-        p.place_labels(sorted(hit | {OUTCOME}))
-        x0, y0 = (i % 2) * (pw + PANEL_GAP), (i // 2) * row_h
-        body.append(panel_title(x0, y0, "abc"[i], DS_LABEL[ds], DS_N[ds]))
-        body.append(p.svg(x0, y0 + TITLE_H))
-    # key in the fourth slot
-    x0, y0 = pw + PANEL_GAP + 4, row_h
-    body.append(text(x0, y0 + 9, "Key", 7))
-    yy = y0 + 26
-    rows = [("absent", "Missed"), ("reversed", "Reversed"), ("overoriented", "Direction imposed"),
+KEY_ROWS = [("absent", "Missed"), ("reversed", "Reversed"), ("overoriented", "Direction imposed"),
             ("unoriented", "Left undirected"), ("added", "Added")]
-    for cat, _ in rows:
+
+
+def recovery_panel(lay, s, ds, true, added, label_pt):
+    """One data set's recovery panel; returns the panel, arrow colours used and category counts."""
+    p = Panel(lay, s, label_pt=label_pt)
+    nr = 2.6 + 1.4 * (1 - min(s, 1))
+    for nid in p.nodes:
+        p.rad[nid] = nr * 1.4 if nid == OUTCOME else nr
+    t = true[true["dataset"] == ds]
+    hit, cnt, colors = set(), {}, set()
+    for e in t.itertuples():
+        if e.modal_category == "correct":
+            p.edge(e.parent, e.child, BLUE_EDGE, 0.9, arrow=False)
+    for e in t.itertuples():
+        cat = e.modal_category
+        if cat == "correct":
+            continue
+        col, dash, arrow, _ = CATS[cat]
+        arrow = arrow and e.true_mark != "undir" or cat == "overoriented"
+        m = p.edge(e.parent, e.child, col, 1.1 if cat == "absent" else 1.3, dash=dash, arrow=arrow, reverse=(cat == "reversed"))
+        if m:
+            colors.add(m)
+        hit |= {e.parent, e.child}
+        cnt[cat] = cnt.get(cat, 0) + 1
+    for e in added[added["dataset"] == ds].itertuples():
+        col, dash, _, _ = CATS["added"]
+        p.edge(e.a, e.b, col, 1.7, dash=dash, arrow=False)
+        hit |= {e.a, e.b}
+        cnt["added"] = cnt.get("added", 0) + 1
+    for nid in p.nodes:
+        if nid == OUTCOME:
+            p.node(nid, BLUE, BLUE, p.rad[nid], ring=True)
+        else:
+            on = nid in hit
+            p.node(nid, BLUE if on else "#ffffff", BLUE if on else FAINT, nr, width=0.9)
+    p.place_labels(sorted(hit | {OUTCOME}))
+    return p, colors, cnt
+
+
+def recovery_key(x0, y0, datasets, counts, wide=False):
+    """Line key plus a table of edge counts; wide puts the table to the right of the lines."""
+    body, colors = [text(x0, y0 + 9, "Key", 7)], set()
+    yy = y0 + 26
+    for cat, _ in KEY_ROWS:
         col, dash, arrow, lab = CATS[cat]
         da = f' stroke-dasharray="{" ".join(str(round(float(v) * 0.6, 2)) for v in dash.split())}"' if dash else ""
         mk = f' marker-end="url(#arr{col.strip("#")})"' if arrow else ""
         if arrow:
             colors.add(col)
-        body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{col}" stroke-width="0.9" fill="none"{da}{mk}/>')
+        body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{col}" stroke-width="0.9" '
+                    f'stroke-linecap="round" fill="none"{da}{mk}/>')
         body.append(text(x0 + 28, yy, lab, 6, weight=500))
         yy += 11
-    body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{FAINT}" stroke-width="0.6" stroke-dasharray="0.1 1.6" '
-                f'stroke-linecap="round" fill="none"/>')
+    body.append(f'<path d="M{x0},{yy - 2.2} L{x0 + 22},{yy - 2.2}" stroke="{BLUE_EDGE}" stroke-width="0.6" fill="none"/>')
     body.append(text(x0 + 28, yy, "Recovered correctly", 6, weight=500))
-    yy += 26
-    cx = [x0, x0 + 98, x0 + 130, x0 + 166]
-    for x, h in zip(cx, ["Edges", "Full", "Ref.", "Astro."]):
-        body.append(text(x, yy, h, 6, anchor="start" if x == cx[0] else "end"))
-    for cat, short in rows:
-        yy += 10
-        body.append(text(cx[0], yy, short, 6, weight=500))
-        for x, ds in zip(cx[1:], DATASETS):
-            body.append(text(x, yy, str(counts[ds].get(cat, 0)), 6, weight=500, anchor="end"))
-    body.append(text(cx[0], yy + 14, "By most frequent outcome over", 5.5, weight=500, color=GREY))
-    body.append(text(cx[0], yy + 21.5, "50 replicates, of 63 true edges.", 5.5, weight=500, color=GREY))
-    return svg_doc(2 * pw + PANEL_GAP, 2 * row_h - PANEL_GAP, body, colors | {FAINT}, marker_size=5), counts
+    lines_bottom = yy
+    tx, ty = (x0 + 200, y0 + 26 - 11) if wide else (x0, yy + 26)
+    short = {"full_set": "Full", "reference_subsample": "Ref.", "astronaut_set": "Astro."}
+    cx = [tx] + [tx + 98 + 36 * j for j in range(len(datasets))]
+    for x, h in zip(cx, ["Edges"] + [short[d] for d in datasets]):
+        body.append(text(x, ty, h, 6, anchor="start" if x == cx[0] else "end"))
+    for cat, lab in KEY_ROWS:
+        ty += 10
+        body.append(text(cx[0], ty, lab, 6, weight=500))
+        for x, ds in zip(cx[1:], datasets):
+            body.append(text(x, ty, str(counts[ds].get(cat, 0)), 6, weight=500, anchor="end"))
+    body.append(text(cx[0], ty + 14, "By most frequent outcome over", 5.5, weight=500, color=GREY))
+    body.append(text(cx[0], ty + 21.5, "50 replicates, of 63 true edges.", 5.5, weight=500, color=GREY))
+    return body, colors, max(lines_bottom, ty + 21.5) - y0
+
+
+def fig3(lay, added_threshold):
+    """Main text: the full-set panel with the key to its right, 6.5 in wide."""
+    true, added = recovery(added_threshold)
+    pw = 312.0
+    s = pw / (lay["width"] + 2 * PANEL_PAD)
+    ds = "full_set"
+    p, colors, cnt = recovery_panel(lay, s, ds, true, added, label_pt=6.0)
+    ph = lay["height"] * s
+    body = [f'<text x="0" y="9" font-family="{FONT}" font-size="7" font-weight="700" fill="{INK}" xml:space="preserve">'
+            f'{DS_LABEL[ds]}<tspan font-size="6" font-weight="500" fill="{GREY}">  {DS_N[ds]}</tspan></text>', p.svg(0, TITLE_H)]
+    kb, kc, _ = recovery_key(pw + 2, TITLE_H + 6, [ds], {ds: cnt})
+    body += kb
+    return svg_doc(TEXT_W, TITLE_H + ph, body, colors | kc | {FAINT}, marker_size=5), {ds: cnt}
+
+
+def fig3_supp(lay, added_threshold):
+    """Supplement: reference-set and astronaut-set panels side by side, 6.5 in wide, key beneath."""
+    true, added = recovery(added_threshold)
+    pw = (TEXT_W - PANEL_GAP) / 2
+    s = pw / (lay["width"] + 2 * PANEL_PAD)
+    ph = lay["height"] * s
+    body, colors, counts = [], set(), {}
+    sets = ["reference_subsample", "astronaut_set"]
+    for i, ds in enumerate(sets):
+        p, c, cnt = recovery_panel(lay, s, ds, true, added, label_pt=5.5)
+        colors |= c
+        counts[ds] = cnt
+        x0 = i * (pw + PANEL_GAP)
+        body.append(panel_title(x0, 0, "ab"[i], DS_LABEL[ds], DS_N[ds]))
+        body.append(p.svg(x0, TITLE_H))
+    y0 = TITLE_H + ph + 10
+    kb, kc, kh = recovery_key(0, y0, sets, counts, wide=True)
+    body += kb
+    return svg_doc(TEXT_W, y0 + kh + 6, body, colors | kc | {FAINT}, marker_size=5), counts
 
 
 # ---------- Figure 6: where credit went ----------
@@ -352,7 +379,9 @@ def main():
     if "3" in figs:
         svg3, counts = fig3(lay, a.added_threshold)
         (OUT / "fig3_recovery_grid.svg").write_text(svg3)
-        print(json.dumps(counts, indent=1))
+        svg3s, counts_s = fig3_supp(lay, a.added_threshold)
+        (OUT / "supp_fig_recovery_grid.svg").write_text(svg3s)
+        print(json.dumps({**counts, **counts_s}, indent=1))
     if "6" in figs:
         for ds in (DATASETS if a.dataset == "all" else [a.dataset]):
             (OUT / f"fig5_credit_dag_{ds}.svg").write_text(fig6(lay, ds, a.label_min, edges))
