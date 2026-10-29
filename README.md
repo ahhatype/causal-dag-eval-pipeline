@@ -50,7 +50,7 @@ Check without running anything heavy: `uv run python -c "from attribution_valida
 ## Data generation
 
 ### Nonlinear variant (supplement)
-`make data-nonlinear` generates the same three data sets from `01_data_generation/config/variants/nonlinear_symmetric_u/`, in which three edges carry symmetric U-shaped mechanisms (nutrients to bone remodeling, inverted; microbiome to urine chemistry; hydration to urine concentration) and one carries a saturating mechanism (urine chemistry to mineralized renal material), everything else unchanged. The `mechanism` column of `edges.csv` selects the form (`linear` when absent); the default configuration has no such column, so `make data` is unaffected. Output goes to `<DATA_DIR>_nonlinear_symmetric_u`; point `DATA_DIR` there in `.env` to run `make structure` on it. The frozen calibration for the variant is in the same directory.
+`make data-nonlinear` generates the same three data sets from `01_data_generation/config/variants/nonlinear_symmetric_u/`, in which three edges carry symmetric U-shaped mechanisms (nutrients to bone remodeling, inverted; microbiome to urine chemistry; hydration to urine concentration) and one carries a saturating mechanism (urine chemistry to mineralized renal material), everything else unchanged. The `mechanism` column of `edges.csv` selects the form (`linear` when absent); the default configuration has no such column, so `make data` is unaffected. Output goes to `<DATA_DIR>_nonlinear_symmetric_u`; `make structure-nonlinear` then runs the structural validation on it with the variant's own configuration and calibration, writing to `outputs/03_structure_validation_nonlinear_symmetric_u`. The frozen calibration for the variant is in the same directory.
 
 
 
