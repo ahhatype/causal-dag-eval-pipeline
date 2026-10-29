@@ -1,0 +1,55 @@
+id,name,level,scale,observed,role,feature_set,simulate
+nephrolithiasis,nephrolithiasis,individual,binary,TRUE,Outcome,none,TRUE
+cumulative_mission_duration,cumulative mission duration,individual,continuous,TRUE,Exposure (added),ancestor,TRUE
+mission_era,mission era,era_root,binary,TRUE,Era (added),ancestor,TRUE
+altered_gravity,altered gravity,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+astronaut_selection,astronaut selection,sampling mechanism,binary,TRUE,Ancestor,none,FALSE
+bisphosphonates,bisphosphonates,individual,binary,TRUE,Ancestor,ancestor,TRUE
+bone_fracture_risk,bone fracture (risk),individual,continuous,FALSE,Ancestor,none,TRUE
+bone_remodeling,bone remodeling,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+co2_risk,CO2 (risk),individual,continuous,FALSE,Ancestor,none,TRUE
+crew_health_and_performance_system,crew health and performance system,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+distance_from_earth,distance from earth,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+food_and_nutrition_risk,food and nutrition (risk),individual,continuous,FALSE,Ancestor,none,TRUE
+hsia_risk,HSIA (risk),era_fixed,continuous,FALSE,Ancestor,none,TRUE
+hostile_closed_environment,hostile closed environment,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+humidity,humidity,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+hydration,hydration,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+individual_factors,individual factors,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+k_citrate,K+ citrate,individual,binary,TRUE,Ancestor,ancestor,TRUE
+medical_prevention_capability,medical prevention capability,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+medical_treatment_capability,medical treatment capability,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+microbiome,microbiome,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+microhost_risk,microhost (risk),individual,continuous,FALSE,Ancestor,none,TRUE
+mineralized_renal_material,mineralized renal material,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+nutrients,nutrients,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+pharm_risk,pharm (risk),era_fixed,continuous,FALSE,Ancestor,none,TRUE
+pre_flight_fitness,pre-flight fitness,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+resistive_exercise,resistive exercise,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+thiazides,thiazides,individual,binary,TRUE,Ancestor,ancestor,TRUE
+urine_chemistry,urine chemistry,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+urine_concentration,urine concentration,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+vehicle_design,vehicle design,era_fixed,continuous,TRUE,Ancestor,context,TRUE
+water_intake,water intake,individual,continuous,TRUE,Ancestor,ancestor,TRUE
+medical_monitoring_capability,medical monitoring capability,era_fixed,continuous,TRUE,Neither,context,TRUE
+medications,medications,individual,binary,TRUE,Neither,non_ancestor,TRUE
+percutaneous_nephrostomy,percutaneous nephrostomy,individual,binary,TRUE,Neither,non_ancestor,TRUE
+surveillance,surveillance,era_fixed,continuous,TRUE,Neither,context,TRUE
+tamsulosin,tamsulosin,individual,binary,TRUE,Neither,non_ancestor,TRUE
+ultrasound,ultrasound,individual,binary,TRUE,Neither,non_ancestor,TRUE
+urinary_retention_risk,urinary retention (risk),individual,continuous,FALSE,Neither,none,TRUE
+crew_capability,crew capability,individual,continuous,TRUE,Descendant,non_ancestor,TRUE
+detect_long_term_health_outcomes,detect long term health outcomes,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+detect_mrm_stone,detect MRM/stone,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+evacuation,evacuation,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+flight_recertification,flight recertification,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+individual_readiness,individual readiness,individual,continuous,TRUE,Descendant,non_ancestor,TRUE
+long_term_health_outcomes,long term health outcomes,individual,continuous,TRUE,Descendant,non_ancestor,TRUE
+loss_of_crew_life,loss of crew life,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+loss_of_mission,loss of mission,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+loss_of_mission_objectives,loss of mission objectives,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+medical_illness,medical illness,individual,continuous,TRUE,Descendant,non_ancestor,TRUE
+task_performance,task performance,individual,continuous,TRUE,Descendant,non_ancestor,TRUE
+ultrasound_manipulation,ultrasound manipulation,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+ureterolithiasis,ureterolithiasis,individual,binary,TRUE,Descendant,non_ancestor,TRUE
+urine_flow,urine flow,individual,continuous,TRUE,Descendant,non_ancestor,TRUE

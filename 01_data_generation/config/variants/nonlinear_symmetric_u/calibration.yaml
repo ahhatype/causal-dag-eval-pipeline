@@ -1,0 +1,84 @@
+cont:
+  cumulative_mission_duration:
+    mu: 58.225738651240228
+    sd: 73.761763473342413
+  nutrients:
+    rs: 0.916702271493527
+    mu: -0.003948697749538
+    sd: 1.001210171046268
+  microbiome:
+    rs: 0.916777926731848
+    mu: -0.00109258635285
+    sd: 0.999100191604731
+  resistive_exercise:
+    rs: 0.5
+    mu: 0.001811081075621
+    sd: 0.755517478727185
+  water_intake:
+    rs: 0.800530641536312
+    mu: 0.002578600686838
+    sd: 0.999859915534835
+  bone_remodeling:
+    rs: 0.648534338680538
+    mu: -0.050789736442388
+    sd: 1.00232941007112
+  hydration:
+    rs: 0.811197562777077
+    mu: -0.000712415652426
+    sd: 1.001348830081385
+  urine_concentration:
+    rs: 0.776177053197941
+    mu: -0.002243832655235
+    sd: 0.999376117646376
+  urine_chemistry:
+    rs: 0.343102818097619
+    mu: -0.053372933607024
+    sd: 0.999533409927588
+  mineralized_renal_material:
+    rs: 0.896757282998593
+    mu: -0.016451901134267
+    sd: 0.998691455766784
+  urine_flow:
+    rs: 0.791631158031205
+    mu: 0.047237162868681
+    sd: 1.000018369831588
+  medical_illness:
+    rs: 0.886000196488865
+    mu: -0.13944773439443
+    sd: 0.998956246423193
+  individual_readiness:
+    rs: 0.880016576026223
+    mu: 0.120854913252112
+    sd: 1.001221398755783
+  long_term_health_outcomes:
+    rs: 0.880016576026223
+    mu: -0.120730093650106
+    sd: 1.001587150337905
+  crew_capability:
+    rs: 0.916515138991168
+    mu: 0.000475475242757
+    sd: 0.999437733289387
+  task_performance:
+    rs: 0.916515138991168
+    mu: -0.001372465808821
+    sd: 0.999638742687291
+logit:
+  medications: -0.988622954522718
+  tamsulosin: -1.561521370772269
+  percutaneous_nephrostomy: -3.902216674346618
+  nephrolithiasis: -2.893872577322273
+  flight_recertification: 2.377796586442436
+  ultrasound_manipulation: -2.623220866608005
+  ureterolithiasis: -2.738439079811186
+  evacuation: -3.076598295557315
+  loss_of_crew_life: -4.156343599739897
+  loss_of_mission_objectives: -3.221061466490207
+uptake:
+  bisphosphonates:
+  - -2.675305471002276
+  - -2.345051719630051
+  k_citrate:
+  - -3.759571497218272
+  - -2.0482626737085
+selection_alpha: -1.15821563814009
+config_hash: 376d9da24a8c2cddef59263ea2578760

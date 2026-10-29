@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-# Usage: Rscript 03_structure_validation/run_all.R [--replicates=N] [--subsamples=N] [--resume | --fresh]
+# Usage: Rscript 03_structure_validation/run_all.R [--replicates=N] [--subsamples=N] [--resume | --fresh] [--variant=<name>]
+# --variant=<name> validates the data of config/variants/<name> (read from <DATA_DIR>_<name>, written to outputs/03_structure_validation_<name>).
 
 file_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
 sv_dir <- if (length(file_arg)) dirname(normalizePath(sub("^--file=", "", file_arg))) else normalizePath(".")
@@ -16,9 +17,16 @@ arg <- function(name) {
 if (!is.null(arg("subsamples"))) params$stability$subsamples <- arg("subsamples")
 flags <- commandArgs(trailingOnly = TRUE)
 
+variant <- sub("^--variant=", "", grep("^--variant=", flags, value = TRUE))
 data_dir <- env_dir(repo_dir, "DATA_DIR", "./02_data")
 out_dir <- file.path(env_dir(repo_dir, "OUTPUT_DIR", "./outputs"), "03_structure_validation")
 cfg_dir <- file.path(repo_dir, "01_data_generation", "config")
+if (length(variant)) {   # a generator variant: its own configuration and frozen calibration, its own data and output directories
+  cfg_dir <- file.path(cfg_dir, "variants", variant)
+  if (!dir.exists(cfg_dir)) stop("no such configuration: ", cfg_dir)
+  data_dir <- file.path(dirname(data_dir), paste0(basename(data_dir), "_", variant))
+  out_dir <- file.path(dirname(out_dir), paste0("03_structure_validation_", variant))
+}
 cfg <- read_config(cfg_dir)
 cal <- read_calibration(file.path(cfg_dir, "calibration.yaml"))
 
