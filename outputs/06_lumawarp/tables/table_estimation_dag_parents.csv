@@ -1,0 +1,25 @@
+treatment,dataset,estimator,reps,truth,mean_estimate,bias,empirical_se,mean_se,coverage,sign_right
+k_citrate,full_set,Naive difference,50,-0.0202,0.0322,0.0524,0.0103,,,0.0
+k_citrate,full_set,LW-TMLE,50,-0.0202,-0.0202,-0.0,0.0109,0.0096,0.92,0.92
+k_citrate,full_set,SL-TMLE,50,-0.0202,-0.0204,-0.0002,0.0106,0.0095,0.92,0.94
+k_citrate,full_set,Logistic g-computation,50,-0.0202,-0.0189,0.0013,0.008,,,1.0
+k_citrate,reference_subsample,Naive difference,50,-0.0202,0.0357,0.0559,0.0325,,,0.1
+k_citrate,reference_subsample,LW-TMLE,50,-0.0202,-0.0181,0.0021,0.0328,0.0311,0.96,0.78
+k_citrate,reference_subsample,SL-TMLE,50,-0.0202,-0.0207,-0.0005,0.031,0.0306,0.94,0.76
+k_citrate,reference_subsample,Logistic g-computation,50,-0.0202,-0.0178,0.0024,0.0279,,,0.82
+k_citrate,astronaut_set,Naive difference,50,-0.0152,0.0189,0.0341,0.0348,,,0.3
+k_citrate,astronaut_set,LW-TMLE,50,-0.0152,-0.0222,-0.007,0.0305,0.0268,0.82,0.74
+k_citrate,astronaut_set,SL-TMLE,50,-0.0152,-0.0268,-0.0116,0.0296,0.0254,0.74,0.78
+k_citrate,astronaut_set,Logistic g-computation,50,-0.0152,-0.0188,-0.0036,0.0266,,,0.8
+bisphosphonates,full_set,Naive difference,50,-0.0083,-0.0081,0.0003,0.009,,,0.82
+bisphosphonates,full_set,LW-TMLE,50,-0.0083,-0.004,0.0044,0.0132,0.0125,0.96,0.64
+bisphosphonates,full_set,SL-TMLE,50,-0.0083,-0.0036,0.0047,0.0131,0.0123,0.96,0.64
+bisphosphonates,full_set,Logistic g-computation,50,-0.0083,-0.0076,0.0007,0.0089,,,0.82
+bisphosphonates,reference_subsample,Naive difference,50,-0.0083,-0.0046,0.0037,0.0223,,,0.58
+bisphosphonates,reference_subsample,LW-TMLE,50,-0.0083,-0.0012,0.0071,0.0439,0.0383,0.84,0.48
+bisphosphonates,reference_subsample,SL-TMLE,50,-0.0083,-0.0012,0.0072,0.0448,0.0391,0.88,0.54
+bisphosphonates,reference_subsample,Logistic g-computation,50,-0.0083,-0.0063,0.0021,0.0255,,,0.58
+bisphosphonates,astronaut_set,Naive difference,50,-0.0063,-0.0036,0.0027,0.0293,,,0.5
+bisphosphonates,astronaut_set,LW-TMLE,50,-0.0063,0.0073,0.0137,0.0453,0.0382,0.84,0.46
+bisphosphonates,astronaut_set,SL-TMLE,50,-0.0063,0.0102,0.0165,0.0462,0.04,0.82,0.44
+bisphosphonates,astronaut_set,Logistic g-computation,50,-0.0063,0.0046,0.011,0.0357,,,0.44
