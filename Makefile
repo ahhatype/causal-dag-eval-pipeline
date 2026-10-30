@@ -1,4 +1,4 @@
-.PHONY: data recalibrate structure attribution convergence confounding table1 credit conditions figures test
+.PHONY: data data-nonlinear recalibrate-nonlinear recalibrate structure structure-nonlinear attribution convergence confounding table1 credit conditions figures test
 
 data:            ## generate all replicate data sets + ground truth (uses frozen calibration)
 	Rscript 01_data_generation/generate_all.R
@@ -6,8 +6,17 @@ data:            ## generate all replicate data sets + ground truth (uses frozen
 recalibrate:     ## re-run the pilot calibration, then generate
 	Rscript 01_data_generation/generate_all.R --recalibrate
 
+data-nonlinear:  ## supplement: the same DAG with three curved edges and one saturating edge, written to $(DATA_DIR)_nonlinear_symmetric_u
+	Rscript 01_data_generation/generate_all.R --variant=nonlinear_symmetric_u
+
+recalibrate-nonlinear:  ## re-run the pilot calibration for the nonlinear variant, then generate
+	Rscript 01_data_generation/generate_all.R --recalibrate --variant=nonlinear_symmetric_u
+
 structure:       ## structural validation: implication tests, power control and causal discovery
 	Rscript 03_structure_validation/run_all.R
+
+structure-nonlinear:  ## supplement: structural validation on the nonlinear variant's data (its own configuration, calibration and output directory)
+	Rscript 03_structure_validation/run_all.R --variant=nonlinear_symmetric_u
 
 attribution:     ## standard and causal SHAP against simulated total effects
 	cd 04_attribution_validation && uv run python run_all.py

@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-# Usage: Rscript 01_data_generation/generate_all.R [--recalibrate]
+# Usage: Rscript 01_data_generation/generate_all.R [--recalibrate] [--variant=<name>]
+# A variant reads config/variants/<name>/ and writes to <DATA_DIR>_<name>; the default configuration is untouched.
 
 args <- commandArgs(trailingOnly = TRUE)
 file_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
@@ -10,7 +11,10 @@ for (f in c("paths", "model_spec", "calibrate", "dag", "select", "ground_truth",
 
 out_dir <- env_dir(repo_dir, "DATA_DIR", "./02_data")
 
-cfg_dir <- file.path(dg_dir, "config")
+variant <- sub("^--variant=", "", grep("^--variant=", args, value = TRUE))
+cfg_dir <- if (length(variant)) file.path(dg_dir, "config", "variants", variant) else file.path(dg_dir, "config")
+if (!dir.exists(cfg_dir)) stop("no such configuration: ", cfg_dir)
+if (length(variant)) out_dir <- file.path(dirname(out_dir), paste0(basename(out_dir), "_", variant))
 cfg <- read_config(cfg_dir)
 message("[1/4] validating DAG against config/dag.txt")
 validate_dag(cfg_dir, cfg)
