@@ -1,0 +1,10 @@
+dataset,method,reps,tau_lw,tau_sl,diff,diff_mcse,top5_lw,top5_sl,auc_lw,auc_sl
+full_set,interventional_shap,10,0.814,0.811,0.003,0.014,1.0,1.0,0.82,0.822
+full_set,ordering_only_shap,10,0.407,0.359,0.048,0.03,0.7,0.62,0.82,0.822
+full_set,standard_shap,10,0.404,0.352,0.052,0.029,0.68,0.6,0.82,0.822
+reference_subsample,interventional_shap,10,0.63,0.618,0.012,0.032,0.84,0.78,0.752,0.796
+reference_subsample,ordering_only_shap,10,0.34,0.307,0.033,0.042,0.6,0.58,0.752,0.796
+reference_subsample,standard_shap,10,0.347,0.29,0.057,0.054,0.64,0.6,0.752,0.796
+astronaut_set,interventional_shap,10,0.579,0.551,0.027,0.046,0.78,0.8,0.771,0.79
+astronaut_set,ordering_only_shap,10,0.354,0.361,-0.007,0.03,0.56,0.6,0.771,0.79
+astronaut_set,standard_shap,10,0.345,0.345,0.0,0.023,0.54,0.58,0.771,0.79
