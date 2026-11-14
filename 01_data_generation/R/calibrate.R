@@ -52,10 +52,12 @@ read_calibration <- function(file) yaml::read_yaml(file)
 config_hash <- function(cfg_dir) {
   f <- tempfile()
   on.exit(unlink(f))
+  con <- file(f, open = "wb")
   writeLines(c(yaml::as.yaml(yaml::read_yaml(file.path(cfg_dir, "params.yaml"))),
                readLines(file.path(cfg_dir, "nodes.csv")),
                readLines(file.path(cfg_dir, "edges.csv")),
-               readLines(file.path(cfg_dir, "simulation_edges.csv"))), f)
+               readLines(file.path(cfg_dir, "simulation_edges.csv"))), con)
+  close(con)
   unname(tools::md5sum(f))
 }
 
