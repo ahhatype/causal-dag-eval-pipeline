@@ -122,7 +122,7 @@ Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (ab
 
 ### Tests
 
-`make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, duration truncation, confounded drug uptake, astronaut selection from the full-set, direct formula evaluation against simcausal, the population-scaled spread (2p(1 − p)|Δ| for binary features), ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
+`make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, each variant's frozen calibration, the config hash under LF and CRLF line endings, duration truncation, confounded drug uptake, astronaut selection from the full-set, direct formula evaluation against simcausal, the population-scaled spread (2p(1 − p)|Δ| for binary features), ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
 
 ## Structure validation
 
