@@ -356,6 +356,8 @@ make figures                                # or, from 05_figures/: python3 fig2
 
 **Regenerating.** The data are fully determined by the config and seeds; `make data` rebuilds them and every analysis refuses to run on data from a different config hash. Check `02_data/provenance.txt` against the archived copy before comparing results across machines, because random number generation can differ across platforms.
 
+**Checking.** [reproducibility/](reproducibility/) has two checks that only read their inputs: `verify_saved_results.py` recomputes the reported summary tables from the committed per-run and per-replicate results, and `verify_generated_data.py` compares each regenerated replicate file with its expected SHA-256.
+
 To prepare the archive from a finished run:
 
 ```bash
