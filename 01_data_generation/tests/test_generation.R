@@ -30,6 +30,23 @@ test_that("calibration matches the current config", {
   expect_silent(check_calibration_current(cfg, cal))
 })
 
+test_that("each variant's calibration matches its config", {
+  for (v_dir in list.dirs(file.path(cfg_dir, "variants"), recursive = FALSE))
+    expect_silent(check_calibration_current(read_config(v_dir), read_calibration(file.path(v_dir, "calibration.yaml"))))
+})
+
+test_that("config hash is the same for LF and CRLF config files", {
+  tmp <- file.path(tempdir(), "cfg_eol"); dir.create(tmp, showWarnings = FALSE)
+  for (eol in c("\n", "\r\n")) {
+    for (f in c("params.yaml", "nodes.csv", "edges.csv", "simulation_edges.csv")) {
+      con <- file(file.path(tmp, f), open = "wb")
+      writeLines(readLines(file.path(cfg_dir, f)), con, sep = eol)
+      close(con)
+    }
+    expect_identical(config_hash(tmp), cal$config_hash)
+  }
+})
+
 test_that("calibrated prevalence and selection retention are on target", {
   s <- sim_source(D, 20000, 3)
   expect_equal(mean(s$nephrolithiasis), 0.10, tolerance = 0.1)

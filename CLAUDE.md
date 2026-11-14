@@ -10,6 +10,7 @@ causal-dag-eval-pipeline: evaluates an established causal DAG (NASA renal-stone 
 - `04_attribution_validation/` (Python, uv): attribution methods and evaluation.
 - `05_figures/` (Python, system `python3`): manuscript figures and LaTeX tables from the stored results; display names from `04_attribution_validation/config/labels.yaml`.
 - `outputs/` (`OUTPUT_DIR`): analysis outputs; the `03_structure_validation` and `04_attribution_validation` result tables are committed as source data, the per-cell and per-record files and `05_figures` are git-ignored.
+- `reproducibility/` (Python, system `python3`): checks that only read their inputs: the stored summary tables against the committed per-run and per-replicate results, and regenerated replicate files against their expected SHA-256.
 - `references/`: drafts and notes; git-ignored, never cite it from README or code.
 
 ## Conventions

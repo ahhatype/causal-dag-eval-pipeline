@@ -77,7 +77,7 @@ Each data set is generated in 50 independent replicates. Replicate r uses the se
    - `params.yaml`: seeds, sample sizes, era values, uptake probabilities, detection sensitivity/specificity, selection parameters, base rates. Entries marked PROVISIONAL are pending domain-expert confirmation.
    - `dag.txt`: the adapted DAGitty code used to validate the config.
 2. **Validation** (`R/validate_dag.R`): `edges.csv` must reproduce `dag.txt` exactly: 54 nodes, 90 edges, same edge set, acyclic, 16 outcome ancestors, 19 other observed features, 7 latent nodes. The simulation edges add no node and change no ancestor set.
-3. **Calibration** (`R/calibrate.R`): a pilot run (n = 200,000) freezes, in topological order, each continuous node's standardization and residual SD, the logit intercept of each binary node (e.g. 10% nephrolithiasis prevalence), the era-specific uptake intercepts of the two confounded drugs, and the selection intercept α. Results are stored in `config/calibration.yaml` with a hash of the config files. Generation stops if the config has changed since calibration; re-run with `make recalibrate`.
+3. **Calibration** (`R/calibrate.R`): a pilot run (n = 200,000) freezes, in topological order, each continuous node's standardization and residual SD, the logit intercept of each binary node (e.g. 10% nephrolithiasis prevalence), the era-specific uptake intercepts of the two confounded drugs, and the selection intercept α. Results are stored in `config/calibration.yaml` with a hash of the config files; the hash is computed over LF line endings on every platform, so a CRLF checkout gives the same value. Generation stops if the config has changed since calibration; re-run with `make recalibrate`.
 4. **Model** (`R/model_spec.R`, `R/dag.R`): each node becomes a formula built from `edges.csv` and `params.yaml`.
    - Mission era is Bernoulli (0.75 for the 2000s). The 10 observed and 2 latent mission-level (context) nodes are fixed by era, so edges among them are kept in the graph but not separately parameterized. Cumulative mission duration is drawn from truncated era-specific distributions (1960s; 2000s Shuttle/ISS mixture).
    - Continuous children: linear combination of parents plus noise, in SD units of the child. Continuous parents enter standardized; binary parents (drugs, procedures) enter as 0/1, so their coefficient is the shift for users vs non-users. Binary children: logistic. Detection nodes use sensitivity/specificity; near-deterministic edges use a 5% flip.
@@ -122,7 +122,7 @@ Takes about 1.5 minutes (ground truth about 1 minute). Outputs in `02_data/` (ab
 
 ### Tests
 
-`make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, duration truncation, confounded drug uptake, astronaut selection from the full-set, direct formula evaluation against simcausal, the population-scaled spread (2p(1 − p)|Δ| for binary features), ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
+`make test` runs `01_data_generation/tests/`: DAG fidelity, topological order, seed reproducibility, common-random-number behavior, calibration targets and staleness, each variant's frozen calibration, the config hash under LF and CRLF line endings, duration truncation, confounded drug uptake, astronaut selection from the full-set, direct formula evaluation against simcausal, the population-scaled spread (2p(1 − p)|Δ| for binary features), ground truth, the checks themselves, an end-to-end run with two replicates at reduced size, and (when `references/` is present locally) that the config tables rebuild exactly from the appendix.
 
 ## Structure validation
 
@@ -355,6 +355,8 @@ make figures                                # or, from 05_figures/: python3 fig2
 **Archived, not committed.** The 50 replicate data sets per data set (about 390 MB as CSV), the per-cell results and the per-record attributions (`values.csv.gz`) are deposited in a DOI-minting repository with the tagged release: <!-- TO BE WRITTEN BY THE AUTHOR: DOI and repository at submission -->.
 
 **Regenerating.** The data are fully determined by the config and seeds; `make data` rebuilds them and every analysis refuses to run on data from a different config hash. Check `02_data/provenance.txt` against the archived copy before comparing results across machines, because random number generation can differ across platforms.
+
+**Checking.** [reproducibility/](reproducibility/) has two checks that only read their inputs: `verify_saved_results.py` recomputes the reported summary tables from the committed per-run and per-replicate results, and `verify_generated_data.py` compares each regenerated replicate file with its expected SHA-256.
 
 To prepare the archive from a finished run:
 
